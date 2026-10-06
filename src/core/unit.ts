@@ -1,6 +1,7 @@
+import type { AiProfile } from './aiProfile';
 import type { ClassDef, ClassTable } from './classes';
 import { addStats, TIER_CAPS, type MutableStats, type Stat, type Stats, type Tier } from './stats';
-import type { MoveType, Side } from './types';
+import type { MoveType, Point, Side } from './types';
 import { gradeFromWexp, wexpForGrade, type WeaponDef, type WeaponKind, type WeaponTable } from './weapons';
 
 /** Units carry at most this many items. */
@@ -36,6 +37,10 @@ export interface UnitDef {
   readonly sprite?: string;
   readonly faction: string;
   readonly skin: string;
+  /** Behaviour when the computer controls the unit; enemies default to aggressive. */
+  readonly ai?: AiProfile;
+  /** Labels the objectives, events and AI refer to: `lord`, `boss`, `leader`, and so on. */
+  readonly tags?: readonly string[];
 }
 
 export type UnitTable = Readonly<Record<string, UnitDef>>;
@@ -56,6 +61,8 @@ export interface UnitInstance {
   readonly boss: boolean;
   readonly chronicled: boolean;
   readonly fictional: boolean;
+  /** Where the unit started: its post, for leashes and defensive behaviour. */
+  readonly home: Point;
 
   classId: string;
   tier: Tier;
@@ -76,6 +83,13 @@ export interface UnitInstance {
   acted: boolean;
   /** Set when a unit "retreats wounded"; such units leave the map. */
   retreated: boolean;
+  /** Left the map by an exit (a fleeing unit or an escort) rather than falling. */
+  escaped: boolean;
+  /** How the computer plays this unit; null for units the player controls. */
+  ai: AiProfile | null;
+  tags: string[];
+  /** A defensive unit that has woken and stays awake. */
+  triggered: boolean;
 }
 
 export const maxHp = (unit: UnitInstance): number => unit.stats.hp;
@@ -125,6 +139,11 @@ export function autoEquip(unit: UnitInstance, weapons: WeaponTable, classes: Cla
 }
 
 /** Build a unit from its definition. Throws a descriptive error for unknown classes or items. */
+export interface UnitOverrides {
+  readonly ai?: AiProfile;
+  readonly tags?: readonly string[];
+}
+
 export function createUnit(
   def: UnitDef,
   id: string,
@@ -132,6 +151,7 @@ export function createUnit(
   y: number,
   classes: ClassTable,
   weapons: WeaponTable,
+  overrides: UnitOverrides = {},
 ): UnitInstance {
   const classDef = classes.get(def.class);
   if (!classDef) throw new Error(`Unit "${def.id}" has unknown class "${def.class}"`);
@@ -168,6 +188,7 @@ export function createUnit(
     boss: def.boss ?? false,
     chronicled: def.chronicled ?? false,
     fictional: def.fictional ?? false,
+    home: { x, y },
     classId: classDef.id,
     tier: classDef.tier,
     moveType: classDef.moveType,
@@ -184,6 +205,11 @@ export function createUnit(
     moved: false,
     acted: false,
     retreated: false,
+    escaped: false,
+    // enemies and allies are played by the computer unless the data says otherwise
+    ai: overrides.ai ?? def.ai ?? (def.side === 'player' ? null : { mode: 'aggressive' }),
+    tags: [...(overrides.tags ?? def.tags ?? [])],
+    triggered: false,
   };
   autoEquip(unit, weapons, classes);
   return unit;

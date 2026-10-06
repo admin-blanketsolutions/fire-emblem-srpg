@@ -5,6 +5,9 @@ export const MOVE_TYPES: readonly MoveType[] = ['foot', 'light', 'mounted', 'arm
 
 export type Side = 'player' | 'ally' | 'enemy' | 'neutral';
 
+/** A tile as written in data files: `[x, y]`. */
+export type Tile = readonly [number, number];
+
 export interface Point {
   readonly x: number;
   readonly y: number;
