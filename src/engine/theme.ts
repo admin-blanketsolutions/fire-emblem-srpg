@@ -1,0 +1,21 @@
+/** Colours for the engine's own interface (windows, bars, overlays), not for game art. */
+export const COLORS = {
+  ink: '#1b1426',
+  panel: '#232640',
+  panelEdge: '#e8d9a8',
+  panelInner: '#7a4a12',
+  text: '#f3e6c0',
+  textDim: '#a8a2b8',
+  gold: '#f0c24a',
+  white: '#ffffff',
+  good: '#7fd08a',
+  bad: '#f08a78',
+  hp: '#4fbf6a',
+  hpLow: '#d8a21e',
+  hpCritical: '#c2412d',
+  hpBack: '#3a2a22',
+  reach: 'rgba(40, 90, 235, 0.58)',
+  attack: 'rgba(235, 55, 45, 0.55)',
+  danger: 'rgba(235, 55, 45, 0.32)',
+  path: '#f0c24a',
+} as const;

@@ -4,7 +4,7 @@ A browser-based tactical RPG in the feel of the Game Boy Advance era, telling th
 
 It takes inspiration from the *genre* and its mechanics only. All names, classes, items, art, music and text are original, and all art and audio are procedurally generated placeholders that can be replaced without code changes.
 
-**Status:** design approved; engine in progress (milestone M1). See [Progress](#progress).
+**Status:** design approved; milestone M1 (engine foundations) complete, M2 next. See [Progress](#progress).
 
 ## What it is
 
@@ -30,16 +30,46 @@ No prophet or Companion is ever depicted. Scripture appears only if quoted exact
 
 TypeScript (strict), Vite, Vitest, and a thin custom Canvas 2D engine (no Phaser). No backend; saves use `localStorage`.
 
+## Running it
+
+Requires Node 22.12 or later.
+
+```bash
+npm install
+npm run dev          # the game, at http://localhost:3000
+npm test             # unit tests (Vitest)
+npm run lint         # layering lint + sprite lint
+npm run build        # typecheck + production build into dist/
+npm run sprites:preview   # the sprite preview page, with live reload
+```
+
+Other sprite commands: `npm run sprites:gen` regenerates the placeholder sprites from the kits in `tools/sprites/kits/`, and `npm run sprites` exports PNG strips and contact sheets to `out/sprites/`.
+
+## Playing it (M1)
+
+M1 has one test map, the *Proving Ground*, with the player's six units and five enemies who do not move yet (enemy behaviour arrives in M3). You can select a unit, see where it can move and attack, walk it across terrain at the correct cost, choose Attack or Wait, and end the turn.
+
+| Action | Keyboard | Touch |
+|---|---|---|
+| Move cursor | Arrow keys | On-screen pad, or tap a tile |
+| Confirm | `Z` | OK, or tap the cursor tile again |
+| Cancel | `X` | Back |
+| Info (unit details) | `A` | Info |
+| Danger (enemy threat range) | `S` | Danger |
+| Menu (end turn) | `Enter` | Menu |
+
+Confirm on an enemy unit shows its move and attack range. The touch pad appears on touch devices only.
+
 ## Progress
 
 | Milestone | Scope | State |
 |---|---|---|
-| M1 | Renderer, tilemap, cursor, movement, attack, sprite tool, one test map | in progress |
-| M2 | Combat forecast and resolution, levelling, weapon triangle, terrain | planned |
+| M1 | Renderer, tilemap, cursor, movement, attack, sprite tool, one test map | done |
+| M2 | Combat forecast and resolution, levelling, weapon triangle, terrain | next |
 | M3 | Enemy AI, phases, danger zone, fog, objectives | planned |
 | M4 | Classes, promotion, inventory, convoy, shops | planned |
 | M5 | Supports, Camp, dialogue and portraits | planned |
 | M6 | Save/load, Codex, title, settings, Classic/Casual | planned |
 | M7 | Prologue and Chapters 1–3 with source-backed dialogue | planned |
 
-The full README (running, adding chapters, units and classes, swapping art and audio) lands with M7.
+The full README (adding chapters, units and classes, swapping art and audio) lands with M7. Each milestone ends with tests green, a production build, and a commit.

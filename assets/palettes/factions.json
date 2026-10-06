@@ -1,0 +1,9 @@
+{
+  "ayyubid":   ["#d8a21e", "#f3e6c0", "#7a4a12"],
+  "fatimid":   ["#2f7d4f", "#f2f2e6", "#c9a64a"],
+  "abbasid":   ["#1e1e24", "#c9a64a", "#8a8a94"],
+  "zengid":    ["#2e6f8e", "#e8e2d0", "#1e3a4a"],
+  "frankish":  ["#e8e4dc", "#b02a2a", "#5a5a64"],
+  "byzantine": ["#5b2a86", "#d8c15a", "#2a1a3a"],
+  "neutral":   ["#8a6a4a", "#d8c9a0", "#4a3a2a"]
+}

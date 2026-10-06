@@ -1,0 +1,21 @@
+[
+  { "id": "plain",    "name": "Plain",         "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 0, "avoid": 0 },
+  { "id": "road",     "name": "Road",          "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 0, "avoid": 0 },
+  { "id": "steppe",   "name": "Dry grass",     "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 0, "avoid": 0,  "flammable": true },
+  { "id": "grove",    "name": "Grove",         "cost": { "foot": 2, "light": 1, "mounted": 3, "armored": 3 },       "cover": 1, "avoid": 20 },
+  { "id": "hill",     "name": "Hill",          "cost": { "foot": 2, "light": 2, "mounted": 3, "armored": 3 },       "cover": 1, "avoid": 10 },
+  { "id": "crag",     "name": "Crag",          "cost": { "foot": 4, "light": 3, "mounted": null, "armored": null }, "cover": 2, "avoid": 30 },
+  { "id": "dune",     "name": "Dune",          "cost": { "foot": 2, "light": 2, "mounted": 3, "armored": 4 },       "cover": 0, "avoid": 5 },
+  { "id": "reeds",    "name": "Reeds",         "cost": { "foot": 3, "light": 2, "mounted": 4, "armored": null },   "cover": 0, "avoid": 5,  "flammable": true, "quench": 2 },
+  { "id": "shallows", "name": "Shallows",      "cost": { "foot": 3, "light": 2, "mounted": 3, "armored": null },   "cover": 0, "avoid": 0,  "quench": 2 },
+  { "id": "river",    "name": "River",         "cost": { "foot": null, "light": null, "mounted": null, "armored": null }, "cover": 0, "avoid": 0 },
+  { "id": "bridge",   "name": "Bridge",        "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 0, "avoid": 0 },
+  { "id": "pier",     "name": "Ferry landing", "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 0, "avoid": 0 },
+  { "id": "house",    "name": "House",         "cost": { "foot": 1, "light": 1, "mounted": 2, "armored": 2 },       "cover": 1, "avoid": 10, "tags": ["visit"] },
+  { "id": "tent",     "name": "Tent",          "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 0, "avoid": 5,  "flammable": true },
+  { "id": "fort",     "name": "Fort floor",    "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 2, "avoid": 20 },
+  { "id": "rampart",  "name": "Rampart",       "cost": { "foot": 2, "light": 2, "mounted": null, "armored": 3 },   "cover": 2, "avoid": 30 },
+  { "id": "wall",     "name": "Wall",          "cost": { "foot": null, "light": null, "mounted": null, "armored": null }, "cover": 0, "avoid": 0 },
+  { "id": "gate",     "name": "Gate",          "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 3, "avoid": 20 },
+  { "id": "hospice",  "name": "Hospice",       "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 0, "avoid": 0,  "heals": 0.1 }
+]

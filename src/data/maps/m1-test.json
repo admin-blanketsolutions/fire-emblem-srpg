@@ -1,0 +1,46 @@
+{
+  "id": "m1-test",
+  "name": "Proving Ground",
+  "size": [22, 16],
+  "tileset": "steppe-river",
+  "legend": {
+    ".": "plain", ",": "steppe", ":": "road", "G": "grove", "h": "hill", "^": "crag", "d": "dune",
+    "r": "reeds", "w": "shallows", "~": "river", "=": "bridge", "H": "house", "T": "tent",
+    "F": "fort", "#": "wall", "R": "rampart", "O": "gate", "+": "hospice"
+  },
+  "terrain": [
+    "^^^hh,,,,,~~,,,,hhh^^^",
+    "^hh,,,,G,,~~,,,,,,hhh^",
+    "hh,,,GG,,,~~,,,,,,,,hh",
+    ",,,,,GG,..~~,,,,,,,,,,",
+    ",,..,,,...~~,..#######",
+    ",,.G.,,..,~~.,.#RRRRR#",
+    ".,,....G..~~,.,#FFHFF#",
+    "::::::::::==:::OFF+FF#",
+    ".,,,.hh...~~.,.#FFHFF#",
+    ",,..hhh.,.ww,..#FFFFF#",
+    ",,,.,.h.,,~~.,.#FFTFF#",
+    ",,,,,,,..,~~,..#######",
+    ",,,,,,,,rr~~rr,,ddd,,,",
+    ",,,,,,,rrr~~rrdddddd,,",
+    "^^,,,,,,rr~~rddddddddd",
+    "^^^^,,,,,r~~dddddddddd"
+  ],
+  "spawns": {
+    "player": [
+      { "unit": "lord", "at": [3, 7] },
+      { "unit": "spear-knight", "at": [4, 6] },
+      { "unit": "axe-knight", "at": [4, 8] },
+      { "unit": "horse-archer", "at": [2, 6] },
+      { "unit": "horseman", "at": [2, 8] },
+      { "unit": "fire-thrower", "at": [1, 7] }
+    ],
+    "enemy": [
+      { "unit": "soldier", "at": [14, 6] },
+      { "unit": "soldier", "at": [14, 8] },
+      { "unit": "crossbowman", "at": [17, 6] },
+      { "unit": "man-at-arms", "at": [17, 7] },
+      { "unit": "horseman-enemy", "at": [13, 3] }
+    ]
+  }
+}

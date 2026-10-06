@@ -100,11 +100,13 @@ Slice content target: **4 battle maps + 1 council stage**, 9 support scenes, abo
 │  │                        fire/structures, state, save (serialize only)
 │  ├─ data/                 JSON/TS data: balance, terrain, classes, skills, items,
 │  │                        units, supports, chapters/, dialogue/, codex/, scripture.json
-│  ├─ engine/               canvas renderer, camera, input (key/touch), audio synth,
-│  │                        asset loader, scene stack, bitmap text, storage adapter
-│  ├─ scenes/               title, settings, camp, preparations, battle, dialogue,
-│  │                        shop, convoy, codex, results
-│  ├─ ui/                   windows, menus, forecast panel, unit info, tooltips
+│  ├─ engine/               display (integer scaling), input (key/touch pad), assets
+│  │                        (sprites rendered from definitions, optional overrides), bitmap
+│  │                        text, window/menu/gauge drawing, game loop; later audio synth,
+│  │                        storage adapter
+│  ├─ scenes/               battle (M1); later title, settings, camp, preparations,
+│  │                        dialogue, shop, convoy, codex, results. Scene-specific panels
+│  │                        (forecast, unit info) live beside their scene
 │  └─ main.ts
 ├─ assets/
 │  ├─ sprites/*.sprite.json palette-indexed sprite definitions (the source of truth)
@@ -112,10 +114,12 @@ Slice content target: **4 battle maps + 1 council stage**, 9 support scenes, abo
 │  ├─ fonts/*.font.json     original 5×7 bitmap font
 │  └─ music/*.song.json     tracker-style placeholder songs
 ├─ public/assets/
-│  ├─ generated/            built by tools/ (PNG sheets + atlas JSON); git-ignored
-│  └─ override/             drop real art/audio here; wins over generated
+│  └─ override/             drop real art/audio here; wins over the bundled definitions
+├─ out/                     tool output (PNG strips, atlas, contact sheets); git-ignored
 ├─ tools/
-│  ├─ sprites/              build.ts · preview.ts · lint.ts
+│  ├─ sprites/              kits/ (placeholder generators) · build.ts · lint.ts ·
+│  │                        preview.html + preview-page.ts (served by the dev server)
+│  ├─ lint-boundaries.ts    layering and purity lint
 │  ├─ lint-sources.ts       data ↔ ledger join check
 │  └─ validate-data.ts      schema + referential integrity
 └─ tests/                   Vitest suites (mirror src/core)
@@ -123,7 +127,7 @@ Slice content target: **4 battle maps + 1 council stage**, 9 support scenes, abo
 
 Layering rules (enforced by an import-boundary lint in M1):
 
-1. `core/` imports nothing from `engine/`, `scenes/`, `ui/`, or the DOM.
+1. `core/` imports nothing from `data/`, `engine/`, `scenes/`, or the DOM, and uses no `Math.random`, `Date.now`, `performance.now` or timers. The import direction is `core ← data ← engine ← scenes`; `tools/lint-boundaries.ts` enforces it and runs in `npm run lint` and in the tests.
 2. `engine/` never contains game rules.
 3. Scenes orchestrate: they call `core/` functions and render the results.
 4. Data is validated once at load (`validate-data`) and typed afterwards.
@@ -159,7 +163,7 @@ Screen layout (map view, 15×10 tiles of 16 px = 240×160):
 
 | Action | Keyboard | Touch |
 |---|---|---|
-| Move cursor | Arrow keys (hold to repeat; hold `X` for fast cursor) | Tap a tile; drag to pan |
+| Move cursor | Arrow keys (hold to repeat) | Tap a tile; drag to pan (drag arrives with M6) |
 | **Confirm** | `Z` | Tap the cursor tile again, or the on-screen **OK** |
 | **Cancel** | `X` | On-screen **Back**, or two-finger tap |
 | **Info** (unit/terrain details; previous unit in lists) | `A` | On-screen **Info** |
@@ -1046,20 +1050,30 @@ Palette-indexed pixel arrays. **At most 15 colours plus transparency per sprite*
 ```
 
 - **Sizes:** map units 16×16; tiles 16×16; battle sprites and portraits 32×32 (placeholders); UI frames 8×8 nine-slice; font cell 6×8 (5×7 glyph).
-- **Faction slots:** palette indices listed in `slots.faction` are remapped per faction at build time (the 15-colour limit still applies to each result).
-- **Kits (composition):** to avoid hand-writing every sprite, the build tool can compose a sprite from layers (body template by movement type + head/headgear + weapon overlay + mount) and then apply hand-edit patches. The composed result is written out as an ordinary sprite definition so artists can edit it directly.
+- **Slots:** palette indices listed in `slots.faction` (primary, secondary, trim) and `slots.skin` (light, shade) are replaced from the ramps in `assets/palettes/` **at render time**, so one sprite serves every faction and skin tone. A ramp is positional, so a slot is only trimmed from the end of its list; the colour limit applies to the sprite's own palette.
+- **Compaction:** the kit generator drops palette entries a sprite never draws, so each definition lists only its own colours and the lint can flag genuinely unused ones.
+- **Kits (composition):** `tools/sprites/kits/` composes the placeholders from layers (body template + headgear + weapon overlay + horse; terrain painters seeded per tile) and writes them out as ordinary sprite definitions with `npm run sprites:gen`. After that the JSON is the source of truth: edit it by hand, or replace it with real art. Regenerating overwrites hand edits, so run it only to start from scratch.
 
 ### 12.2 Tools (`tools/`)
 
 | Command | Does |
 |---|---|
-| `npm run sprites` | validates and renders all definitions to PNG sheets plus `atlas.json` in `public/assets/generated/` (own minimal PNG encoder using Node `zlib`; no native deps) |
-| `npm run sprites:preview` | writes `tools/sprites/preview.html`: every sprite at 1×–8×, palette swatches, animation playback, faction swatches, and red flags for violations |
-| `npm run sprites:lint` | fails on >15 colours, wrong size, missing frames, unreferenced palette slots, forbidden speaker/portrait IDs |
+| `npm run sprites:gen` | regenerates every placeholder definition in `assets/sprites/` from the kits |
+| `npm run sprites` | validates and renders all definitions to one PNG strip per sprite, an `atlas.json` and contact sheets in `out/sprites/` (own minimal PNG encoder using Node `zlib`; no native deps). The strips are templates for artists; the game does not load them |
+| `npm run sprites:preview` | opens `tools/sprites/preview.html` on the dev server: every sprite at 4×–16×, each frame set, animation playback, faction and skin switching, palette swatches (dots mark recolour slots) and the lint results; editing a `.sprite.json` reloads it |
+| `npm run sprites:lint` | fails on a malformed definition, a wrong size for the kind, an id outside its prefix (`unit.`, `tile.`, `ui.` …) or naming a Prophet or Companion, a transparent hole in a tile, a map unit without `idle`; warns on unused or duplicate palette entries and recolour groups that are never drawn |
+
+The lint rules live in `src/core/spritelint.ts`, so the command line, the preview page and the tests share them.
 
 ### 12.3 Replacing art
 
-Drop `public/assets/override/sprites/<id>.png` (a horizontal strip of frames; same frame order as the generated sheet) and, if needed, `<id>.json` for frame sizes and animations. The loader checks `override/` first, then `generated/`. The README (M7) documents the contract and ships a checklist per asset kind.
+The game renders sprites from their definitions at run time. To replace one with real art, put a PNG strip in `public/assets/override/sprites/` (all frames of the sprite side by side, sets in the order they appear in the definition, each frame exactly `size[0]` wide and `size[1]` high; `out/sprites/strips/<id>.png` is a ready template) and list it in `public/assets/override/manifest.json`:
+
+```json
+{ "sprites": { "unit.pikeman": "sprites/unit.pikeman.png" } }
+```
+
+A strip of the wrong size is ignored with a console warning, so a bad file can never break the game. Overrides are full-colour and are not recoloured by faction or skin. The README (M7) documents the contract and ships a checklist per asset kind.
 
 ### 12.4 Faction palettes (placeholders)
 

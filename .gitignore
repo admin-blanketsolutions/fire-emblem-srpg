@@ -143,6 +143,6 @@ vite.config.ts.timestamp-*
 .vite/
 
 # Sultan of Two Banners: generated assets and tool output
-public/assets/generated/
-tools/sprites/preview.html
+out/
+.claude/
 .DS_Store

@@ -1,0 +1,62 @@
+{
+  "lord": {
+    "name": "Young Lord", "className": "Young Lord", "side": "player", "level": 3,
+    "moveType": "foot", "mov": 5, "mgt": 6, "grd": 3, "maxHp": 20,
+    "weapon": { "name": "Iron Sabre", "might": 5, "rangeMin": 1, "rangeMax": 1 },
+    "spriteId": "unit.young-lord", "faction": "ayyubid", "skin": "s2"
+  },
+  "spear-knight": {
+    "name": "Spear Knight", "className": "Spear Knight", "side": "player", "level": 4,
+    "moveType": "foot", "mov": 5, "mgt": 8, "grd": 6, "maxHp": 26,
+    "weapon": { "name": "Brace Spear", "might": 6, "rangeMin": 1, "rangeMax": 1 },
+    "spriteId": "unit.pikeman", "faction": "ayyubid", "skin": "s3"
+  },
+  "axe-knight": {
+    "name": "Axe Knight", "className": "Axe Knight", "side": "player", "level": 5,
+    "moveType": "foot", "mov": 5, "mgt": 10, "grd": 6, "maxHp": 28,
+    "weapon": { "name": "Halberd", "might": 9, "rangeMin": 1, "rangeMax": 1 },
+    "spriteId": "unit.axeman", "faction": "ayyubid", "skin": "s3"
+  },
+  "horse-archer": {
+    "name": "Horse Archer", "className": "Horse Archer", "side": "player", "level": 2,
+    "moveType": "mounted", "mov": 7, "mgt": 4, "grd": 2, "maxHp": 17,
+    "weapon": { "name": "Composite Bow", "might": 6, "rangeMin": 2, "rangeMax": 3 },
+    "spriteId": "unit.horse-archer", "faction": "ayyubid", "skin": "s4"
+  },
+  "horseman": {
+    "name": "Horseman", "className": "Horseman", "side": "player", "level": 3,
+    "moveType": "mounted", "mov": 7, "mgt": 5, "grd": 4, "maxHp": 20,
+    "weapon": { "name": "Cavalry Lance", "might": 7, "rangeMin": 1, "rangeMax": 1 },
+    "spriteId": "unit.horseman", "faction": "ayyubid", "skin": "s2"
+  },
+  "fire-thrower": {
+    "name": "Fire Thrower", "className": "Fire Thrower", "side": "player", "level": 2,
+    "moveType": "light", "mov": 6, "mgt": 6, "grd": 1, "maxHp": 16,
+    "weapon": { "name": "Naphtha Pot", "might": 6, "rangeMin": 1, "rangeMax": 2 },
+    "spriteId": "unit.fire-thrower", "faction": "ayyubid", "skin": "s1"
+  },
+  "soldier": {
+    "name": "Soldier", "className": "Soldier", "side": "enemy", "level": 2,
+    "moveType": "foot", "mov": 5, "mgt": 4, "grd": 3, "maxHp": 18,
+    "weapon": { "name": "Levy Spear", "might": 5, "rangeMin": 1, "rangeMax": 1 },
+    "spriteId": "unit.soldier", "faction": "frankish", "skin": "s1"
+  },
+  "crossbowman": {
+    "name": "Crossbowman", "className": "Crossbowman", "side": "enemy", "level": 3,
+    "moveType": "foot", "mov": 5, "mgt": 5, "grd": 3, "maxHp": 18,
+    "weapon": { "name": "Frankish Crossbow", "might": 8, "rangeMin": 2, "rangeMax": 2 },
+    "spriteId": "unit.crossbowman", "faction": "frankish", "skin": "s1"
+  },
+  "man-at-arms": {
+    "name": "Man-at-Arms", "className": "Man-at-Arms", "side": "enemy", "level": 4,
+    "moveType": "armored", "mov": 4, "mgt": 7, "grd": 8, "maxHp": 24,
+    "weapon": { "name": "Iron Mace", "might": 6, "rangeMin": 1, "rangeMax": 1 },
+    "spriteId": "unit.man-at-arms", "faction": "frankish", "skin": "s1"
+  },
+  "horseman-enemy": {
+    "name": "Horseman", "className": "Horseman", "side": "enemy", "level": 3,
+    "moveType": "mounted", "mov": 7, "mgt": 5, "grd": 4, "maxHp": 20,
+    "weapon": { "name": "Cavalry Lance", "might": 7, "rangeMin": 1, "rangeMax": 1 },
+    "spriteId": "unit.horseman", "faction": "frankish", "skin": "s1"
+  }
+}

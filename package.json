@@ -1,0 +1,31 @@
+{
+  "name": "sultan-of-two-banners",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A GBA-style tactical RPG about the life of Salah ad-Din, built from the Arabic and Islamic sources first.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "npm run lint:boundaries && npm run sprites:lint",
+    "lint:boundaries": "tsx tools/lint-boundaries.ts",
+    "sprites:gen": "tsx tools/sprites/kits/generate.ts",
+    "sprites": "tsx tools/sprites/build.ts",
+    "sprites:preview": "vite --open /tools/sprites/preview.html",
+    "sprites:lint": "tsx tools/sprites/lint.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  }
+}

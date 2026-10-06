@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sprite preview</title>
+    <style>
+      :root { color-scheme: dark; --bg: #7a9a3c; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #14101c; color: #f3e6c0; font: 14px/1.4 system-ui, sans-serif; }
+      header { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+        padding: 10px 16px; background: #1f1a2e; border-bottom: 1px solid #3a3150; }
+      header h1 { margin: 0 8px 0 0; font-size: 16px; }
+      label { display: inline-flex; gap: 6px; align-items: center; color: #c9bfa0; }
+      select, input[type="search"] { background: #2b2540; color: inherit; border: 1px solid #4a4068; border-radius: 6px; padding: 4px 8px; font: inherit; }
+      #summary { margin-left: auto; color: #a8a2b8; }
+      main { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; padding: 16px; }
+      .card { background: #1f1a2e; border: 1px solid #3a3150; border-radius: 10px; padding: 12px; min-width: 0; }
+      .card.bad { border-color: #c2412d; }
+      .card h2 { margin: 0 0 2px; font: 600 14px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
+      .meta { color: #a8a2b8; font-size: 12px; margin-bottom: 8px; }
+      .stage { background: var(--bg); border-radius: 6px; padding: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      canvas { image-rendering: crisp-edges; image-rendering: pixelated; display: block; }
+      .set { margin-top: 8px; }
+      .set b { font-size: 12px; font-weight: 600; color: #c9bfa0; }
+      .set .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; background: var(--bg); border-radius: 6px; padding: 6px; }
+      .palette { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 8px; }
+      .sw { width: 22px; height: 22px; border-radius: 4px; border: 1px solid #0006; font: 700 10px/22px ui-monospace, monospace; text-align: center; color: #fff; text-shadow: 0 0 2px #000, 0 0 2px #000; position: relative; }
+      .sw.slot::after { content: ""; position: absolute; right: -1px; top: -1px; width: 7px; height: 7px; border-radius: 50%; background: #f0c24a; border: 1px solid #1b1426; }
+      .sw.skin::after { background: #e2b48a; }
+      .issues { margin: 8px 0 0; padding: 0; list-style: none; font-size: 12px; }
+      .issues li { padding: 2px 6px; border-radius: 4px; margin-top: 3px; }
+      .issues .error { background: #5a1f19; color: #ffd0c8; }
+      .issues .warning { background: #4d3a12; color: #ffe2a0; }
+      .issues .ok { color: #7fd08a; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Sprite preview</h1>
+      <label>Zoom <select id="zoom"><option>4</option><option selected>8</option><option>12</option><option>16</option></select>×</label>
+      <label>Faction <select id="faction"></select></label>
+      <label>Skin <select id="skin"></select></label>
+      <label>Background
+        <select id="bg">
+          <option value="#7a9a3c">grass</option><option value="#d8c28a">sand</option><option value="#8a8576">stone</option>
+          <option value="#2b2540">night</option><option value="#ff00ff">magenta (shows holes)</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="problems" /> problems only</label>
+      <label><input type="search" id="filter" placeholder="filter by id" /></label>
+      <span id="summary"></span>
+    </header>
+    <main id="grid"></main>
+    <script type="module" src="./preview-page.ts"></script>
+  </body>
+</html>

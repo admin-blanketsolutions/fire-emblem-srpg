@@ -1,6 +1,6 @@
 # Sultan of Two Banners — Decisions Log
 
-**Status:** v0.2 · 2026-10-06
+**Status:** v0.3 · 2026-10-06
 Every place where I had to make a judgment call about history, sensitivity or engineering. Where it was a close call, I chose the **more conservative, source-backed option** and recorded it here. Entries marked **Approved** were confirmed by the project owner on 2026-10-06; the rest are policies I follow unless told otherwise.
 
 Companion documents: [DESIGN.md](DESIGN.md) · [SOURCES.md](SOURCES.md)
@@ -32,6 +32,8 @@ Companion documents: [DESIGN.md](DESIGN.md) · [SOURCES.md](SOURCES.md)
 | D-023 | Class names: common format, historical flavour | Approved (first mapping) |
 | D-024 | Additional weapon types | Approved |
 | D-025 | Repository, publication and commit identity | Policy |
+| D-026 | Art pipeline as built (M1) | Policy |
+| D-027 | No religious emblems on generic art | Policy |
 
 ---
 
@@ -207,6 +209,17 @@ They appear in the Codex and in carefully framed scenes, never as spectacle.
 - The repository is **public** and **GitHub Pages is enabled** through a workflow, so every push to `main` publishes the built game. I kept an updated workflow rather than silently removing the deployment the owner had set up.
 - Commits in this repository use a repository-local identity (the owner's name with the `blanketsolutions.net` address) so the owner's separate global work identity is not published.
 - The repository's name and description still say "Fire Emblem" and "Phaser 3". I did not change repository settings; the game's own title, README and assets use only original names.
+
+## D-026 Art pipeline as built (M1)
+
+- **Runtime rendering.** The game renders every sprite from its JSON definition when it starts and caches the frames, rather than loading generated PNGs. This keeps one source of truth, allows faction and skin recolouring with no extra files, and means a sprite edit needs no build step beyond saving the file. The PNG strips under `out/sprites/` are an export for artists and for inspection; they are git-ignored and not shipped.
+- **Overrides.** Real art replaces a sprite through `public/assets/override/manifest.json` (DESIGN §12.3). A bad override is ignored with a warning.
+- **Preview.** The preview page is served by the dev server rather than written out as a static file, so it can import the same validation, lint and rendering code as the game and reload when a definition changes.
+- **Hold-X fast cursor dropped.** The first draft let the player hold Cancel to move the cursor faster. Cancel also backs out of menus, so one key doing both is error-prone; held arrows already repeat at about 14 tiles a second.
+
+## D-027 No religious emblems on generic art
+
+- The healing-tent tile has a green band and pennant, not a cross or a crescent. I have no source for any emblem on an Ayyubid field hospital; a cross would read as Christian, and the modern medical emblems (the Red Cross and Red Crescent) date from the 1860s and 1870s. Generic terrain and unit placeholders carry no religious symbols at all; any symbol that does appear later needs its own ledger row.
 
 ## Confirmed and open
 
