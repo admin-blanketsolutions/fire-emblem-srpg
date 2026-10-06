@@ -1,0 +1,8 @@
+{
+  "expPerLevel": 100,
+  "levelCap": 20,
+  "tierExpRate": { "1": 1.0, "2": 0.85, "3": 0.7 },
+  "critMultiplier": 3,
+  "doubleThreshold": 4,
+  "bossExpBonus": 40
+}

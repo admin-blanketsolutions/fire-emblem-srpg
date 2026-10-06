@@ -1,6 +1,6 @@
 # Sultan of Two Banners — Decisions Log
 
-**Status:** v0.3 · 2026-10-06
+**Status:** v0.4 · 2026-10-06
 Every place where I had to make a judgment call about history, sensitivity or engineering. Where it was a close call, I chose the **more conservative, source-backed option** and recorded it here. Entries marked **Approved** were confirmed by the project owner on 2026-10-06; the rest are policies I follow unless told otherwise.
 
 Companion documents: [DESIGN.md](DESIGN.md) · [SOURCES.md](SOURCES.md)
@@ -34,6 +34,7 @@ Companion documents: [DESIGN.md](DESIGN.md) · [SOURCES.md](SOURCES.md)
 | D-025 | Repository, publication and commit identity | Policy |
 | D-026 | Art pipeline as built (M1) | Policy |
 | D-027 | No religious emblems on generic art | Policy |
+| D-028 | Combat and progression as built (M2) | Policy |
 
 ---
 
@@ -220,6 +221,18 @@ They appear in the Codex and in carefully framed scenes, never as spectacle.
 ## D-027 No religious emblems on generic art
 
 - The healing-tent tile has a green band and pennant, not a cross or a crescent. I have no source for any emblem on an Ayyubid field hospital; a cross would read as Christian, and the modern medical emblems (the Red Cross and Red Crescent) date from the 1860s and 1870s. Generic terrain and unit placeholders carry no religious symbols at all; any symbol that does appear later needs its own ledger row.
+
+## D-028 Combat and progression as built (M2)
+
+- **The formulas are DESIGN §5.2 exactly,** and the worked example there is a test: the Young Lord and the Soldier produce 84% and 64% to hit, 8 and 6 damage, 7% and 0% crit, no double, HP 20 → 14 and 18 → 10.
+- **Random draws are in a fixed order** (DESIGN §5.2) so a battle seed replays exactly and the suspend-save (M6) can restore the generator's state. Hit mode (Honest or Weighted) and *Guaranteed progress* are rules passed to the battle, not constants.
+- **Who earns EXP.** Only player units earn EXP and weapon EXP, and only if they survive the fight. Enemy and ally units do not level, so their definitions need no growth rates. A player unit that is attacked and cannot answer still earns 1 EXP.
+- **Rounding.** EXP after the tier rate is rounded down, minimum 1.
+- **Equipping.** Choosing *Attack* offers every usable weapon that reaches at least one hostile unit from where the unit stands; choosing one equips it (the choice persists, as in the genre). The danger zone and threat range use every weapon the unit can wield, so a bow in the pack extends the displayed threat.
+- **Counters** use the defender's equipped weapon only. A weapon that cannot reach the distance, a remedy, or a weapon with no uses left cannot counter.
+- **Healing** is a class action using a remedy: it restores the remedy's Might in HP (never above maximum), uses one charge, spends the unit's action, and earns `min(30, 5 + HP restored)` EXP.
+- **Deferred.** The 32×32 *battle scene* presentation (DESIGN §5.6) needs battle sprites and is not in the slice; map animation is. Skills, supports, structures and fire's *Ignite* arrive in later milestones; the formulas already accept support bonuses and a structure flag.
+- **Data.** The proving ground now uses real classes and the §5.4 weapon list (29 items); the first Tier II and III classes arrive with promotion in M4.
 
 ## Confirmed and open
 

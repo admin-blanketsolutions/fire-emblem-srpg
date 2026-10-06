@@ -1,0 +1,190 @@
+import type { ClassDef, ClassTable } from './classes';
+import { addStats, TIER_CAPS, type MutableStats, type Stat, type Stats, type Tier } from './stats';
+import type { MoveType, Side } from './types';
+import { gradeFromWexp, wexpForGrade, type WeaponDef, type WeaponKind, type WeaponTable } from './weapons';
+
+/** Units carry at most this many items. */
+export const INVENTORY_SLOTS = 5;
+
+export interface ItemStack {
+  readonly id: string;
+  /** Remaining uses; a weapon at 0 breaks and is removed. */
+  uses: number;
+}
+
+/** A unit as authored in data (DESIGN §3.6). */
+export interface UnitDef {
+  readonly id: string;
+  readonly name: string;
+  readonly side: Side;
+  readonly class: string;
+  readonly level: number;
+  /** Personal additions to the class base stats (this is where Fortune lives). */
+  readonly offset?: Readonly<Partial<Stats>>;
+  /** Growth rates in percent per level-up; missing stats grow 0. */
+  readonly growth: Readonly<Partial<Stats>>;
+  /** Starting weapon grade per kind, and personal caps that replace the class's. */
+  readonly weaponGrades?: Readonly<Partial<Record<WeaponKind, number>>>;
+  readonly inventory: readonly string[];
+  readonly skills?: readonly string[];
+  /** Story-critical: retreats wounded and always returns. */
+  readonly chronicled?: boolean;
+  /** An invented character, flagged as such in the game and the ledger. */
+  readonly fictional?: boolean;
+  /** Earns bonus EXP when defeated. */
+  readonly boss?: boolean;
+  readonly sprite?: string;
+  readonly faction: string;
+  readonly skin: string;
+}
+
+export type UnitTable = Readonly<Record<string, UnitDef>>;
+
+/** A unit on the battlefield. Identity and growth are fixed; the rest changes in play. */
+export interface UnitInstance {
+  /** Unique on the board (`soldier#2` when a definition is placed more than once). */
+  readonly id: string;
+  readonly defId: string;
+  readonly name: string;
+  readonly side: Side;
+  readonly spriteId: string;
+  readonly faction: string;
+  readonly skin: string;
+  readonly growth: Readonly<Partial<Stats>>;
+  /** Personal weapon-grade caps that replace the class's. */
+  readonly gradeCaps: Readonly<Partial<Record<WeaponKind, number>>>;
+  readonly boss: boolean;
+  readonly chronicled: boolean;
+  readonly fictional: boolean;
+
+  classId: string;
+  tier: Tier;
+  moveType: MoveType;
+  level: number;
+  exp: number;
+  /** Current stats; `stats.hp` is the maximum. */
+  stats: MutableStats;
+  wexp: Partial<Record<WeaponKind, number>>;
+  inventory: ItemStack[];
+  /** Index into `inventory` of the equipped weapon, or -1. */
+  equipped: number;
+  skills: string[];
+  hp: number;
+  x: number;
+  y: number;
+  moved: boolean;
+  acted: boolean;
+  /** Set when a unit "retreats wounded"; such units leave the map. */
+  retreated: boolean;
+}
+
+export const maxHp = (unit: UnitInstance): number => unit.stats.hp;
+
+/** The stat cap for a unit's class and tier. */
+export function statCap(classDef: ClassDef, stat: Stat): number {
+  return classDef.caps?.[stat] ?? TIER_CAPS[classDef.tier][stat];
+}
+
+/** The highest grade the unit can currently use in a weapon kind: 0 if its class cannot use it. */
+export function currentGrade(unit: UnitInstance, classDef: ClassDef, kind: WeaponKind): number {
+  const cap = unit.gradeCaps[kind] ?? classDef.weapons[kind] ?? 0;
+  if (cap === 0) return 0;
+  return Math.min(cap, gradeFromWexp(unit.wexp[kind] ?? 0));
+}
+
+export function canEquip(unit: UnitInstance, weapon: WeaponDef, classDef: ClassDef): boolean {
+  if (weapon.mountedOnly && unit.moveType !== 'mounted') return false;
+  return weapon.grade <= currentGrade(unit, classDef, weapon.kind);
+}
+
+/** The equipped weapon, or null if none is equipped or it has no uses left. */
+export function equippedWeapon(unit: UnitInstance, weapons: WeaponTable): WeaponDef | null {
+  const stack = unit.inventory[unit.equipped];
+  if (!stack || stack.uses <= 0) return null;
+  return weapons.get(stack.id) ?? null;
+}
+
+/** Inventory slots holding a weapon, with its definition. */
+export function weaponStacks(unit: UnitInstance, weapons: WeaponTable): Array<{ slot: number; stack: ItemStack; weapon: WeaponDef }> {
+  const out: Array<{ slot: number; stack: ItemStack; weapon: WeaponDef }> = [];
+  unit.inventory.forEach((stack, slot) => {
+    const weapon = weapons.get(stack.id);
+    if (weapon && stack.uses > 0) out.push({ slot, stack, weapon });
+  });
+  return out;
+}
+
+/** Equip the first weapon the unit can wield (offensive weapons first), or none. */
+export function autoEquip(unit: UnitInstance, weapons: WeaponTable, classes: ClassTable): void {
+  const classDef = classes.get(unit.classId);
+  unit.equipped = -1;
+  if (!classDef) return;
+  const usable = weaponStacks(unit, weapons).filter((w) => canEquip(unit, w.weapon, classDef));
+  const pick = usable.find((w) => w.weapon.kind !== 'remedy') ?? usable[0];
+  if (pick) unit.equipped = pick.slot;
+}
+
+/** Build a unit from its definition. Throws a descriptive error for unknown classes or items. */
+export function createUnit(
+  def: UnitDef,
+  id: string,
+  x: number,
+  y: number,
+  classes: ClassTable,
+  weapons: WeaponTable,
+): UnitInstance {
+  const classDef = classes.get(def.class);
+  if (!classDef) throw new Error(`Unit "${def.id}" has unknown class "${def.class}"`);
+  const stats = addStats(classDef.base, def.offset ?? {});
+
+  const inventory: ItemStack[] = def.inventory.map((itemId) => {
+    const weapon = weapons.get(itemId);
+    if (!weapon) throw new Error(`Unit "${def.id}" carries unknown item "${itemId}"`);
+    return { id: itemId, uses: weapon.uses };
+  });
+  if (inventory.length > INVENTORY_SLOTS) throw new Error(`Unit "${def.id}" carries more than ${INVENTORY_SLOTS} items`);
+
+  // Weapon EXP starts at the explicit grades, and at least enough to wield the starting kit.
+  const wexp: Partial<Record<WeaponKind, number>> = {};
+  for (const [kind, grade] of Object.entries(def.weaponGrades ?? {})) wexp[kind as WeaponKind] = wexpForGrade(grade);
+  const gradeCaps = def.weaponGrades ?? {};
+  for (const { id: itemId } of inventory) {
+    const weapon = weapons.get(itemId);
+    if (!weapon) continue;
+    const cap = gradeCaps[weapon.kind] ?? classDef.weapons[weapon.kind] ?? 0;
+    if (cap >= weapon.grade) wexp[weapon.kind] = Math.max(wexp[weapon.kind] ?? 0, wexpForGrade(weapon.grade));
+  }
+
+  const unit: UnitInstance = {
+    id,
+    defId: def.id,
+    name: def.name,
+    side: def.side,
+    spriteId: def.sprite ?? `unit.${classDef.id}`,
+    faction: def.faction,
+    skin: def.skin,
+    growth: def.growth,
+    gradeCaps,
+    boss: def.boss ?? false,
+    chronicled: def.chronicled ?? false,
+    fictional: def.fictional ?? false,
+    classId: classDef.id,
+    tier: classDef.tier,
+    moveType: classDef.moveType,
+    level: def.level,
+    exp: 0,
+    stats,
+    wexp,
+    inventory,
+    equipped: -1,
+    skills: [...(def.skills ?? classDef.skills ?? [])],
+    hp: stats.hp,
+    x,
+    y,
+    moved: false,
+    acted: false,
+    retreated: false,
+  };
+  autoEquip(unit, weapons, classes);
+  return unit;
+}

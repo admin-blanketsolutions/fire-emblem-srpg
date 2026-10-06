@@ -211,9 +211,9 @@ describe('the committed sprite definitions', () => {
   });
 
   it('cover every sprite id the data refers to', async () => {
-    const { testUnits, terrain } = await import('../src/data');
+    const { createTestBattle, terrain } = await import('../src/data');
     const ids = new Set(sprites.map(({ def: d }) => d.id));
-    for (const template of Object.values(testUnits)) expect(ids.has(template.spriteId), template.spriteId).toBe(true);
+    for (const u of createTestBattle().units) expect(ids.has(u.spriteId), u.spriteId).toBe(true);
     for (const id of terrain.keys()) expect(ids.has(`tile.${id}`), `tile.${id}`).toBe(true);
   });
 });

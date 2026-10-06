@@ -1,30 +1,59 @@
-import type { BattleState, UnitInstance } from '../core/battle';
+import type { BattleState, HealReport } from '../core/battle';
 import { cameraToInclude, clampCamera, type CameraPos } from '../core/camera';
 import { tileKey } from '../core/grid';
 import type { Action } from '../core/input';
 import { pathTo, type ReachResult } from '../core/pathfinding';
 import type { Point } from '../core/types';
+import type { UnitInstance } from '../core/unit';
+import type { WeaponDef } from '../core/weapons';
 import { LOGICAL_HEIGHT, LOGICAL_WIDTH } from '../core/viewport';
 import type { Assets } from '../engine/assets';
 import type { Scene } from '../engine/game';
 import type { TextRenderer } from '../engine/text';
 import { COLORS } from '../engine/theme';
-import { drawGauge, drawMenu, drawPanel, menuSize, type MenuItem } from '../engine/ui';
+import { drawGauge, drawMenu, menuSize, type MenuItem } from '../engine/ui';
+import {
+  drawExpWindow,
+  drawFightHud,
+  drawForecast,
+  drawHealForecast,
+  drawInfoPage,
+  drawLevelUp,
+  drawMessage,
+  drawTerrainWindow,
+  drawUnitWindow,
+  drawWeaponSelect,
+  type Pen,
+} from './battleWindows';
+import { FightPlayer, type FightCue } from './fightPlayer';
+import { expSteps, fightSteps, type ResultStep } from './results';
 
 const TILE = 16;
 /** Time a unit takes to cross one tile. */
 const STEP_MS = 80;
 const BANNER_MS = 850;
 const POPUP_MS = 800;
-const FLASH_MS = 320;
-const GHOST_MS = 600;
-/** How long input is locked after an attack so the result can be read. */
-const BUSY_MS = 520;
+const HEAL_MS = 750;
+const EXP_FILL_MS = 700;
+const EXP_HOLD_MS = 380;
+const MESSAGE_MS = 1300;
 /** Camera speed in pixels per millisecond. */
 const CAMERA_SPEED = 0.24;
+const HEAL_TINT = 'rgba(80, 200, 120, 0.55)';
 
+type ActionId = 'attack' | 'heal' | 'wait';
 interface ActionItem extends MenuItem {
-  readonly id: 'attack' | 'wait';
+  readonly id: ActionId;
+}
+
+type Purpose = 'attack' | 'heal';
+
+/** A weapon (or remedy) the unit could use now, and whom it would reach. */
+interface Choice {
+  readonly slot: number;
+  readonly weapon: WeaponDef;
+  readonly uses: number;
+  readonly targets: UnitInstance[];
 }
 
 type Mode =
@@ -33,8 +62,21 @@ type Mode =
   | { kind: 'selected'; unit: UnitInstance; reach: ReachResult; threat: Point[] }
   | { kind: 'moving'; unit: UnitInstance; path: Point[]; elapsed: number; origin: Point }
   | { kind: 'action'; unit: UnitInstance; origin: Point; items: ActionItem[]; index: number }
-  | { kind: 'target'; unit: UnitInstance; origin: Point; targets: UnitInstance[]; index: number }
-  | { kind: 'busy'; left: number }
+  | { kind: 'weapon'; unit: UnitInstance; origin: Point; purpose: Purpose; choices: Choice[]; index: number }
+  | {
+      kind: 'target';
+      unit: UnitInstance;
+      origin: Point;
+      purpose: Purpose;
+      choice: Choice;
+      /** Where Back returns to: the weapon list when there was one to choose from. */
+      back: Choice[] | null;
+      index: number;
+      detail: boolean;
+    }
+  | { kind: 'fight'; player: FightPlayer }
+  | { kind: 'healing'; report: HealReport; hpBefore: number; elapsed: number }
+  | { kind: 'results'; steps: ResultStep[]; index: number; elapsed: number }
   | { kind: 'menu'; index: number };
 
 interface Popup {
@@ -46,11 +88,6 @@ interface Popup {
   age: number;
 }
 
-interface Ghost {
-  readonly unit: UnitInstance;
-  age: number;
-}
-
 export interface BattleSceneOptions {
   readonly battle: BattleState;
   readonly assets: Assets;
@@ -58,8 +95,9 @@ export interface BattleSceneOptions {
 }
 
 /**
- * The battle screen: a tile map with a cursor, unit selection, movement, an action menu and
- * a basic attack. The rules live in `BattleState`; this class is input handling and drawing.
+ * The battle screen: a tile map with a cursor, unit selection, movement, the action menu,
+ * weapon choice, the forecast, animated fights, EXP and level-ups, and healing. The rules live
+ * in `BattleState`; this class is input handling and drawing.
  */
 export class BattleScene implements Scene {
   private readonly battle: BattleState;
@@ -78,9 +116,9 @@ export class BattleScene implements Scene {
   private dangerOn = false;
   private dangerCache: Set<number> | null = null;
   private infoOpen = false;
+  /** The unit whose action is being played out; it is not greyed until the sequence ends. */
+  private actor: UnitInstance | null = null;
   private readonly popups: Popup[] = [];
-  private readonly flashes = new Map<string, number>();
-  private readonly ghosts: Ghost[] = [];
 
   constructor({ battle, assets, text }: BattleSceneOptions) {
     this.battle = battle;
@@ -109,7 +147,7 @@ export class BattleScene implements Scene {
 
   update(dtMs: number, actions: ReadonlySet<Action>, taps: readonly Point[]): void {
     this.clock += dtMs;
-    this.updateEffects(dtMs);
+    this.updatePopups(dtMs);
     this.updateCamera(dtMs);
     const mode = this.mode;
     switch (mode.kind) {
@@ -129,12 +167,20 @@ export class BattleScene implements Scene {
       case 'action':
         this.updateAction(mode, actions);
         break;
+      case 'weapon':
+        this.updateWeapon(mode, actions);
+        break;
       case 'target':
         this.updateTarget(mode, this.withTaps(actions, taps));
         break;
-      case 'busy':
-        mode.left -= dtMs;
-        if (mode.left <= 0) this.afterAction();
+      case 'fight':
+        this.updateFight(mode, dtMs);
+        break;
+      case 'healing':
+        this.updateHealing(mode, dtMs);
+        break;
+      case 'results':
+        this.updateResults(mode, dtMs, actions);
         break;
       case 'menu':
         this.updateMenu(mode, actions);
@@ -142,15 +188,9 @@ export class BattleScene implements Scene {
     }
   }
 
-  private updateEffects(dtMs: number): void {
+  private updatePopups(dtMs: number): void {
     for (const p of this.popups) p.age += dtMs;
     for (let i = this.popups.length - 1; i >= 0; i--) if ((this.popups[i]?.age ?? 0) > POPUP_MS) this.popups.splice(i, 1);
-    for (const [id, left] of this.flashes) {
-      if (left - dtMs <= 0) this.flashes.delete(id);
-      else this.flashes.set(id, left - dtMs);
-    }
-    for (const g of this.ghosts) g.age += dtMs;
-    for (let i = this.ghosts.length - 1; i >= 0; i--) if ((this.ghosts[i]?.age ?? 0) > GHOST_MS) this.ghosts.splice(i, 1);
   }
 
   private updateCamera(dtMs: number): void {
@@ -230,15 +270,28 @@ export class BattleScene implements Scene {
   private updateMoving(mode: Extract<Mode, { kind: 'moving' }>, dtMs: number): void {
     mode.elapsed += dtMs;
     const total = (mode.path.length - 1) * STEP_MS;
-    const at = this.walkTile(mode);
-    this.cursor = at;
+    this.cursor = this.walkTile(mode);
     this.followCursor();
     if (mode.elapsed >= total) this.openActionMenu(mode.unit, mode.origin);
   }
 
+  // ---------------------------------------------------------------- the action menu
+
+  private attackChoices(unit: UnitInstance): Choice[] {
+    return this.battle.attackOptions(unit).map((o) => ({ slot: o.slot, weapon: o.weapon, uses: unit.inventory[o.slot]?.uses ?? 0, targets: o.targets }));
+  }
+
+  private healChoices(unit: UnitInstance): Choice[] {
+    return this.battle
+      .usableRemedies(unit)
+      .map(({ slot, weapon }) => ({ slot, weapon, uses: unit.inventory[slot]?.uses ?? 0, targets: this.battle.healTargets(unit, weapon) }))
+      .filter((c) => c.targets.length > 0);
+  }
+
   private openActionMenu(unit: UnitInstance, origin: Point): void {
     const items: ActionItem[] = [];
-    if (this.battle.targetsFrom(unit, unit).length > 0) items.push({ id: 'attack', label: 'Attack' });
+    if (this.attackChoices(unit).length > 0) items.push({ id: 'attack', label: 'Attack' });
+    if (this.healChoices(unit).length > 0) items.push({ id: 'heal', label: 'Heal' });
     items.push({ id: 'wait', label: 'Wait' });
     this.setCursor(unit.x, unit.y);
     this.mode = { kind: 'action', unit, origin, items, index: 0 };
@@ -258,65 +311,141 @@ export class BattleScene implements Scene {
       return;
     }
     if (!actions.has('confirm')) return;
-    const choice = mode.items[mode.index];
-    if (choice?.id === 'attack') {
-      const targets = this.battle.targetsFrom(mode.unit, mode.unit);
-      const first = targets[0];
-      if (!first) return;
-      this.setCursor(first.x, first.y);
-      this.mode = { kind: 'target', unit: mode.unit, origin: mode.origin, targets, index: 0 };
-    } else if (choice?.id === 'wait') {
+    const choice = mode.items[mode.index]?.id;
+    if (choice === 'attack') this.chooseWeapon(mode.unit, mode.origin, 'attack', this.attackChoices(mode.unit));
+    else if (choice === 'heal') this.chooseWeapon(mode.unit, mode.origin, 'heal', this.healChoices(mode.unit));
+    else if (choice === 'wait') {
       this.battle.wait(mode.unit);
       this.dangerCache = null;
       this.afterAction();
     }
   }
 
-  private updateTarget(mode: Extract<Mode, { kind: 'target' }>, actions: ReadonlySet<Action>): void {
-    const count = mode.targets.length;
-    const previous = actions.has('left') || actions.has('up');
-    const next = actions.has('right') || actions.has('down');
-    if (previous || next) {
-      mode.index = (mode.index + (next ? 1 : count - 1)) % count;
-      const t = mode.targets[mode.index];
-      if (t) this.setCursor(t.x, t.y);
-    }
+  /** With one weapon to choose go straight to the targets; with several, show the list. */
+  private chooseWeapon(unit: UnitInstance, origin: Point, purpose: Purpose, choices: Choice[]): void {
+    const only = choices[0];
+    if (!only) return;
+    if (choices.length === 1) this.startTargets(unit, origin, purpose, only, null);
+    else this.mode = { kind: 'weapon', unit, origin, purpose, choices, index: 0 };
+  }
+
+  private updateWeapon(mode: Extract<Mode, { kind: 'weapon' }>, actions: ReadonlySet<Action>): void {
+    const n = mode.choices.length;
+    if (actions.has('up')) mode.index = (mode.index + n - 1) % n;
+    if (actions.has('down')) mode.index = (mode.index + 1) % n;
     if (actions.has('cancel')) {
       this.openActionMenu(mode.unit, mode.origin);
       return;
     }
-    if (!actions.has('confirm')) return;
+    const choice = mode.choices[mode.index];
+    if (actions.has('confirm') && choice) this.startTargets(mode.unit, mode.origin, mode.purpose, choice, mode.choices);
+  }
+
+  private startTargets(unit: UnitInstance, origin: Point, purpose: Purpose, choice: Choice, back: Choice[] | null): void {
+    if (purpose === 'attack') this.battle.equip(unit, choice.slot);
+    const first = choice.targets[0];
+    if (first) this.setCursor(first.x, first.y);
+    this.mode = { kind: 'target', unit, origin, purpose, choice, back, index: 0, detail: false };
+  }
+
+  private updateTarget(mode: Extract<Mode, { kind: 'target' }>, actions: ReadonlySet<Action>): void {
+    const targets = mode.choice.targets;
+    const previous = actions.has('left') || actions.has('up');
+    const next = actions.has('right') || actions.has('down');
+    if (previous || next) {
+      mode.index = (mode.index + (next ? 1 : targets.length - 1)) % targets.length;
+      const t = targets[mode.index];
+      if (t) this.setCursor(t.x, t.y);
+    }
+    if (actions.has('info')) mode.detail = !mode.detail;
+    if (actions.has('cancel')) {
+      if (mode.detail) mode.detail = false;
+      else if (mode.back) this.mode = { kind: 'weapon', unit: mode.unit, origin: mode.origin, purpose: mode.purpose, choices: mode.back, index: Math.max(0, mode.back.indexOf(mode.choice)) };
+      else this.openActionMenu(mode.unit, mode.origin);
+      return;
+    }
+    if (!actions.has('confirm') || mode.detail) return;
     // a tap or cursor move that landed on another target selects it first
-    const at = mode.targets.findIndex((t) => t.x === this.cursor.x && t.y === this.cursor.y);
+    const at = targets.findIndex((t) => t.x === this.cursor.x && t.y === this.cursor.y);
     if (at >= 0 && at !== mode.index) {
       mode.index = at;
       return;
     }
-    const target = mode.targets[mode.index];
-    if (target) this.performAttack(mode.unit, target);
+    const target = targets[mode.index];
+    if (!target) return;
+    if (mode.purpose === 'attack') this.startFight(mode.unit, target);
+    else this.startHeal(mode.unit, target, mode.choice.slot);
   }
 
-  private performAttack(attacker: UnitInstance, defender: UnitInstance): void {
-    const report = this.battle.attack(attacker, defender);
+  // ---------------------------------------------------------------- fights, healing and their results
+
+  private startFight(attacker: UnitInstance, defender: UnitInstance): void {
+    const report = this.battle.fight(attacker, defender);
     this.dangerCache = null;
-    this.popup(defender, report.damage > 0 ? String(report.damage) : 'No damage', report.damage > 0 ? COLORS.white : COLORS.textDim);
-    this.flashes.set(defender.id, FLASH_MS);
-    if (report.counterDamage !== null) {
-      this.popup(attacker, report.counterDamage > 0 ? String(report.counterDamage) : 'No damage', report.counterDamage > 0 ? COLORS.white : COLORS.textDim);
-      this.flashes.set(attacker.id, FLASH_MS);
-    }
-    for (const unit of report.defeated) {
-      this.ghosts.push({ unit, age: 0 });
-      this.popup(unit, 'Retreats', COLORS.bad, 10);
-    }
+    this.actor = attacker;
     this.setCursor(attacker.x, attacker.y);
-    this.mode = { kind: 'busy', left: BUSY_MS };
+    this.mode = { kind: 'fight', player: new FightPlayer(report) };
+  }
+
+  private updateFight(mode: Extract<Mode, { kind: 'fight' }>, dtMs: number): void {
+    for (const cue of mode.player.update(dtMs)) this.applyCue(cue);
+    if (mode.player.done) this.startResults(fightSteps(mode.player.report, this.battle.tables.balance.expPerLevel));
+  }
+
+  private applyCue(cue: FightCue): void {
+    if (cue.kind === 'defeat') {
+      this.popup(cue.unit, 'Retreats', COLORS.bad, 10);
+      return;
+    }
+    const { event, target } = cue;
+    if (!event.hit) this.popup(target, 'Miss', COLORS.textDim);
+    else if (event.damage === 0) this.popup(target, 'No damage', COLORS.textDim);
+    else this.popup(target, event.crit ? `${event.damage}!` : String(event.damage), event.crit ? COLORS.gold : COLORS.white);
+  }
+
+  private startHeal(healer: UnitInstance, target: UnitInstance, slot: number): void {
+    const hpBefore = target.hp;
+    const report = this.battle.heal(healer, target, slot);
+    this.actor = healer;
+    this.popup(target, `+${report.restored}`, COLORS.good);
+    this.mode = { kind: 'healing', report, hpBefore, elapsed: 0 };
+  }
+
+  private updateHealing(mode: Extract<Mode, { kind: 'healing' }>, dtMs: number): void {
+    mode.elapsed += dtMs;
+    if (mode.elapsed < HEAL_MS) return;
+    const award = mode.report.expAward;
+    this.startResults(award ? expSteps(award, this.battle.tables.balance.expPerLevel) : []);
+  }
+
+  private startResults(steps: ResultStep[]): void {
+    if (steps.length === 0) this.afterAction();
+    else this.mode = { kind: 'results', steps, index: 0, elapsed: 0 };
+  }
+
+  private updateResults(mode: Extract<Mode, { kind: 'results' }>, dtMs: number, actions: ReadonlySet<Action>): void {
+    const step = mode.steps[mode.index];
+    if (!step) {
+      this.afterAction();
+      return;
+    }
+    mode.elapsed += dtMs;
+    const confirm = actions.has('confirm');
+    const finished =
+      step.kind === 'levelup' ? confirm : step.kind === 'exp' ? confirm || mode.elapsed >= EXP_FILL_MS + EXP_HOLD_MS : confirm || mode.elapsed >= MESSAGE_MS;
+    if (!finished) return;
+    mode.index += 1;
+    mode.elapsed = 0;
+    if (mode.index >= mode.steps.length) this.afterAction();
   }
 
   private afterAction(): void {
+    this.actor = null;
     this.mode = { kind: 'free' };
     if (this.battle.isSideSpent('player')) this.beginEnemyPhase();
   }
+
+  // ---------------------------------------------------------------- the turn menu and phases
 
   private updateMenu(mode: Extract<Mode, { kind: 'menu' }>, actions: ReadonlySet<Action>): void {
     const items = this.menuItems();
@@ -374,7 +503,7 @@ export class BattleScene implements Scene {
     const merged = new Set(actions);
     for (const tap of taps) {
       const tile = this.tileAtScreen(tap);
-      if (!tile || !this.battle.map.inBounds(tile.x, tile.y)) continue;
+      if (!this.battle.map.inBounds(tile.x, tile.y)) continue;
       if (tile.x === this.cursor.x && tile.y === this.cursor.y) merged.add('confirm');
       else this.setCursor(tile.x, tile.y);
     }
@@ -398,17 +527,7 @@ export class BattleScene implements Scene {
   }
 
   private followCursor(): void {
-    this.camTarget = cameraToInclude(
-      this.camTarget,
-      this.cursor.x,
-      this.cursor.y,
-      TILE,
-      2,
-      this.mapWidthPx,
-      this.mapHeightPx,
-      LOGICAL_WIDTH,
-      LOGICAL_HEIGHT,
-    );
+    this.camTarget = cameraToInclude(this.camTarget, this.cursor.x, this.cursor.y, TILE, 2, this.mapWidthPx, this.mapHeightPx, LOGICAL_WIDTH, LOGICAL_HEIGHT);
   }
 
   // ---------------------------------------------------------------- helpers
@@ -454,7 +573,6 @@ export class BattleScene implements Scene {
   private focusUnit(): UnitInstance | undefined {
     const mode = this.mode;
     if (mode.kind === 'selected' || mode.kind === 'action') return mode.unit;
-    if (mode.kind === 'target') return mode.targets[mode.index];
     return this.battle.unitAt(this.cursor.x, this.cursor.y);
   }
 
@@ -517,41 +635,55 @@ export class BattleScene implements Scene {
         for (const p of path.slice(1)) ctx.fillRect(p.x * TILE - camX + 6, p.y * TILE - camY + 6, 4, 4);
       }
     } else if (mode.kind === 'target') {
-      for (const t of mode.targets) this.fillTile(ctx, t.x, t.y, camX, camY, COLORS.attack);
+      const color = mode.purpose === 'attack' ? COLORS.attack : HEAL_TINT;
+      for (const t of mode.choice.targets) this.fillTile(ctx, t.x, t.y, camX, camY, color);
+    } else if (mode.kind === 'weapon') {
+      const choice = mode.choices[mode.index];
+      const color = mode.purpose === 'attack' ? COLORS.attack : HEAL_TINT;
+      for (const t of choice?.targets ?? []) this.fillTile(ctx, t.x, t.y, camX, camY, color);
     }
   }
 
   private drawUnits(ctx: CanvasRenderingContext2D, camX: number, camY: number): void {
-    const drawables: Array<{ unit: UnitInstance; alpha: number }> = [
-      ...this.battle.livingUnits().map((unit) => ({ unit, alpha: 1 })),
-      ...this.ghosts.map((g) => ({ unit: g.unit, alpha: Math.max(0, 1 - g.age / GHOST_MS) })),
-    ];
-    drawables.sort((a, b) => a.unit.y - b.unit.y || a.unit.x - b.unit.x);
-    const showBarsFor = this.mode.kind === 'target' ? new Set(this.mode.targets) : null;
-    for (const { unit, alpha } of drawables) {
-      const flashLeft = this.flashes.get(unit.id);
-      if (flashLeft !== undefined && Math.floor(flashLeft / 60) % 2 === 1) continue;
-      const pos = this.unitPixel(unit);
-      const x = pos.x - camX;
-      const y = pos.y - camY;
+    const mode = this.mode;
+    const frame = mode.kind === 'fight' ? mode.player.frame() : null;
+    const fighters = mode.kind === 'fight' ? [mode.player.report.attacker, mode.player.report.defender] : [];
+    const drawables = [...this.battle.livingUnits(), ...fighters.filter((f) => f.retreated)];
+    drawables.sort((a, b) => a.y - b.y || a.x - b.x);
+    const showBarsFor = mode.kind === 'target' ? new Set(mode.choice.targets) : null;
+    for (const unit of drawables) {
+      const alpha = frame?.alpha.get(unit.id) ?? 1;
+      if (alpha <= 0 || frame?.blink.has(unit.id)) continue;
+      const base = this.unitPixel(unit);
+      const offset = frame?.offsets.get(unit.id) ?? { x: 0, y: 0 };
+      const x = base.x + offset.x - camX;
+      const y = base.y + offset.y - camY;
       if (x <= -TILE || y <= -TILE || x >= LOGICAL_WIDTH || y >= LOGICAL_HEIGHT) continue;
-      const walking = this.mode.kind === 'moving' && this.mode.unit === unit;
-      const spent = unit.side === 'player' && unit.acted && alpha === 1;
+      const walking = mode.kind === 'moving' && mode.unit === unit;
+      const spent = unit.side === 'player' && unit.acted && unit !== this.actor && alpha === 1;
       const look = { faction: unit.faction, skin: unit.skin, spent };
       const phase = this.battle.units.indexOf(unit) * 350;
-      const frame = spent
+      const sprite = spent
         ? this.assets.frame(unit.spriteId, 'idle', 0, look)
         : this.assets.animFrame(unit.spriteId, walking ? 'walk' : 'idle', this.clock + phase, look);
       ctx.globalAlpha = alpha;
-      ctx.drawImage(frame, x, y);
+      ctx.drawImage(sprite, x, y);
       ctx.globalAlpha = 1;
-      if (alpha === 1 && (unit.hp < unit.maxHp || showBarsFor?.has(unit))) drawGauge(ctx, x + 2, y + 13, 12, unit.hp, unit.maxHp, 2);
+      const healing = mode.kind === 'healing' && mode.report.target === unit;
+      const shown = frame?.hp.get(unit.id) ?? (healing ? this.healHp(mode) : unit.hp);
+      if (alpha === 1 && (shown < unit.stats.hp || showBarsFor?.has(unit) || frame?.hp.has(unit.id))) drawGauge(ctx, x + 2, y + 13, 12, shown, unit.stats.hp, 2);
     }
   }
 
+  /** The healed unit's HP bar while it fills. */
+  private healHp(mode: Extract<Mode, { kind: 'healing' }>): number {
+    const k = Math.min(1, mode.elapsed / (HEAL_MS * 0.8));
+    return Math.round(mode.hpBefore + mode.report.restored * k);
+  }
+
   private drawCursor(ctx: CanvasRenderingContext2D, camX: number, camY: number): void {
-    const mode = this.mode;
-    if (mode.kind === 'banner' || mode.kind === 'moving' || mode.kind === 'busy') return;
+    const kind = this.mode.kind;
+    if (kind === 'banner' || kind === 'moving' || kind === 'fight' || kind === 'healing' || kind === 'results') return;
     ctx.drawImage(this.assets.animFrame('ui.cursor', 'blink', this.clock), this.cursor.x * TILE - camX, this.cursor.y * TILE - camY);
   }
 
@@ -565,6 +697,7 @@ export class BattleScene implements Scene {
   }
 
   private drawInterface(ctx: CanvasRenderingContext2D, camX: number, camY: number): void {
+    const pen: Pen = { ctx, text: this.text };
     const mode = this.mode;
     switch (mode.kind) {
       case 'banner':
@@ -585,21 +718,54 @@ export class BattleScene implements Scene {
         drawMenu(ctx, this.text, mode.items, mode.index, x, y);
         return;
       }
+      case 'weapon':
+        drawWeaponSelect(pen, mode.choices, mode.choices.map((c) => c.uses), mode.index, mode.purpose === 'attack' ? 'Attack with' : 'Heal with');
+        return;
+      case 'target': {
+        const target = mode.choice.targets[mode.index];
+        if (!target) return;
+        const atTop = target.y * TILE - camY > LOGICAL_HEIGHT / 2;
+        if (mode.purpose === 'attack') {
+          const fc = this.battle.forecastFor(mode.unit, target);
+          if (fc) drawForecast(pen, this.battle, fc, mode.unit, target, mode.detail, atTop);
+        } else {
+          drawHealForecast(pen, mode.unit, target, mode.choice.weapon, atTop);
+        }
+        return;
+      }
+      case 'fight':
+        drawFightHud(pen, mode.player.report.attacker, mode.player.report.defender, mode.player.frame().hp);
+        return;
+      case 'results':
+        this.drawResultStep(pen, mode);
+        return;
       case 'moving':
-      case 'busy':
+      case 'healing':
         return;
       default:
         break;
     }
     const unit = this.focusUnit();
+    const onRight = this.cursor.x * TILE - camX < LOGICAL_WIDTH / 2; // windows sit on the side away from the cursor
     if (this.infoOpen && unit) {
-      this.drawInfoPage(ctx, unit, camX);
+      drawInfoPage(pen, this.battle, unit, onRight);
       return;
     }
-    const cursorX = this.cursor.x * TILE - camX;
-    const onRight = cursorX < LOGICAL_WIDTH / 2; // windows sit on the side away from the cursor
-    if (unit) this.drawUnitWindow(ctx, unit, onRight);
-    this.drawTerrainWindow(ctx, onRight);
+    if (unit) drawUnitWindow(pen, this.battle, unit, onRight);
+    drawTerrainWindow(pen, this.battle.map.terrainAt(this.cursor.x, this.cursor.y), onRight);
+  }
+
+  private drawResultStep(pen: Pen, mode: Extract<Mode, { kind: 'results' }>): void {
+    const step = mode.steps[mode.index];
+    if (!step) return;
+    if (step.kind === 'message') drawMessage(pen, step.lines);
+    else if (step.kind === 'levelup') drawLevelUp(pen, step.unit, step.levelUp, step.stats);
+    else {
+      const k = Math.min(1, mode.elapsed / EXP_FILL_MS);
+      const eased = 1 - (1 - k) * (1 - k);
+      const shown = step.from + (step.to - step.from) * eased;
+      drawExpWindow(pen, { ...step.unit, level: step.level }, shown, this.battle.tables.balance.expPerLevel, step.gained);
+    }
   }
 
   private drawBanner(ctx: CanvasRenderingContext2D, title: string, sub: string): void {
@@ -611,71 +777,5 @@ export class BattleScene implements Scene {
     ctx.fillRect(0, top + 43, LOGICAL_WIDTH, 1);
     this.text.drawCentered(ctx, title, LOGICAL_WIDTH / 2, top + 9, { color: COLORS.text, shadow: COLORS.ink, scale: 2 });
     if (sub) this.text.drawCentered(ctx, sub, LOGICAL_WIDTH / 2, top + 30, { color: COLORS.textDim });
-  }
-
-  private drawUnitWindow(ctx: CanvasRenderingContext2D, unit: UnitInstance, onRight: boolean): void {
-    const hpText = `${unit.hp}/${unit.maxHp}`;
-    const w = Math.max(88, this.text.width(unit.name) + 10, this.text.width(`${unit.className}  Lv ${unit.level}`) + 10);
-    const h = 36;
-    const x = onRight ? LOGICAL_WIDTH - w - 2 : 2;
-    const y = 2;
-    drawPanel(ctx, x, y, w, h);
-    this.text.draw(ctx, unit.name, x + 6, y + 5, { color: COLORS.text });
-    this.text.draw(ctx, `${unit.className}  Lv ${unit.level}`, x + 6, y + 14, { color: COLORS.textDim });
-    this.text.draw(ctx, 'HP', x + 6, y + 24, { color: COLORS.gold });
-    drawGauge(ctx, x + 20, y + 25, w - 60, unit.hp, unit.maxHp, 4);
-    this.text.drawRight(ctx, hpText, x + w - 5, y + 24, { color: COLORS.text });
-  }
-
-  private drawTerrainWindow(ctx: CanvasRenderingContext2D, onRight: boolean): void {
-    const t = this.battle.map.terrainAt(this.cursor.x, this.cursor.y);
-    const detail = t.heals ? `Cover ${t.cover}  Avoid ${t.avoid}  Heals ${Math.round(t.heals * 100)}%` : `Cover ${t.cover}  Avoid ${t.avoid}`;
-    const w = Math.max(this.text.width(t.name), this.text.width(detail)) + 12;
-    const h = 25;
-    const x = onRight ? LOGICAL_WIDTH - w - 2 : 2;
-    const y = LOGICAL_HEIGHT - h - 2;
-    drawPanel(ctx, x, y, w, h);
-    this.text.draw(ctx, t.name, x + 6, y + 5, { color: COLORS.text });
-    this.text.draw(ctx, detail, x + 6, y + 14, { color: COLORS.textDim });
-  }
-
-  private drawInfoPage(ctx: CanvasRenderingContext2D, unit: UnitInstance, camX: number): void {
-    const w = 168;
-    const h = 108;
-    const cursorX = this.cursor.x * TILE - camX;
-    const x = cursorX < LOGICAL_WIDTH / 2 ? LOGICAL_WIDTH - w - 4 : 4;
-    const y = Math.round((LOGICAL_HEIGHT - h) / 2);
-    drawPanel(ctx, x, y, w, h);
-    const left = x + 8;
-    const right = x + w - 8;
-    const gold = { color: COLORS.gold };
-    const plain = { color: COLORS.text };
-    this.text.draw(ctx, unit.name, left, y + 7, plain);
-    this.text.drawRight(ctx, `Lv ${unit.level}`, right, y + 7, plain);
-    this.text.draw(ctx, unit.className, left, y + 17, { color: COLORS.textDim });
-    this.text.draw(ctx, 'HP', left, y + 30, gold);
-    drawGauge(ctx, left + 16, y + 31, 70, unit.hp, unit.maxHp, 4);
-    this.text.drawRight(ctx, `${unit.hp}/${unit.maxHp}`, right, y + 30, plain);
-    const rows: ReadonlyArray<readonly [string, string, string, string]> = [
-      ['Might', String(unit.mgt), 'Guard', String(unit.grd)],
-      ['Move', String(unit.mov), 'Type', unit.moveType],
-    ];
-    rows.forEach(([a, av, b, bv], i) => {
-      const ry = y + 45 + i * 11;
-      this.text.draw(ctx, a, left, ry, gold);
-      this.text.draw(ctx, av, left + 36, ry, plain);
-      this.text.draw(ctx, b, left + 78, ry, gold);
-      this.text.draw(ctx, bv, left + 112, ry, plain);
-    });
-    const weapon = unit.weapon;
-    this.text.draw(ctx, 'Weapon', left, y + 70, gold);
-    if (weapon) {
-      this.text.draw(ctx, weapon.name, left + 44, y + 70, plain);
-      const range = weapon.rangeMin === weapon.rangeMax ? `${weapon.rangeMax}` : `${weapon.rangeMin}-${weapon.rangeMax}`;
-      this.text.draw(ctx, `Might ${weapon.might}   Range ${range}`, left + 44, y + 80, { color: COLORS.textDim });
-    } else {
-      this.text.draw(ctx, 'none', left + 44, y + 70, { color: COLORS.textDim });
-    }
-    this.text.drawCentered(ctx, 'Info or Back to close', x + w / 2, y + h - 13, { color: COLORS.textDim });
   }
 }

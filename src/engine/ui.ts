@@ -18,15 +18,15 @@ export function drawPanel(ctx: CanvasRenderingContext2D, x: number, y: number, w
   ctx.clearRect(x + w - 1, y + h - 1, 1, 1);
 }
 
-/** A horizontal gauge. The fill colour turns amber and red as the value drops. */
-export function drawGauge(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, value: number, max: number, h = 3): void {
+/** A horizontal gauge. Unless `fill` is given, the colour turns amber and red as the value drops. */
+export function drawGauge(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, value: number, max: number, h = 3, fill?: string): void {
   ctx.fillStyle = COLORS.ink;
   ctx.fillRect(x - 1, y - 1, w + 2, h + 2);
   ctx.fillStyle = COLORS.hpBack;
   ctx.fillRect(x, y, w, h);
   const ratio = max <= 0 ? 0 : Math.max(0, Math.min(1, value / max));
   const filled = value > 0 ? Math.max(1, Math.round(w * ratio)) : 0;
-  ctx.fillStyle = ratio > 0.5 ? COLORS.hp : ratio > 0.25 ? COLORS.hpLow : COLORS.hpCritical;
+  ctx.fillStyle = fill ?? (ratio > 0.5 ? COLORS.hp : ratio > 0.25 ? COLORS.hpLow : COLORS.hpCritical);
   ctx.fillRect(x, y, filled, h);
 }
 

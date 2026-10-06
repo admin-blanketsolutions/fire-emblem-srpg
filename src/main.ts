@@ -1,4 +1,4 @@
-import { createM1Battle } from './data';
+import { createTestBattle } from './data';
 import { Assets } from './engine/assets';
 import { Display } from './engine/display';
 import { Game } from './engine/game';
@@ -24,7 +24,7 @@ async function boot(): Promise<void> {
   const input = new Input(display);
   installTouchControls(input);
   const game = new Game({ display, input, assets, text });
-  const battle = createM1Battle();
+  const battle = createTestBattle();
   const scene = new BattleScene({ battle, assets, text });
   game.run(scene);
   // A handle for poking at a running battle from the browser console while developing.

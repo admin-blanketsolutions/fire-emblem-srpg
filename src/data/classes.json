@@ -1,0 +1,141 @@
+[
+  {
+    "id": "young-lord",
+    "line": "lord",
+    "tier": 1,
+    "name": "Young Lord",
+    "moveType": "foot",
+    "base": { "hp": 19, "mgt": 5, "skl": 5, "spd": 6, "fort": 0, "grd": 3, "nrv": 1, "bld": 7, "mov": 5 },
+    "weapons": { "sabre": 3, "spear": 2, "bow": 1 }
+  },
+  {
+    "id": "soldier",
+    "line": "soldier",
+    "tier": 1,
+    "name": "Soldier",
+    "moveType": "foot",
+    "base": { "hp": 18, "mgt": 4, "skl": 3, "spd": 4, "fort": 0, "grd": 3, "nrv": 0, "bld": 6, "mov": 5 },
+    "weapons": { "spear": 3, "sabre": 2, "mace": 1 },
+    "growthMod": { "hp": 10, "grd": 5, "spd": -5 }
+  },
+  {
+    "id": "pikeman",
+    "line": "pike",
+    "tier": 1,
+    "name": "Pikeman",
+    "moveType": "foot",
+    "base": { "hp": 19, "mgt": 5, "skl": 4, "spd": 4, "fort": 0, "grd": 3, "nrv": 0, "bld": 7, "mov": 5 },
+    "weapons": { "spear": 4, "sabre": 2, "mace": 1, "javelin": 1 },
+    "growthMod": { "grd": 5, "skl": 5 }
+  },
+  {
+    "id": "swordsman",
+    "line": "sword",
+    "tier": 1,
+    "name": "Swordsman",
+    "moveType": "foot",
+    "base": { "hp": 18, "mgt": 4, "skl": 6, "spd": 7, "fort": 0, "grd": 2, "nrv": 0, "bld": 5, "mov": 5 },
+    "weapons": { "sabre": 4, "dagger": 2, "spear": 1 },
+    "growthMod": { "skl": 10, "spd": 10, "grd": -5 }
+  },
+  {
+    "id": "axeman",
+    "line": "axe",
+    "tier": 1,
+    "name": "Axeman",
+    "moveType": "foot",
+    "base": { "hp": 21, "mgt": 6, "skl": 3, "spd": 3, "fort": 0, "grd": 3, "nrv": 0, "bld": 8, "mov": 5 },
+    "weapons": { "axe": 4, "mace": 2, "javelin": 1 },
+    "growthMod": { "hp": 10, "mgt": 10, "spd": -10 }
+  },
+  {
+    "id": "archer",
+    "line": "bow",
+    "tier": 1,
+    "name": "Archer",
+    "moveType": "foot",
+    "base": { "hp": 17, "mgt": 4, "skl": 5, "spd": 5, "fort": 0, "grd": 2, "nrv": 1, "bld": 5, "mov": 5 },
+    "weapons": { "bow": 4, "dagger": 1 },
+    "growthMod": { "skl": 10, "spd": 5 }
+  },
+  {
+    "id": "horse-archer",
+    "line": "horse-archer",
+    "tier": 1,
+    "name": "Horse Archer",
+    "moveType": "mounted",
+    "base": { "hp": 17, "mgt": 4, "skl": 5, "spd": 7, "fort": 0, "grd": 2, "nrv": 1, "bld": 5, "mov": 7 },
+    "weapons": { "bow": 4, "sabre": 2, "javelin": 1 },
+    "growthMod": { "skl": 5, "spd": 10 }
+  },
+  {
+    "id": "horseman",
+    "line": "cavalry",
+    "tier": 1,
+    "name": "Horseman",
+    "moveType": "mounted",
+    "base": { "hp": 20, "mgt": 5, "skl": 4, "spd": 5, "fort": 0, "grd": 4, "nrv": 0, "bld": 8, "mov": 7 },
+    "weapons": { "spear": 3, "sabre": 3, "mace": 1 },
+    "growthMod": { "hp": 5, "mgt": 5, "grd": 5 }
+  },
+  {
+    "id": "crossbowman",
+    "line": "crossbow",
+    "tier": 1,
+    "name": "Crossbowman",
+    "moveType": "foot",
+    "base": { "hp": 18, "mgt": 5, "skl": 4, "spd": 3, "fort": 0, "grd": 3, "nrv": 0, "bld": 7, "mov": 5 },
+    "weapons": { "crossbow": 4, "dagger": 1 },
+    "growthMod": { "mgt": 5, "skl": 5, "spd": -5 }
+  },
+  {
+    "id": "skirmisher",
+    "line": "skirmish",
+    "tier": 1,
+    "name": "Skirmisher",
+    "moveType": "light",
+    "base": { "hp": 16, "mgt": 3, "skl": 5, "spd": 7, "fort": 0, "grd": 1, "nrv": 1, "bld": 4, "mov": 6 },
+    "weapons": { "javelin": 4, "dagger": 2, "bow": 1 },
+    "growthMod": { "spd": 15, "skl": 5, "grd": -5 }
+  },
+  {
+    "id": "fire-thrower",
+    "line": "fire",
+    "tier": 1,
+    "name": "Fire Thrower",
+    "moveType": "light",
+    "base": { "hp": 16, "mgt": 2, "skl": 6, "spd": 5, "fort": 0, "grd": 1, "nrv": 2, "bld": 4, "mov": 6 },
+    "weapons": { "fire": 4, "dagger": 1 },
+    "growthMod": { "skl": 10, "nrv": 10, "hp": -5 }
+  },
+  {
+    "id": "sapper",
+    "line": "engineer",
+    "tier": 1,
+    "name": "Sapper",
+    "moveType": "foot",
+    "base": { "hp": 18, "mgt": 4, "skl": 3, "spd": 3, "fort": 0, "grd": 3, "nrv": 1, "bld": 8, "mov": 5 },
+    "weapons": { "mace": 3, "axe": 2, "spear": 2 },
+    "growthMod": { "hp": 5, "mgt": 5, "nrv": 5 }
+  },
+  {
+    "id": "healer",
+    "line": "medic",
+    "tier": 1,
+    "name": "Healer",
+    "moveType": "light",
+    "base": { "hp": 15, "mgt": 1, "skl": 4, "spd": 4, "fort": 0, "grd": 1, "nrv": 4, "bld": 4, "mov": 6 },
+    "weapons": { "remedy": 4, "dagger": 1 },
+    "growthMod": { "nrv": 10, "skl": 5, "mgt": -5 }
+  },
+  {
+    "id": "scribe",
+    "line": "scribe",
+    "tier": 1,
+    "name": "Scribe",
+    "moveType": "light",
+    "base": { "hp": 14, "mgt": 1, "skl": 3, "spd": 4, "fort": 0, "grd": 1, "nrv": 5, "bld": 4, "mov": 6 },
+    "weapons": { "remedy": 2, "dagger": 1 },
+    "growthMod": { "nrv": 15, "skl": 5, "mgt": -10 }
+  }
+]

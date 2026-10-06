@@ -29,18 +29,19 @@
   "spawns": {
     "player": [
       { "unit": "lord", "at": [3, 7] },
-      { "unit": "spear-knight", "at": [4, 6] },
-      { "unit": "axe-knight", "at": [4, 8] },
+      { "unit": "pikeman", "at": [4, 6] },
+      { "unit": "axeman", "at": [4, 8] },
       { "unit": "horse-archer", "at": [2, 6] },
       { "unit": "horseman", "at": [2, 8] },
-      { "unit": "fire-thrower", "at": [1, 7] }
+      { "unit": "fire-thrower", "at": [1, 7] },
+      { "unit": "healer", "at": [3, 8] }
     ],
     "enemy": [
       { "unit": "soldier", "at": [14, 6] },
       { "unit": "soldier", "at": [14, 8] },
       { "unit": "crossbowman", "at": [17, 6] },
-      { "unit": "man-at-arms", "at": [17, 7] },
-      { "unit": "horseman-enemy", "at": [13, 3] }
+      { "unit": "enemy-pikeman", "at": [17, 7] },
+      { "unit": "enemy-horseman", "at": [13, 3] }
     ]
   }
 }

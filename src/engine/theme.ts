@@ -14,6 +14,7 @@ export const COLORS = {
   hpLow: '#d8a21e',
   hpCritical: '#c2412d',
   hpBack: '#3a2a22',
+  exp: '#5aa0e8',
   reach: 'rgba(40, 90, 235, 0.58)',
   attack: 'rgba(235, 55, 45, 0.55)',
   danger: 'rgba(235, 55, 45, 0.32)',

@@ -1,0 +1,213 @@
+import type { Balance } from './balance';
+import type { Rng } from './rng';
+import type { TerrainDef } from './terrain';
+import type { UnitInstance } from './unit';
+import { canReach, isEffective, isOffensive, triangle, type WeaponDef } from './weapons';
+
+/**
+ * Combat arithmetic (DESIGN §5.2). Everything here is pure: formulas take plain values and
+ * resolution takes a seeded `Rng`, so a fight can be replayed exactly.
+ */
+
+/** Bonuses from supports and skills, added to the exchange (M5). */
+export interface Bonus {
+  readonly hit: number;
+  readonly avoid: number;
+  readonly crit: number;
+}
+export const NO_BONUS: Bonus = { hit: 0, avoid: 0, crit: 0 };
+
+/** One side of a fight, with everything the formulas need. */
+export interface Combatant {
+  readonly unit: UnitInstance;
+  /** The equipped weapon, or null for none. */
+  readonly weapon: WeaponDef | null;
+  /** Uses left on the equipped weapon. */
+  readonly usesLeft: number;
+  /** The terrain under the unit. */
+  readonly terrain: TerrainDef;
+  readonly bonus?: Bonus;
+  /** A structure (gate, barricade): it has no attack speed, so its evasion is terrain alone. */
+  readonly structure?: boolean;
+}
+
+export type HitMode = 'honest' | 'weighted';
+
+const clamp = (n: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, n));
+const bonusOf = (c: Combatant): Bonus => c.bonus ?? NO_BONUS;
+
+/** Attack speed: Speed, less the weight the unit is too weak to carry, plus Quick. */
+export function attackSpeed(c: Combatant): number {
+  const { stats } = c.unit;
+  if (!c.weapon) return stats.spd;
+  return stats.spd - Math.max(0, c.weapon.weight - stats.bld) + (c.weapon.quick ?? 0);
+}
+
+/** Might of the weapon against this target: doubled if effective, plus any flat bonus. */
+export function effectiveMight(weapon: WeaponDef, target: Combatant): number {
+  const classes = target.structure ? (['structure'] as const) : ([target.unit.moveType] as const);
+  const isEff = classes.some((c) => isEffective(weapon, c));
+  const flat = classes.reduce((sum, c) => sum + (weapon.vsBonus?.[c] ?? 0), 0);
+  return weapon.might * (isEff ? 2 : 1) + flat;
+}
+
+/** Offensive power before defence: Might (Skill for fire) plus weapon Might and the triangle. */
+export function power(attacker: Combatant, defender: Combatant, tri: number): number {
+  const weapon = attacker.weapon;
+  if (!weapon) return 0;
+  const stat = weapon.kind === 'fire' ? attacker.unit.stats.skl : attacker.unit.stats.mgt;
+  return stat + effectiveMight(weapon, defender) + tri;
+}
+
+/** Fire is resisted by Nerve and water; everything else by Guard and cover, less Pierce. */
+export function defence(weapon: WeaponDef, defender: Combatant): number {
+  if (weapon.kind === 'fire') return defender.unit.stats.nrv + (defender.terrain.quench ?? 0);
+  return defender.unit.stats.grd + defender.terrain.cover - (weapon.pierce ?? 0);
+}
+
+export function accuracy(attacker: Combatant, tri: number, distance: number): number {
+  const weapon = attacker.weapon;
+  if (!weapon) return 0;
+  const { skl, fort } = attacker.unit.stats;
+  const close = distance === 1 ? (weapon.closeHit ?? 0) : 0;
+  return weapon.hit + 2 * skl + Math.floor(fort / 2) + 10 * tri + bonusOf(attacker).hit + close;
+}
+
+export function evasion(defender: Combatant): number {
+  const terrain = defender.terrain.avoid;
+  if (defender.structure) return terrain;
+  return 2 * attackSpeed(defender) + defender.unit.stats.fort + terrain + bonusOf(defender).avoid;
+}
+
+export function critRate(attacker: Combatant, defender: Combatant): number {
+  const weapon = attacker.weapon;
+  if (!weapon) return 0;
+  const raw = weapon.crit + Math.floor(attacker.unit.stats.skl / 2) + bonusOf(attacker).crit - defender.unit.stats.fort;
+  return clamp(raw, 0, 100);
+}
+
+/** Damage, hit and crit chance for one strike. */
+export interface StrikeStats {
+  readonly damage: number;
+  readonly hit: number;
+  readonly crit: number;
+}
+
+/** What a side's strike would do, or null if it cannot attack at this distance. */
+export function strikeStats(attacker: Combatant, defender: Combatant, distance: number): StrikeStats | null {
+  const weapon = attacker.weapon;
+  if (!weapon || !isOffensive(weapon) || attacker.usesLeft <= 0 || !canReach(weapon, distance)) return null;
+  const tri = defender.weapon ? triangle(weapon.kind, defender.weapon.kind) : 0;
+  const damage = Math.max(0, power(attacker, defender, tri) - defence(weapon, defender));
+  return {
+    damage,
+    hit: clamp(accuracy(attacker, tri, distance) - evasion(defender), 0, 100),
+    crit: critRate(attacker, defender),
+  };
+}
+
+export interface SideForecast {
+  /** Null when this side cannot attack in this exchange. */
+  readonly strike: StrikeStats | null;
+  /** Strikes this side will make if nobody falls: 0, 1 or 2. */
+  readonly strikes: number;
+  readonly attackSpeed: number;
+  readonly accuracy: number;
+  readonly evasion: number;
+  readonly triangle: -1 | 0 | 1;
+  readonly weaponName: string | null;
+  readonly hpNow: number;
+  /** Expected HP after the exchange if every strike hits (and none crits). */
+  readonly hpAfter: number;
+}
+
+export interface Forecast {
+  readonly distance: number;
+  readonly attacker: SideForecast;
+  readonly defender: SideForecast;
+  /** The order of strikes: the attacker, the counter, then each side's follow-up. */
+  readonly order: readonly ('a' | 'd')[];
+}
+
+/** The order of strikes, honouring weapon durability. */
+function strikeOrder(aCan: boolean, dCan: boolean, aDouble: boolean, dDouble: boolean, aUses: number, dUses: number): Array<'a' | 'd'> {
+  const wanted: Array<'a' | 'd'> = [];
+  if (aCan) wanted.push('a');
+  if (dCan) wanted.push('d');
+  if (aCan && aDouble) wanted.push('a');
+  if (dCan && dDouble) wanted.push('d');
+  const used = { a: 0, d: 0 };
+  const limit = { a: aUses, d: dUses };
+  return wanted.filter((side) => used[side]++ < limit[side]);
+}
+
+export function forecast(a: Combatant, d: Combatant, distance: number, balance: Balance): Forecast {
+  const aStrike = strikeStats(a, d, distance);
+  const dStrike = strikeStats(d, a, distance);
+  const aSpeed = attackSpeed(a);
+  const dSpeed = attackSpeed(d);
+  const aDouble = aSpeed >= dSpeed + balance.doubleThreshold;
+  const dDouble = dSpeed >= aSpeed + balance.doubleThreshold;
+  const order = aStrike ? strikeOrder(true, dStrike !== null, aDouble, dDouble, a.usesLeft, d.usesLeft) : [];
+  const count = (side: 'a' | 'd'): number => order.filter((s) => s === side).length;
+
+  // simulate the exchange with every strike hitting, to show the expected HP
+  let aHp = a.unit.hp;
+  let dHp = d.unit.hp;
+  for (const side of order) {
+    if (aHp <= 0 || dHp <= 0) break;
+    if (side === 'a') dHp = Math.max(0, dHp - (aStrike?.damage ?? 0));
+    else aHp = Math.max(0, aHp - (dStrike?.damage ?? 0));
+  }
+
+  const side = (c: Combatant, other: Combatant, strike: StrikeStats | null, speed: number, key: 'a' | 'd', hpAfter: number): SideForecast => ({
+    strike,
+    strikes: count(key),
+    attackSpeed: speed,
+    accuracy: strike ? accuracy(c, c.weapon && other.weapon ? triangle(c.weapon.kind, other.weapon.kind) : 0, distance) : 0,
+    evasion: evasion(c),
+    triangle: c.weapon && other.weapon ? triangle(c.weapon.kind, other.weapon.kind) : 0,
+    weaponName: c.weapon?.name ?? null,
+    hpNow: c.unit.hp,
+    hpAfter,
+  });
+  return {
+    distance,
+    attacker: side(a, d, aStrike, aSpeed, 'a', aHp),
+    defender: side(d, a, dStrike, dSpeed, 'd', dHp),
+    order,
+  };
+}
+
+/** One strike as it happened, with the target's HP afterwards. */
+export interface StrikeEvent {
+  readonly by: 'a' | 'd';
+  readonly hit: boolean;
+  readonly crit: boolean;
+  readonly damage: number;
+  readonly targetHpAfter: number;
+  readonly killed: boolean;
+}
+
+/**
+ * Play out the forecast's strikes with seeded rolls. For each strike one hit roll is drawn
+ * (two, averaged, in Weighted mode) and, only on a hit with a crit chance, one crit roll.
+ * The sequence stops as soon as a unit falls.
+ */
+export function resolveStrikes(fc: Forecast, aHp: number, dHp: number, rng: Rng, mode: HitMode, balance: Balance): StrikeEvent[] {
+  const events: StrikeEvent[] = [];
+  let hp = { a: aHp, d: dHp };
+  for (const by of fc.order) {
+    if (hp.a <= 0 || hp.d <= 0) break;
+    const stats = (by === 'a' ? fc.attacker : fc.defender).strike;
+    if (!stats) continue;
+    const roll = mode === 'weighted' ? (rng.int(100) + rng.int(100)) / 2 : rng.int(100);
+    const hit = roll < stats.hit;
+    const crit = hit && stats.crit > 0 && rng.int(100) < stats.crit;
+    const damage = hit ? stats.damage * (crit ? balance.critMultiplier : 1) : 0;
+    const target = by === 'a' ? 'd' : 'a';
+    hp = { ...hp, [target]: Math.max(0, hp[target] - damage) };
+    events.push({ by, hit, crit, damage, targetHpAfter: hp[target], killed: hp[target] <= 0 });
+  }
+  return events;
+}

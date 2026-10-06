@@ -1,62 +1,134 @@
 {
   "lord": {
-    "name": "Young Lord", "className": "Young Lord", "side": "player", "level": 3,
-    "moveType": "foot", "mov": 5, "mgt": 6, "grd": 3, "maxHp": 20,
-    "weapon": { "name": "Iron Sabre", "might": 5, "rangeMin": 1, "rangeMax": 1 },
-    "spriteId": "unit.young-lord", "faction": "ayyubid", "skin": "s2"
+    "id": "lord",
+    "name": "Young Lord",
+    "side": "player",
+    "class": "young-lord",
+    "level": 3,
+    "offset": { "hp": 1, "mgt": 1, "skl": 1, "spd": 1, "fort": 3 },
+    "growth": { "hp": 70, "mgt": 45, "skl": 50, "spd": 45, "fort": 35, "grd": 30, "nrv": 25 },
+    "inventory": ["iron-sabre", "levy-spear"],
+    "faction": "ayyubid",
+    "skin": "s2"
   },
-  "spear-knight": {
-    "name": "Spear Knight", "className": "Spear Knight", "side": "player", "level": 4,
-    "moveType": "foot", "mov": 5, "mgt": 8, "grd": 6, "maxHp": 26,
-    "weapon": { "name": "Brace Spear", "might": 6, "rangeMin": 1, "rangeMax": 1 },
-    "spriteId": "unit.pikeman", "faction": "ayyubid", "skin": "s3"
+  "pikeman": {
+    "id": "pikeman",
+    "name": "Pikeman",
+    "side": "player",
+    "class": "pikeman",
+    "level": 4,
+    "offset": { "hp": 2, "mgt": 1, "skl": 1, "spd": 1, "fort": 2, "grd": 1 },
+    "growth": { "hp": 60, "mgt": 40, "skl": 40, "spd": 40, "fort": 30, "grd": 35, "nrv": 15 },
+    "inventory": ["brace-spear", "levy-spear"],
+    "faction": "ayyubid",
+    "skin": "s3"
   },
-  "axe-knight": {
-    "name": "Axe Knight", "className": "Axe Knight", "side": "player", "level": 5,
-    "moveType": "foot", "mov": 5, "mgt": 10, "grd": 6, "maxHp": 28,
-    "weapon": { "name": "Halberd", "might": 9, "rangeMin": 1, "rangeMax": 1 },
-    "spriteId": "unit.axeman", "faction": "ayyubid", "skin": "s3"
+  "axeman": {
+    "id": "axeman",
+    "name": "Axeman",
+    "side": "player",
+    "class": "axeman",
+    "level": 4,
+    "offset": { "hp": 3, "mgt": 2, "fort": 1 },
+    "growth": { "hp": 70, "mgt": 50, "skl": 35, "spd": 30, "fort": 25, "grd": 30, "nrv": 10 },
+    "inventory": ["hatchet", "javelin"],
+    "faction": "ayyubid",
+    "skin": "s3"
   },
   "horse-archer": {
-    "name": "Horse Archer", "className": "Horse Archer", "side": "player", "level": 2,
-    "moveType": "mounted", "mov": 7, "mgt": 4, "grd": 2, "maxHp": 17,
-    "weapon": { "name": "Composite Bow", "might": 6, "rangeMin": 2, "rangeMax": 3 },
-    "spriteId": "unit.horse-archer", "faction": "ayyubid", "skin": "s4"
+    "id": "horse-archer",
+    "name": "Horse Archer",
+    "side": "player",
+    "class": "horse-archer",
+    "level": 2,
+    "offset": { "skl": 1, "fort": 2 },
+    "growth": { "hp": 55, "mgt": 40, "skl": 50, "spd": 55, "fort": 40, "grd": 20, "nrv": 20 },
+    "inventory": ["composite-bow", "short-bow"],
+    "faction": "ayyubid",
+    "skin": "s4"
   },
   "horseman": {
-    "name": "Horseman", "className": "Horseman", "side": "player", "level": 3,
-    "moveType": "mounted", "mov": 7, "mgt": 5, "grd": 4, "maxHp": 20,
-    "weapon": { "name": "Cavalry Lance", "might": 7, "rangeMin": 1, "rangeMax": 1 },
-    "spriteId": "unit.horseman", "faction": "ayyubid", "skin": "s2"
+    "id": "horseman",
+    "name": "Horseman",
+    "side": "player",
+    "class": "horseman",
+    "level": 3,
+    "offset": { "mgt": 1, "fort": 2 },
+    "growth": { "hp": 60, "mgt": 40, "skl": 35, "spd": 40, "fort": 30, "grd": 30, "nrv": 15 },
+    "inventory": ["brace-spear", "iron-sabre"],
+    "faction": "ayyubid",
+    "skin": "s2"
   },
   "fire-thrower": {
-    "name": "Fire Thrower", "className": "Fire Thrower", "side": "player", "level": 2,
-    "moveType": "light", "mov": 6, "mgt": 6, "grd": 1, "maxHp": 16,
-    "weapon": { "name": "Naphtha Pot", "might": 6, "rangeMin": 1, "rangeMax": 2 },
-    "spriteId": "unit.fire-thrower", "faction": "ayyubid", "skin": "s1"
+    "id": "fire-thrower",
+    "name": "Fire Thrower",
+    "side": "player",
+    "class": "fire-thrower",
+    "level": 2,
+    "offset": { "skl": 1, "fort": 1 },
+    "growth": { "hp": 50, "mgt": 30, "skl": 55, "spd": 45, "fort": 30, "grd": 15, "nrv": 40 },
+    "inventory": ["naphtha-pot", "knife"],
+    "faction": "ayyubid",
+    "skin": "s5"
+  },
+  "healer": {
+    "id": "healer",
+    "name": "Healer",
+    "side": "player",
+    "class": "healer",
+    "level": 2,
+    "offset": { "nrv": 1, "fort": 3 },
+    "growth": { "hp": 45, "mgt": 20, "skl": 40, "spd": 40, "fort": 45, "grd": 15, "nrv": 55 },
+    "inventory": ["salve", "knife"],
+    "faction": "ayyubid",
+    "skin": "s1"
   },
   "soldier": {
-    "name": "Soldier", "className": "Soldier", "side": "enemy", "level": 2,
-    "moveType": "foot", "mov": 5, "mgt": 4, "grd": 3, "maxHp": 18,
-    "weapon": { "name": "Levy Spear", "might": 5, "rangeMin": 1, "rangeMax": 1 },
-    "spriteId": "unit.soldier", "faction": "frankish", "skin": "s1"
+    "id": "soldier",
+    "name": "Soldier",
+    "side": "enemy",
+    "class": "soldier",
+    "level": 2,
+    "offset": { "mgt": 1, "fort": 1 },
+    "growth": {},
+    "inventory": ["levy-spear"],
+    "faction": "frankish",
+    "skin": "s1"
   },
   "crossbowman": {
-    "name": "Crossbowman", "className": "Crossbowman", "side": "enemy", "level": 3,
-    "moveType": "foot", "mov": 5, "mgt": 5, "grd": 3, "maxHp": 18,
-    "weapon": { "name": "Frankish Crossbow", "might": 8, "rangeMin": 2, "rangeMax": 2 },
-    "spriteId": "unit.crossbowman", "faction": "frankish", "skin": "s1"
+    "id": "crossbowman",
+    "name": "Crossbowman",
+    "side": "enemy",
+    "class": "crossbowman",
+    "level": 2,
+    "offset": { "fort": 1 },
+    "growth": {},
+    "inventory": ["light-crossbow"],
+    "faction": "frankish",
+    "skin": "s2"
   },
-  "man-at-arms": {
-    "name": "Man-at-Arms", "className": "Man-at-Arms", "side": "enemy", "level": 4,
-    "moveType": "armored", "mov": 4, "mgt": 7, "grd": 8, "maxHp": 24,
-    "weapon": { "name": "Iron Mace", "might": 6, "rangeMin": 1, "rangeMax": 1 },
-    "spriteId": "unit.man-at-arms", "faction": "frankish", "skin": "s1"
+  "enemy-pikeman": {
+    "id": "enemy-pikeman",
+    "name": "Pikeman",
+    "side": "enemy",
+    "class": "pikeman",
+    "level": 3,
+    "offset": { "hp": 2, "grd": 1, "fort": 1 },
+    "growth": {},
+    "inventory": ["brace-spear"],
+    "faction": "frankish",
+    "skin": "s3"
   },
-  "horseman-enemy": {
-    "name": "Horseman", "className": "Horseman", "side": "enemy", "level": 3,
-    "moveType": "mounted", "mov": 7, "mgt": 5, "grd": 4, "maxHp": 20,
-    "weapon": { "name": "Cavalry Lance", "might": 7, "rangeMin": 1, "rangeMax": 1 },
-    "spriteId": "unit.horseman", "faction": "frankish", "skin": "s1"
+  "enemy-horseman": {
+    "id": "enemy-horseman",
+    "name": "Horseman",
+    "side": "enemy",
+    "class": "horseman",
+    "level": 3,
+    "offset": { "fort": 1 },
+    "growth": {},
+    "inventory": ["brace-spear"],
+    "faction": "frankish",
+    "skin": "s4"
   }
 }

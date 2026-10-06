@@ -438,7 +438,9 @@ counter     = D has a usable weapon whose range includes the distance
 
 A structure target (§4.6) has GRD and HP but no attack speed: its evasion is the terrain avoid only, and `effective` / `vsBonus` entries keyed `'structure'` apply.
 
-Sequence: A strikes; if D survives and can counter, D strikes; then each side with `double` strikes again (A's second hit, then D's second hit). Dead units stop the sequence. Each strike (hit or miss) uses 1 durability; at 0 the weapon breaks.
+Sequence: A strikes; if D survives and can counter, D strikes; then each side with `double` strikes again (A's second hit, then D's second hit). Dead units stop the sequence. Each strike (hit or miss) uses 1 durability; at 0 the weapon breaks, and a weapon with one use left cannot make a second strike.
+
+**Random draws (fixed order, so a seed replays exactly).** For each strike: one hit roll (two, averaged, in Weighted mode), then, only if it hit and the crit chance is above 0, one crit roll. Level-ups draw one roll per growth stat in the order HP, MGT, SKL, SPD, FORT, GRD, NRV whether or not the stat is capped, then at most one re-roll for Guaranteed progress. The forecast never draws.
 
 **Worked example** (Salah ad-Din, Young Lord Lv 3, Iron Sabre, attacks a Soldier with a Levy Spear standing in a grove):
 
@@ -492,7 +494,7 @@ Spear (rumh) ──▶ Mace (dabbus) ──▶ Sabre (sayf) ──▶ Spear     
 
 ### 5.4 Weapons, grades, items
 
-- **Weapon grades I–V** per type, earned by weapon EXP (WEXP): grade thresholds `0 / 15 / 40 / 80 / 140`. Each attack made adds 1 WEXP (2 on a kill). Each weapon needs a grade to equip; classes cap the grade (§6.4).
+- **Weapon grades I–V** per type, earned by weapon EXP (WEXP): grade thresholds `0 / 15 / 40 / 80 / 140`. Each fight in which a unit struck at least once adds 1 WEXP (2 if it made the kill); a heal adds 1 to Remedy. Only player units earn WEXP. A unit starts with at least the grade needed for its starting weapons, within its class cap. Each weapon needs a grade to equip; classes cap the grade (§6.4).
 - **Durability:** each strike uses 1. Broken weapons are removed. *Mend* restores uses.
 - **Inventory:** 5 slots per unit. **Convoy** (the baggage train, *athqal*): 100 slots, Camp only.
 - **Currency:** dinars.
@@ -534,14 +536,14 @@ HP shown as *current → expected after the exchange if all hits land*. `▲/▼
 ### 5.6 Battle presentation
 
 - **Map animations** (default): attacker lunges, defender flashes, HP bar drains, numbers pop.
-- **Battle scene** (setting): 32×32 battle sprites face each other on a ground strip with the same math; skippable with `X`.
+- **Battle scene** (setting, *deferred*): 32×32 battle sprites face each other on a ground strip with the same math; skippable with `X`. The slice ships map animation only; the battle scene needs battle sprites and is a post-slice feature (DECISIONS D-028).
 - Defeat: flash and fade ("retreats wounded"); no blood effects exist in the asset set.
 
 ### 5.7 EXP, levels, caps
 
-- **100 EXP per level.** Every tier runs **levels 1–20**, and promotion **resets the level to 1** (the classic model, §6.6). A unit at level 20 earns no EXP until it promotes; Tier III is the end of a line.
+- **100 EXP per level.** Only player units earn EXP; a unit that is defeated earns none. Every tier runs **levels 1–20**, and promotion **resets the level to 1** (the classic model, §6.6). A unit at level 20 earns no EXP until it promotes; Tier III is the end of a line.
 - Effective level for comparisons: `effLevel = level + 20·(tier − 1)`.
-- `La` = actor's effective level, `Ld` = opponent's. EXP is multiplied by the actor's tier rate (Tier I ×1.0, Tier II ×0.85, Tier III ×0.7; `balance.json`).
+- `La` = actor's effective level, `Ld` = opponent's. EXP is multiplied by the actor's tier rate (Tier I ×1.0, Tier II ×0.85, Tier III ×0.7; `balance.json`) and rounded down, with a minimum of 1.
 
 ```
 combat, damage dealt, no kill :  clamp(10 + 3·(Ld − La), 1, 30)
