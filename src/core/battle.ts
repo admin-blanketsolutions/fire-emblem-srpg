@@ -14,7 +14,7 @@ import type { GameMap } from './map';
 import type { TerrainDef, TerrainTable } from './terrain';
 import { applyItem, canUseItem, equipWeapon, swapItems, type ItemUseReport } from './inventory';
 import { checkPromotion, promote } from './promotion';
-import { adjustedCost, movementOf, rangeBonus, skillBonus, type CombatContext } from './skills';
+import { adjustedCost, movementOf, rangeBonus, skillBonus, type CombatContext, type SkillTable } from './skills';
 import { checkObjective, newProgress, type Checkpoint, type ObjectiveProgress, type Outcome } from './objectives';
 import { computeReach, pathTo, type ReachResult } from './pathfinding';
 import type { Rng } from './rng';
@@ -45,6 +45,7 @@ export interface BattleTables {
   readonly units: UnitTable;
   readonly structures: StructureTable;
   readonly terrain: TerrainTable;
+  readonly skills: SkillTable;
   readonly ai: AiWeights;
 }
 
@@ -156,6 +157,8 @@ export class BattleState {
   readonly flames = new Map<number, number>();
   /** Counts of things done this chapter, for the limits on actions (barricades, decrees). */
   private readonly counts = new Map<string, number>();
+  /** Burns from phases that were skipped, to be reported with the next phase. */
+  private readonly skippedBurns: Array<{ unit: UnitInstance; damage: number }> = [];
 
   countOf(key: string): number {
     return this.counts.get(key) ?? 0;
@@ -855,10 +858,10 @@ export class BattleState {
    * Put a structure on the map. It stands exactly where it is put, even on ground nobody could
    * walk on (a wall), unless something is already there, when it takes the nearest free tile.
    */
-  placeStructure(defId: string, at: Point, side: Side, tags: readonly string[] = [], ai?: AiProfile): UnitInstance {
+  placeStructure(defId: string, at: Point, side: Side, tags: readonly string[] = [], ai?: AiProfile, faction?: string): UnitInstance {
     const def = this.tables.structures.get(defId);
     if (!def) throw new Error(`Unknown structure "${defId}"`);
-    const unit = createStructure(def, this.freshId(defId), at.x, at.y, side, this.tables, tags);
+    const unit = createStructure(def, this.freshId(defId), at.x, at.y, side, this.tables, tags, faction);
     // only the computer plays a structure that fires
     if (unit.ai) unit.ai = side === 'player' ? null : (ai ?? unit.ai);
     const tile = this.unitAt(at.x, at.y) ? this.freeTileNear(at, unit) : at;
@@ -873,7 +876,7 @@ export class BattleState {
   spawn(spec: SpawnSpec): UnitInstance {
     const def = this.tables.units[spec.def];
     if (!def && this.tables.structures.has(spec.def)) {
-      const built = this.placeStructure(spec.def, { x: spec.at[0], y: spec.at[1] }, spec.side ?? 'enemy', spec.tags ?? [], spec.ai);
+      const built = this.placeStructure(spec.def, { x: spec.at[0], y: spec.at[1] }, spec.side ?? 'enemy', spec.tags ?? [], spec.ai, spec.faction);
       this.arrivals.push(built);
       return built;
     }
@@ -934,8 +937,10 @@ export class BattleState {
       case 'promote':
         for (const u of this.units) {
           if (u.retreated || !matchesKey(u, action.unit)) continue;
-          if (this.canPromote(u)) promote(u, this.tables.classes);
-          else if (this.tables.items.has('charter-of-iqta') && u.inventory.length < INVENTORY_SLOTS && this.classOf(u).promotesTo) {
+          if (this.canPromote(u)) {
+            const result = promote(u, this.tables.classes);
+            this.messages.push({ kind: 'message', text: `${u.name} is promoted: ${result.from.name} to ${result.to.name}.` });
+          } else if (this.tables.items.has('charter-of-iqta') && u.inventory.length < INVENTORY_SLOTS && this.classOf(u).promotesTo) {
             u.inventory.push({ id: 'charter-of-iqta', uses: 1 });
           }
         }
@@ -1014,6 +1019,7 @@ export class BattleState {
     this.expireStatuses();
     this.check('phaseEnd');
     if (!this.outcome) this.advancePhase();
+    burned.push(...this.skippedBurns.splice(0));
     if (this.outcome) return { turn: this.turn, phase: this.phase, healed: [], burned, arrived: [] };
     return { ...this.startPhase(), burned };
   }
@@ -1058,11 +1064,13 @@ export class BattleState {
         i = 0;
       }
       const phase = order[i] as Phase;
-      if (phase === 'player' || this.livingUnits(phase).length > 0 || this.reinforcementsDue(phase)) {
+      if (phase === 'player' || this.actors(phase).length > 0 || this.reinforcementsDue(phase)) {
         this.phaseIndex = i;
         this.phase = phase;
         return;
       }
+      // a side with nothing that can act has no phase to play, but the phase still ends: its flames still burn
+      this.skippedBurns.push(...this.burnUnits(phase));
     }
   }
 

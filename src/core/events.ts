@@ -31,6 +31,8 @@ export interface SpawnSpec {
   readonly def: string;
   /** For a structure: whose it is (default enemy). Units take their side from their definition. */
   readonly side?: Side;
+  /** For a structure: whose colours its flag wears (a faction palette). */
+  readonly faction?: string;
   readonly at: Tile;
   readonly ai?: AiProfile;
   readonly tags?: readonly string[];

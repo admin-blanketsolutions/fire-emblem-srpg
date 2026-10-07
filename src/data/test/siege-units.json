@@ -1,0 +1,50 @@
+{
+  "sapper": {
+    "id": "sapper",
+    "name": "Sapper",
+    "side": "player",
+    "class": "sapper",
+    "level": 3,
+    "offset": { "hp": 2, "mgt": 1, "fort": 2 },
+    "growth": { "hp": 65, "mgt": 45, "skl": 35, "spd": 30, "fort": 30, "grd": 35, "nrv": 15 },
+    "inventory": ["iron-mace", "hatchet"],
+    "faction": "ayyubid",
+    "skin": "s3"
+  },
+  "engineer": {
+    "id": "engineer",
+    "name": "Engineer",
+    "side": "player",
+    "class": "engineer",
+    "level": 2,
+    "offset": { "skl": 1, "fort": 2 },
+    "growth": { "hp": 60, "mgt": 40, "skl": 45, "spd": 35, "fort": 35, "grd": 30, "nrv": 20 },
+    "inventory": ["iron-mace", "tabarzin"],
+    "faction": "ayyubid",
+    "skin": "s2"
+  },
+  "scribe": {
+    "id": "scribe",
+    "name": "Scribe",
+    "side": "player",
+    "class": "scribe",
+    "level": 2,
+    "offset": { "nrv": 1, "fort": 3 },
+    "growth": { "hp": 40, "mgt": 15, "skl": 35, "spd": 40, "fort": 45, "grd": 15, "nrv": 50 },
+    "inventory": ["knife", "salve"],
+    "faction": "ayyubid",
+    "skin": "s2"
+  },
+  "captain": {
+    "id": "captain",
+    "name": "Captain",
+    "side": "player",
+    "class": "soldier",
+    "level": 10,
+    "offset": { "hp": 3, "mgt": 2, "skl": 2, "spd": 1, "fort": 3, "grd": 1 },
+    "growth": { "hp": 60, "mgt": 45, "skl": 40, "spd": 35, "fort": 30, "grd": 35, "nrv": 15 },
+    "inventory": ["levy-spear", "bandage", "charter-of-iqta"],
+    "faction": "ayyubid",
+    "skin": "s4"
+  }
+}

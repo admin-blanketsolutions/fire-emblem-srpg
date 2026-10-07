@@ -6,7 +6,7 @@ import { Pix } from './pix';
  * Every sprite shares one palette; faction colours and skin tones are slots remapped at render time.
  */
 
-const PALETTE = [
+export const PALETTE = [
   '#00000000', // 0 transparent
   '#1b1426', // 1 outline
   '#e2b48a', // 2 skin (slot)
@@ -25,7 +25,7 @@ const PALETTE = [
   '#c2412d', // 15 accent red
 ] as const;
 
-const CHAR_TO_INDEX: Readonly<Record<string, number>> = {
+export const CHAR_TO_INDEX: Readonly<Record<string, number>> = {
   '.': 0, o: 1, s: 2, d: 3, a: 4, b: 5, t: 6, h: 7, m: 8, M: 9, w: 10, l: 11, e: 12, H: 13, J: 14, r: 15,
 };
 
@@ -70,10 +70,13 @@ const ROBE_HEM: Record<'stand' | 'stepA' | 'stepB', LegPose> = {
   stepB: ['....oaaaaaao....', '....otttttto....', '.....oooooooo...'],
 };
 
-type Head = 'hair' | 'cap' | 'helmet' | 'turban' | 'hood' | 'plume' | 'band' | 'closedhelm';
+type Head = 'hair' | 'cap' | 'helmet' | 'turban' | 'hood' | 'plume' | 'band' | 'closedhelm' | 'crest' | 'crown' | 'greathelm';
 
-/** Rows 0..3 replacement for each head variant. */
-const HEADS: Record<Head, readonly [string, string, string, string]> = {
+/** Heads that rise above the usual top row. */
+const TALL_HEADS: ReadonlySet<Head> = new Set<Head>(['turban', 'plume', 'crest', 'crown']);
+
+/** Rows from the top replacing the body template's, for each head variant (most use four; a great helm covers the face too). */
+const HEADS: Record<Head, readonly string[]> = {
   hair: [BLANK, '....oooooooo....', '....ohhhhhho....', '....ohhhhhho....'],
   cap: [BLANK, '....oooooooo....', '....ollllllo....', '....ohhhhhho....'],
   helmet: [BLANK, '....oooooooo....', '....oMmmmmmo....', '....ommmmmmo....'],
@@ -82,6 +85,9 @@ const HEADS: Record<Head, readonly [string, string, string, string]> = {
   hood: [BLANK, '....oooooooo....', '....obbbbbbo....', '....obbhhbbo....'],
   plume: ['.......rr.......', '....ooorrooo....', '....ohhhhhho....', '....ohhhhhho....'],
   band: [BLANK, '....oooooooo....', '....ohhhhhho....', '....obbbbbbo....'],
+  crest: ['.....oaaaao.....', '....oooooooo....', '....oMmmmmmo....', '....ommmmmmo....'],
+  crown: ['....oa.aa.ao....', '....oaaaaaao....', '....ohhhhhho....', '....ohhhhhho....'],
+  greathelm: [BLANK, '....oooooooo....', '....oMmmmmmo....', '....ommmmmmo....', '....ommMMmmo....', '....omoooomo....', '.....ommmmo.....'],
 };
 
 type Pixel = readonly [number, number, string];
@@ -91,6 +97,7 @@ const col = (x: number, y0: number, y1: number, ch: string): Pixel[] =>
 const OVERLAYS: Record<string, readonly Pixel[]> = {
   spear: [[13, 1, 'M'], [13, 2, 'm'], ...col(13, 3, 13, 'w')],
   longspear: [[13, 0, 'M'], [13, 1, 'm'], ...col(13, 2, 14, 'w')],
+  pennonlongspear: [[13, 0, 'M'], [13, 1, 'm'], ...col(13, 2, 14, 'w'), [14, 0, 'a'], [15, 0, 'a'], [14, 1, 'b'], [15, 1, 'b']],
   javelin: [[13, 3, 'M'], ...col(13, 4, 12, 'w'), [14, 6, 'M'], ...col(14, 7, 12, 'w')],
   sabre: [[12, 10, 'l'], [13, 9, 'M'], [14, 8, 'M'], [15, 7, 'm']],
   dagger: [[13, 9, 'M'], [13, 10, 'l']],
@@ -129,7 +136,7 @@ function composeFoot(look: FootLook, pose: 'stand' | 'stepA' | 'stepB', bob: boo
   const base = look.body === 'foot' ? FOOT : ROBED;
   const grid = toGrid(base);
   HEADS[look.head].forEach((row, i) => {
-    if (i === 0 && look.head !== 'turban' && look.head !== 'plume') return;
+    if (i === 0 && !TALL_HEADS.has(look.head)) return;
     grid[i] = row.split('');
   });
   if (look.head === 'turban') {
@@ -138,8 +145,8 @@ function composeFoot(look: FootLook, pose: 'stand' | 'stepA' | 'stepB', bob: boo
   if (look.armored) {
     for (const row of grid) {
       for (let x = 0; x < 16; x++) {
+        // mail in place of the tunic; the tabard keeps the faction's second colour
         if (row[x] === 'a') row[x] = 'm';
-        else if (row[x] === 'b') row[x] = 'M';
       }
     }
   }
@@ -172,6 +179,7 @@ const INDEX_TO_CHAR: readonly string[] = Object.entries(CHAR_TO_INDEX)
 
 const MOUNTED_OVERLAYS: Record<string, readonly Pixel[]> = {
   lance: [[11, 0, 'M'], [11, 1, 'm'], ...col(11, 2, 7, 'w')],
+  pennonlance: [[11, 0, 'M'], [11, 1, 'm'], ...col(11, 2, 7, 'w'), [12, 0, 'a'], [13, 0, 'a'], [12, 1, 'b'], [13, 1, 'b']],
   bow: [[11, 0, 'w'], [12, 1, 'w'], [12, 2, 'w'], [12, 3, 'w'], [12, 4, 'w'], [11, 5, 'w'], [11, 1, 'e'], [11, 2, 'e'], [11, 3, 'e'], [11, 4, 'e']],
   sabre: [[11, 6, 'l'], [11, 5, 'M'], [11, 4, 'M'], [11, 3, 'M'], [11, 2, 'm']],
   javelin: [[11, 1, 'M'], ...col(11, 2, 7, 'w')],
@@ -190,6 +198,9 @@ const RIDER_TOPS: Partial<Record<Head, readonly [string, string]>> = {
   hood: ['.oooo.', 'obbbbo'],
   turban: ['.oeeo.', 'oeeeeo'],
   plume: ['..rr..', 'orrrro'],
+  crest: ['.aaaa.', 'ommMmo'],
+  crown: ['.a.aa.', 'ohhhho'],
+  greathelm: ['.oooo.', 'oMmmMo'],
 };
 const RIDER_BODY: readonly string[] = ['osssso', 'ossoso', '.osso.', 'oabbao', 'oabbao', '.otto.'];
 
@@ -244,7 +255,7 @@ function composeMounted(look: { head: Head; weapon?: keyof typeof MOUNTED_OVERLA
   return rows.map((r) => r.join(''));
 }
 
-function sprite(id: string, frames: Record<string, string[][]>): SpriteDef {
+export function sprite(id: string, frames: Record<string, string[][]>): SpriteDef {
   return {
     id,
     kind: 'map-unit',
@@ -272,24 +283,70 @@ function mountedSprite(id: string, look: { head: Head; weapon?: keyof typeof MOU
   });
 }
 
+type MountedLook = { head: Head; weapon?: keyof typeof MOUNTED_OVERLAYS };
+
+/** The look of every class that goes on foot, by class id (DESIGN §6.2): Tier I plain, Tier II armoured or pennoned, Tier III crested. */
+const FOOT_LOOKS: ReadonlyArray<readonly [string, FootLook]> = [
+  ['young-lord', { body: 'foot', head: 'plume', weapon: 'sabre' }],
+  ['soldier', { body: 'foot', head: 'cap', weapon: 'spear' }],
+  ['man-at-arms', { body: 'foot', head: 'closedhelm', weapon: 'mace', offhand: 'shield', armored: true }],
+  ['bulwark', { body: 'foot', head: 'greathelm', weapon: 'spear', offhand: 'shield', armored: true }],
+  ['pikeman', { body: 'foot', head: 'helmet', weapon: 'longspear' }],
+  ['spear-knight', { body: 'foot', head: 'closedhelm', weapon: 'pennonlongspear', armored: true }],
+  ['pike-marshal', { body: 'foot', head: 'crest', weapon: 'pennonlongspear', offhand: 'shield', armored: true }],
+  ['swordsman', { body: 'foot', head: 'band', weapon: 'sabre' }],
+  ['blademaster', { body: 'foot', head: 'turban', weapon: 'sabre', offhand: 'dagger' }],
+  ['legend', { body: 'foot', head: 'crest', weapon: 'sabre', offhand: 'dagger', armored: true }],
+  ['axeman', { body: 'foot', head: 'helmet', weapon: 'axe' }],
+  ['axe-knight', { body: 'foot', head: 'closedhelm', weapon: 'axe', offhand: 'shield', armored: true }],
+  ['warlord', { body: 'foot', head: 'crest', weapon: 'axe', offhand: 'shield', armored: true }],
+  ['archer', { body: 'foot', head: 'hood', weapon: 'bow' }],
+  ['marksman', { body: 'foot', head: 'band', weapon: 'bow' }],
+  ['master-archer', { body: 'foot', head: 'crown', weapon: 'bow' }],
+  ['crossbowman', { body: 'foot', head: 'helmet', weapon: 'crossbow' }],
+  ['arbalester', { body: 'foot', head: 'closedhelm', weapon: 'crossbow', armored: true }],
+  ['crossbow-master', { body: 'foot', head: 'greathelm', weapon: 'crossbow', armored: true }],
+  ['skirmisher', { body: 'foot', head: 'band', weapon: 'javelin', offhand: 'dagger' }],
+  ['harrier', { body: 'foot', head: 'hood', weapon: 'javelin', offhand: 'dagger' }],
+  ['vanguard', { body: 'foot', head: 'plume', weapon: 'javelin', offhand: 'dagger' }],
+  ['fire-thrower', { body: 'foot', head: 'turban', weapon: 'pot' }],
+  ['fire-master', { body: 'foot', head: 'hood', weapon: 'pot' }],
+  ['master-of-flames', { body: 'foot', head: 'crown', weapon: 'pot' }],
+  ['sapper', { body: 'foot', head: 'cap', weapon: 'pick' }],
+  ['engineer', { body: 'foot', head: 'helmet', weapon: 'pick' }],
+  ['master-engineer', { body: 'foot', head: 'crest', weapon: 'pick', armored: true }],
+  ['healer', { body: 'robed', head: 'hood', weapon: 'staff' }],
+  ['physician', { body: 'robed', head: 'cap', weapon: 'staff' }],
+  ['master-physician', { body: 'robed', head: 'crown', weapon: 'staff' }],
+  ['scribe', { body: 'robed', head: 'turban', weapon: 'scroll' }],
+  ['counselor', { body: 'robed', head: 'cap', weapon: 'scroll' }],
+  ['vizier', { body: 'robed', head: 'crown', weapon: 'scroll' }],
+];
+
+const MOUNTED_LOOKS: ReadonlyArray<readonly [string, MountedLook]> = [
+  ['lord', { head: 'plume', weapon: 'sabre' }],
+  ['sovereign', { head: 'crest', weapon: 'sabre' }],
+  ['horse-archer', { head: 'cap', weapon: 'bow' }],
+  ['horse-marksman', { head: 'band', weapon: 'bow' }],
+  ['steppe-lord', { head: 'plume', weapon: 'bow' }],
+  ['horseman', { head: 'helmet', weapon: 'lance' }],
+  ['mounted-knight', { head: 'closedhelm', weapon: 'pennonlance' }],
+  ['cavalry-marshal', { head: 'crest', weapon: 'pennonlance' }],
+];
+
+/** Map sprites for all forty-two classes, one per class id (`unit.<class>`). */
 export function unitSprites(): SpriteDef[] {
-  return [
-    // Tier I of the fourteen class lines (DESIGN §6.2)
-    footSprite('unit.young-lord', { body: 'foot', head: 'plume', weapon: 'sabre' }),
-    footSprite('unit.soldier', { body: 'foot', head: 'cap', weapon: 'spear' }),
-    footSprite('unit.pikeman', { body: 'foot', head: 'helmet', weapon: 'longspear' }),
-    footSprite('unit.swordsman', { body: 'foot', head: 'band', weapon: 'sabre' }),
-    footSprite('unit.axeman', { body: 'foot', head: 'helmet', weapon: 'axe' }),
-    footSprite('unit.archer', { body: 'foot', head: 'hood', weapon: 'bow' }),
-    mountedSprite('unit.horse-archer', { head: 'cap', weapon: 'bow' }),
-    mountedSprite('unit.horseman', { head: 'helmet', weapon: 'lance' }),
-    footSprite('unit.crossbowman', { body: 'foot', head: 'helmet', weapon: 'crossbow' }),
-    footSprite('unit.skirmisher', { body: 'foot', head: 'band', weapon: 'javelin', offhand: 'dagger' }),
-    footSprite('unit.fire-thrower', { body: 'foot', head: 'turban', weapon: 'pot' }),
-    footSprite('unit.sapper', { body: 'foot', head: 'cap', weapon: 'pick' }),
-    footSprite('unit.healer', { body: 'robed', head: 'hood', weapon: 'staff' }),
-    footSprite('unit.scribe', { body: 'robed', head: 'turban', weapon: 'scroll' }),
-    // A Tier II class used by the M1 proving ground
-    footSprite('unit.man-at-arms', { body: 'foot', head: 'closedhelm', weapon: 'mace', offhand: 'shield', armored: true }),
+  const sprites = [
+    ...FOOT_LOOKS.map(([id, look]) => footSprite(`unit.${id}`, look)),
+    ...MOUNTED_LOOKS.map(([id, look]) => mountedSprite(`unit.${id}`, look)),
   ];
+  // two classes that look alike are a mistake: a player must be able to tell them apart at a glance
+  const seen = new Map<string, string>();
+  for (const sprite of sprites) {
+    const key = JSON.stringify(sprite.frames.idle);
+    const twin = seen.get(key);
+    if (twin) throw new Error(`${sprite.id} looks exactly like ${twin}`);
+    seen.set(key, sprite.id);
+  }
+  return sprites;
 }

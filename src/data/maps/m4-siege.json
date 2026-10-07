@@ -1,0 +1,55 @@
+{
+  "id": "m4-siege",
+  "name": "The Siege Demo",
+  "size": [22, 14],
+  "tileset": "steppe-river",
+  "legend": {".": "plain", ",": "steppe", ":": "road", "G": "grove", "h": "hill", "#": "wall", "R": "rampart", "F": "fort", "O": "gate", "+": "hospice"},
+  "terrain": [
+    "......,,,,,,,.........",
+    "......,,,h,,,.........",
+    "...GG.,,,,,,,.........",
+    ".....h,,,,,,,########.",
+    "......,,,,,,,#RRRRRR#.",
+    "......,,,,,,,#FFFFFF#.",
+    ":::::::::::::OFFFFFF#.",
+    "......,,,,,,,#FFFFFF#.",
+    "......,,,,,,,#FFFFF+#.",
+    ".....h,,,,,,,#FFFFFF#.",
+    "..G...,,,,,,,########.",
+    "...G..,,,,,,,.........",
+    ".G....,,,,,,,.........",
+    "......,,,,,,,........."
+  ],
+  "wind": "E",
+  "spawns": {
+    "player": [
+      {"unit": "lord", "at": [3, 6], "tags": ["lord"]},
+      {"unit": "axeman", "at": [4, 5]},
+      {"unit": "sapper", "at": [4, 7]},
+      {"unit": "engineer", "at": [3, 5]},
+      {"unit": "fire-thrower", "at": [2, 6]},
+      {"unit": "horse-archer", "at": [2, 7]},
+      {"unit": "scribe", "at": [2, 5]},
+      {"unit": "captain", "at": [4, 6]},
+      {"unit": "healer", "at": [3, 7]}
+    ],
+    "enemy": [
+      {"unit": "gate", "at": [13, 6], "faction": "frankish"},
+      {"unit": "wall-segment", "at": [13, 4], "faction": "frankish"},
+      {"unit": "wall-segment", "at": [13, 5], "faction": "frankish"},
+      {"unit": "wall-segment", "at": [13, 7], "faction": "frankish"},
+      {"unit": "wall-segment", "at": [13, 8], "faction": "frankish"},
+      {"unit": "barricade", "at": [11, 6], "faction": "frankish"},
+      {"unit": "mangonel", "at": [15, 5], "faction": "frankish"},
+      {"unit": "mangonel", "at": [15, 8], "faction": "frankish"},
+      {"unit": "soldier", "at": [14, 6], "ai": {"mode": "defensive"}},
+      {"unit": "soldier", "at": [14, 7], "ai": {"mode": "defensive"}},
+      {"unit": "crossbowman", "at": [17, 4], "ai": {"mode": "stationary"}},
+      {"unit": "enemy-pikeman", "at": [18, 7], "tags": ["leader"], "ai": {"mode": "defensive"}}
+    ]
+  },
+  "objective": {"type": "rout"},
+  "events": [
+    {"id": "key", "when": {"type": "turnStart", "turn": 1, "phase": "player"}, "then": [{"type": "giveItem", "unit": "lord", "item": "gate-key"}, {"type": "message", "text": "The gate is barred. A key, an axe or a sapper will open it, and the dry grass will burn."}]}
+  ]
+}

@@ -1,3 +1,4 @@
+import { createSiegeDemo } from './data/demos';
 import { createProvingBattle, PROVING_OBJECTIVES } from './data/proving';
 import { Assets } from './engine/assets';
 import { Display } from './engine/display';
@@ -25,12 +26,15 @@ async function boot(): Promise<void> {
   installTouchControls(input);
   const game = new Game({ display, input, assets, text });
 
-  // The proving ground can be played under each objective: ?objective=seize, ?fog=1, ?seed=42
+  // The proving ground can be played under each objective: ?objective=seize, ?fog=1, ?seed=42.
+  // ?demo=siege opens a walled courtyard with gates, mangonels and dry grass to burn.
   const params = new URLSearchParams(window.location.search);
   const objective = PROVING_OBJECTIVES.find((o) => o === params.get('objective')) ?? 'rout';
   const seed = Number(params.get('seed'));
   const makeScene = (): BattleScene => {
-    const battle = createProvingBattle(objective, params.has('seed') && Number.isFinite(seed) ? { seed } : undefined, params.get('fog') === '1' ? { fog: true } : undefined);
+    const options = params.has('seed') && Number.isFinite(seed) ? { seed } : undefined;
+    const battle =
+      params.get('demo') === 'siege' ? createSiegeDemo(options) : createProvingBattle(objective, options, params.get('fog') === '1' ? { fog: true } : undefined);
     const scene = new BattleScene({ battle, assets, text, onRestart: () => game.setScene(makeScene()) });
     // A handle for poking at a running battle from the browser console while developing.
     if (import.meta.env.DEV) Object.assign(window, { sultan: { battle, scene, assets } });

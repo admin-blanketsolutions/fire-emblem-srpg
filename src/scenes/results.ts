@@ -1,6 +1,7 @@
 import type { ExpAward, FightReport } from '../core/battle';
 import type { LevelUp } from '../core/exp';
 import { kindLabel, roman } from '../core/labels';
+import type { PromotionResult } from '../core/promotion';
 import { STAT_KEYS, type MutableStats, type Stats } from '../core/stats';
 import type { UnitInstance } from '../core/unit';
 
@@ -11,7 +12,8 @@ import type { UnitInstance } from '../core/unit';
 export type ResultStep =
   | { readonly kind: 'message'; readonly lines: readonly string[] }
   | { readonly kind: 'exp'; readonly unit: UnitInstance; readonly level: number; readonly from: number; readonly to: number; readonly gained: number }
-  | { readonly kind: 'levelup'; readonly unit: UnitInstance; readonly levelUp: LevelUp; readonly stats: Stats };
+  | { readonly kind: 'levelup'; readonly unit: UnitInstance; readonly levelUp: LevelUp; readonly stats: Stats }
+  | { readonly kind: 'promotion'; readonly result: PromotionResult };
 
 /** The steps for one EXP award: the bar fills, each level-up shows, and the bar fills again. */
 export function expSteps(award: ExpAward, perLevel: number): ResultStep[] {
@@ -49,3 +51,6 @@ export function fightSteps(report: FightReport, perLevel: number): ResultStep[] 
   }
   return steps;
 }
+
+/** The steps for a unit promoted by an item. */
+export const promotionSteps = (result: PromotionResult): ResultStep[] => [{ kind: 'promotion', result }];

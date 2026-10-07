@@ -157,7 +157,7 @@ export function performAction(battle: BattleState, unit: UnitInstance, id: Class
     }
     case 'entrench': {
       tile = aimed as Point;
-      target = battle.placeStructure('barricade', tile, unit.side);
+      target = battle.placeStructure('barricade', tile, unit.side, [], undefined, unit.faction);
       battle.bump(`entrench:${unit.id}`);
       amount = 1;
       break;

@@ -39,7 +39,7 @@ export const aiWeights = validateAiWeights(aiJson);
 export const testMap = parseMap(m1TestMapJson as unknown as MapJson, terrain);
 export const testUnits = testUnitsJson as unknown as UnitTable;
 
-export const tables: BattleTables = { weapons, items, classes, balance, units: testUnits, structures, terrain, ai: aiWeights };
+export const tables: BattleTables = { weapons, items, classes, balance, units: testUnits, structures, terrain, skills, ai: aiWeights };
 
 export function createTestBattle(options?: BattleOptions) {
   return buildBattle(testMap, testUnits, tables, options);

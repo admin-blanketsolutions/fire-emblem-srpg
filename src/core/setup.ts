@@ -29,7 +29,7 @@ export function buildBattle(map: GameMap, defs: UnitTable, tables: BattleTables,
       // a gate, a wall, a barricade or a siege engine: placed where the map says, on its side
       const structure = tables.structures.get(spawn.unit);
       if (!structure) throw new Error(`Map "${map.id}" places unknown unit "${spawn.unit}"`);
-      const built = createStructure(structure, id, spawn.at[0], spawn.at[1], side, tables, spawn.tags ?? []);
+      const built = createStructure(structure, id, spawn.at[0], spawn.at[1], side, tables, spawn.tags ?? [], spawn.faction);
       if (built.ai) built.ai = side === 'player' ? null : (spawn.ai ?? built.ai);
       return built;
     }

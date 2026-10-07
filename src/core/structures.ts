@@ -49,7 +49,7 @@ export function buildStructureTable(raw: readonly unknown[], weapons: WeaponTabl
 }
 
 /** Build a structure as a unit. */
-export function createStructure(def: StructureDef, id: string, x: number, y: number, side: Side, catalog: UnitCatalog, tags: readonly string[] = []): UnitInstance {
+export function createStructure(def: StructureDef, id: string, x: number, y: number, side: Side, catalog: UnitCatalog, tags: readonly string[] = [], faction = 'neutral'): UnitInstance {
   const placeholder = (catalog.classes as ClassTable).get('structure');
   if (!placeholder) throw new Error('The class table has no "structure" placeholder');
   const weapon = def.weapon ? catalog.weapons.get(def.weapon) : undefined;
@@ -60,7 +60,7 @@ export function createStructure(def: StructureDef, id: string, x: number, y: num
     name: def.name,
     side,
     spriteId: def.sprite ?? `unit.${def.id}`,
-    faction: 'neutral',
+    faction,
     skin: 's1',
     growth: {},
     gradeCaps: {},

@@ -12,6 +12,8 @@ export interface SpawnJson {
   readonly ai?: AiProfile;
   /** Extra tags for this placement (`lord`, `boss`, `guards`, …). */
   readonly tags?: readonly string[];
+  /** For a structure: whose colours its flag wears (a faction palette); default neutral. */
+  readonly faction?: string;
 }
 
 /** Units that arrive at the start of a phase. */

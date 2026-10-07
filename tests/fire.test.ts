@@ -108,12 +108,13 @@ describe('standing in flames', () => {
 
   it('does more to wood: a barricade takes 8 and a mangonel too, until they fall', () => {
     const hero = unit({ id: 'hero', x: 0 });
-    const battle = hot([hero], ['.....'], 0);
+    const battle = hot([hero, bystander(1)], ['.....'], 0);
     const barricade = battle.placeStructure('barricade', { x: 3, y: 0 }, 'enemy');
     const gate = battle.placeStructure('gate', { x: 4, y: 0 }, 'enemy');
     battle.ignite(3, 0);
     battle.ignite(4, 0);
     battle.endPhase(); // the player's phase: nothing of the player's is in flames
+    expect(barricade.hp).toBe(12);
     const report = battle.endPhase(); // the enemy's phase ends
     expect(barricade.hp).toBe(12 - 8);
     expect(gate.hp).toBe(24 - 4); // stone and iron burn no worse than flesh
@@ -122,6 +123,18 @@ describe('standing in flames', () => {
     battle.endPhase();
     battle.endPhase();
     expect(barricade.retreated).toBe(true);
+  });
+
+  it('a side with nothing that can act has no phase, but its structures still burn when it would have ended', () => {
+    const hero = unit({ id: 'hero', x: 0 });
+    const battle = hot([hero], ['.....'], 0);
+    const barricade = battle.placeStructure('barricade', { x: 3, y: 0 }, 'enemy');
+    battle.ignite(3, 0);
+    const report = battle.endPhase();
+    expect(battle.phase).toBe('player');
+    expect(battle.turn).toBe(2);
+    expect(barricade.hp).toBe(4);
+    expect(report.burned).toEqual([{ unit: barricade, damage: 8 }]);
   });
 });
 
