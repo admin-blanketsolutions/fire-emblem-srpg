@@ -44,7 +44,7 @@ export function unit(spec: UnitSpec = {}): UnitInstance {
     faction: 'ayyubid',
     skin: 's1',
   };
-  return createUnit(def, id, spec.x ?? 0, spec.y ?? 0, classes, weapons);
+  return createUnit(def, id, spec.x ?? 0, spec.y ?? 0, tables);
 }
 
 /** A rectangular map of one terrain (default plain), or of explicit rows with the given legend. */

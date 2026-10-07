@@ -22,7 +22,16 @@ export interface ClassDef {
   /** The highest weapon grade the class can reach, per kind. */
   readonly weapons: Readonly<Partial<Record<WeaponKind, number>>>;
   readonly skills?: readonly string[];
+  /** The next tier of the same line. */
   readonly promotesTo?: string;
+  /** Stats gained on promotion to `promotesTo` (DESIGN §6.6). */
+  readonly promotionGain?: Readonly<Partial<Stats>>;
+  /** The name the sources use, or the game's own label for a role they do not name (SOURCES §6.1). */
+  readonly historical?: { readonly name: string; readonly label: 'attested' | 'game-label' };
+  /** The ledger row (`CLS-…`) behind the class line. */
+  readonly ledger?: string;
+  /** Art to use if it is not `unit.<id>`. */
+  readonly sprite?: string;
   /** True for classes that are not for general recruitment. */
   readonly unique?: boolean;
 }
@@ -44,7 +53,8 @@ export function buildClassTable(raw: readonly unknown[]): ClassTable {
       if (!WEAPON_KINDS.includes(kind as WeaponKind)) throw new Error(`${where}: unknown weapon kind "${kind}"`);
       if (!Number.isInteger(grade) || (grade as number) < 1 || (grade as number) > 5) throw new Error(`${where}: grade for ${kind} must be 1 to 5`);
     }
-    for (const group of [c.caps, c.growthMod] as const) {
+    if (c.historical && !['attested', 'game-label'].includes(c.historical.label)) throw new Error(`${where}: historical.label must be "attested" or "game-label"`);
+    for (const group of [c.caps, c.growthMod, c.promotionGain] as const) {
       for (const key of Object.keys(group ?? {})) {
         if (!(STAT_KEYS as readonly string[]).includes(key)) throw new Error(`${where}: unknown stat "${key}"`);
       }
@@ -52,7 +62,14 @@ export function buildClassTable(raw: readonly unknown[]): ClassTable {
     table.set(c.id, c as ClassDef);
   });
   for (const c of table.values()) {
-    if (c.promotesTo !== undefined && !table.has(c.promotesTo)) throw new Error(`class "${c.id}" promotes to unknown "${c.promotesTo}"`);
+    if (c.promotesTo === undefined) {
+      if (c.promotionGain !== undefined) throw new Error(`class "${c.id}" has a promotionGain but nothing to promote to`);
+      continue;
+    }
+    const next = table.get(c.promotesTo);
+    if (!next) throw new Error(`class "${c.id}" promotes to unknown "${c.promotesTo}"`);
+    if (next.line !== c.line || next.tier !== c.tier + 1) throw new Error(`class "${c.id}" must promote to the next tier of its own line, not "${next.id}"`);
+    if (!c.promotionGain) throw new Error(`class "${c.id}" promotes but has no promotionGain`);
   }
   return table;
 }

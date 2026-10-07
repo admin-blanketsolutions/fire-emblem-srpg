@@ -6,7 +6,38 @@
     "name": "Young Lord",
     "moveType": "foot",
     "base": { "hp": 19, "mgt": 5, "skl": 5, "spd": 6, "fort": 0, "grd": 3, "nrv": 1, "bld": 7, "mov": 5 },
-    "weapons": { "sabre": 3, "spear": 2, "bow": 1 }
+    "weapons": { "sabre": 3, "spear": 2, "bow": 1 },
+    "skills": ["stand-fast"],
+    "promotesTo": "lord",
+    "promotionGain": { "hp": 11, "mgt": 4, "skl": 4, "spd": 4, "grd": 4, "nrv": 3, "bld": 3, "mov": 2 },
+    "historical": { "name": "Fata", "label": "game-label" },
+    "ledger": "CLS-LORD"
+  },
+  {
+    "id": "lord",
+    "line": "lord",
+    "tier": 2,
+    "name": "Lord",
+    "moveType": "mounted",
+    "base": { "hp": 30, "mgt": 9, "skl": 9, "spd": 10, "fort": 0, "grd": 7, "nrv": 4, "bld": 10, "mov": 7 },
+    "weapons": { "sabre": 5, "spear": 4, "bow": 2, "mace": 3 },
+    "skills": ["stand-fast", "presence"],
+    "promotesTo": "sovereign",
+    "promotionGain": { "hp": 8, "mgt": 3, "skl": 3, "spd": 3, "grd": 3, "nrv": 3, "bld": 2 },
+    "historical": { "name": "Amir", "label": "attested" },
+    "ledger": "CLS-LORD"
+  },
+  {
+    "id": "sovereign",
+    "line": "lord",
+    "tier": 3,
+    "name": "Sovereign",
+    "moveType": "mounted",
+    "base": { "hp": 38, "mgt": 12, "skl": 12, "spd": 13, "fort": 0, "grd": 10, "nrv": 7, "bld": 12, "mov": 7 },
+    "weapons": { "sabre": 5, "spear": 5, "bow": 3, "mace": 4 },
+    "skills": ["command", "clemency"],
+    "historical": { "name": "Sultan", "label": "attested" },
+    "ledger": "CLS-LORD"
   },
   {
     "id": "soldier",
@@ -15,8 +46,40 @@
     "name": "Soldier",
     "moveType": "foot",
     "base": { "hp": 18, "mgt": 4, "skl": 3, "spd": 4, "fort": 0, "grd": 3, "nrv": 0, "bld": 6, "mov": 5 },
+    "growthMod": { "hp": 10, "grd": 5, "spd": -5 },
     "weapons": { "spear": 3, "sabre": 2, "mace": 1 },
-    "growthMod": { "hp": 10, "grd": 5, "spd": -5 }
+    "skills": ["stand-fast"],
+    "promotesTo": "man-at-arms",
+    "promotionGain": { "hp": 6, "mgt": 3, "skl": 2, "spd": 1, "grd": 5, "nrv": 1, "bld": 5, "mov": -1 },
+    "historical": { "name": "Jundi", "label": "attested" },
+    "ledger": "CLS-SOLDIER"
+  },
+  {
+    "id": "man-at-arms",
+    "line": "soldier",
+    "tier": 2,
+    "name": "Man-at-Arms",
+    "moveType": "armored",
+    "base": { "hp": 24, "mgt": 7, "skl": 5, "spd": 5, "fort": 0, "grd": 8, "nrv": 1, "bld": 11, "mov": 4 },
+    "weapons": { "spear": 3, "sabre": 3, "mace": 4, "axe": 2 },
+    "skills": ["stand-fast", "shield-wall"],
+    "promotesTo": "bulwark",
+    "promotionGain": { "hp": 7, "mgt": 3, "skl": 2, "spd": 1, "grd": 4, "nrv": 2, "bld": 3 },
+    "historical": { "name": "Ghulam Guard", "label": "game-label" },
+    "ledger": "CLS-SOLDIER"
+  },
+  {
+    "id": "bulwark",
+    "line": "soldier",
+    "tier": 3,
+    "name": "Bulwark",
+    "moveType": "armored",
+    "base": { "hp": 31, "mgt": 10, "skl": 7, "spd": 6, "fort": 0, "grd": 12, "nrv": 3, "bld": 14, "mov": 4 },
+    "caps": { "grd": 48 },
+    "weapons": { "spear": 4, "sabre": 3, "mace": 5, "axe": 4 },
+    "skills": ["shield-wall", "bulwark"],
+    "historical": { "name": "Amir of the Guard", "label": "game-label" },
+    "ledger": "CLS-SOLDIER"
   },
   {
     "id": "pikeman",
@@ -25,8 +88,39 @@
     "name": "Pikeman",
     "moveType": "foot",
     "base": { "hp": 19, "mgt": 5, "skl": 4, "spd": 4, "fort": 0, "grd": 3, "nrv": 0, "bld": 7, "mov": 5 },
+    "growthMod": { "grd": 5, "skl": 5 },
     "weapons": { "spear": 4, "sabre": 2, "mace": 1, "javelin": 1 },
-    "growthMod": { "grd": 5, "skl": 5 }
+    "skills": ["highlander"],
+    "promotesTo": "spear-knight",
+    "promotionGain": { "hp": 7, "mgt": 3, "skl": 3, "spd": 3, "grd": 3, "nrv": 2, "bld": 3 },
+    "historical": { "name": "Kurdish Spearman", "label": "attested" },
+    "ledger": "CLS-PIKE"
+  },
+  {
+    "id": "spear-knight",
+    "line": "pike",
+    "tier": 2,
+    "name": "Spear Knight",
+    "moveType": "foot",
+    "base": { "hp": 26, "mgt": 8, "skl": 7, "spd": 7, "fort": 0, "grd": 6, "nrv": 2, "bld": 10, "mov": 5 },
+    "weapons": { "spear": 5, "sabre": 3, "mace": 3, "javelin": 2 },
+    "skills": ["highlander", "phalanx"],
+    "promotesTo": "pike-marshal",
+    "promotionGain": { "hp": 7, "mgt": 3, "skl": 3, "spd": 2, "grd": 3, "nrv": 2, "bld": 2 },
+    "historical": { "name": "Muqaddam", "label": "attested" },
+    "ledger": "CLS-PIKE"
+  },
+  {
+    "id": "pike-marshal",
+    "line": "pike",
+    "tier": 3,
+    "name": "Pike Marshal",
+    "moveType": "foot",
+    "base": { "hp": 33, "mgt": 11, "skl": 10, "spd": 9, "fort": 0, "grd": 9, "nrv": 4, "bld": 12, "mov": 5 },
+    "weapons": { "spear": 5, "sabre": 4, "mace": 3, "javelin": 2 },
+    "skills": ["phalanx", "counter-charge"],
+    "historical": { "name": "Kurdish Amir", "label": "game-label" },
+    "ledger": "CLS-PIKE"
   },
   {
     "id": "swordsman",
@@ -35,8 +129,40 @@
     "name": "Swordsman",
     "moveType": "foot",
     "base": { "hp": 18, "mgt": 4, "skl": 6, "spd": 7, "fort": 0, "grd": 2, "nrv": 0, "bld": 5, "mov": 5 },
+    "growthMod": { "skl": 10, "spd": 10, "grd": -5 },
     "weapons": { "sabre": 4, "dagger": 2, "spear": 1 },
-    "growthMod": { "skl": 10, "spd": 10, "grd": -5 }
+    "skills": ["parry"],
+    "promotesTo": "blademaster",
+    "promotionGain": { "hp": 6, "mgt": 3, "skl": 4, "spd": 4, "grd": 2, "nrv": 1, "bld": 2 },
+    "historical": { "name": "Jundi swordsman", "label": "game-label" },
+    "ledger": "CLS-SWORD"
+  },
+  {
+    "id": "blademaster",
+    "line": "sword",
+    "tier": 2,
+    "name": "Blademaster",
+    "moveType": "foot",
+    "base": { "hp": 24, "mgt": 7, "skl": 10, "spd": 11, "fort": 0, "grd": 4, "nrv": 1, "bld": 7, "mov": 5 },
+    "weapons": { "sabre": 5, "dagger": 3, "spear": 2 },
+    "skills": ["parry", "keen-edge"],
+    "promotesTo": "legend",
+    "promotionGain": { "hp": 6, "mgt": 3, "skl": 3, "spd": 4, "grd": 2, "nrv": 2, "bld": 1 },
+    "historical": { "name": "Faris", "label": "attested" },
+    "ledger": "CLS-SWORD"
+  },
+  {
+    "id": "legend",
+    "line": "sword",
+    "tier": 3,
+    "name": "Legend",
+    "moveType": "foot",
+    "base": { "hp": 30, "mgt": 10, "skl": 13, "spd": 15, "fort": 0, "grd": 6, "nrv": 3, "bld": 8, "mov": 5 },
+    "caps": { "spd": 44 },
+    "weapons": { "sabre": 5, "dagger": 4, "spear": 2 },
+    "skills": ["keen-edge", "last-stand"],
+    "historical": { "name": "Faris al-Muslimin", "label": "attested" },
+    "ledger": "CLS-SWORD"
   },
   {
     "id": "axeman",
@@ -45,8 +171,39 @@
     "name": "Axeman",
     "moveType": "foot",
     "base": { "hp": 21, "mgt": 6, "skl": 3, "spd": 3, "fort": 0, "grd": 3, "nrv": 0, "bld": 8, "mov": 5 },
+    "growthMod": { "hp": 10, "mgt": 10, "spd": -10 },
     "weapons": { "axe": 4, "mace": 2, "javelin": 1 },
-    "growthMod": { "hp": 10, "mgt": 10, "spd": -10 }
+    "skills": ["heavy-blow"],
+    "promotesTo": "axe-knight",
+    "promotionGain": { "hp": 7, "mgt": 4, "skl": 2, "spd": 2, "grd": 3, "nrv": 1, "bld": 3 },
+    "historical": { "name": "axe-bearer", "label": "game-label" },
+    "ledger": "CLS-AXE"
+  },
+  {
+    "id": "axe-knight",
+    "line": "axe",
+    "tier": 2,
+    "name": "Axe Knight",
+    "moveType": "foot",
+    "base": { "hp": 28, "mgt": 10, "skl": 5, "spd": 5, "fort": 0, "grd": 6, "nrv": 1, "bld": 11, "mov": 5 },
+    "weapons": { "axe": 5, "mace": 3, "javelin": 2 },
+    "skills": ["heavy-blow", "sunder"],
+    "promotesTo": "warlord",
+    "promotionGain": { "hp": 8, "mgt": 4, "skl": 2, "spd": 2, "grd": 3, "nrv": 1, "bld": 2 },
+    "historical": { "name": "halberdier", "label": "attested" },
+    "ledger": "CLS-AXE"
+  },
+  {
+    "id": "warlord",
+    "line": "axe",
+    "tier": 3,
+    "name": "Warlord",
+    "moveType": "foot",
+    "base": { "hp": 36, "mgt": 14, "skl": 7, "spd": 7, "fort": 0, "grd": 9, "nrv": 2, "bld": 13, "mov": 5 },
+    "weapons": { "axe": 5, "mace": 4, "javelin": 2 },
+    "skills": ["sunder", "warcry"],
+    "historical": { "name": "Amir", "label": "game-label" },
+    "ledger": "CLS-AXE"
   },
   {
     "id": "archer",
@@ -55,8 +212,37 @@
     "name": "Archer",
     "moveType": "foot",
     "base": { "hp": 17, "mgt": 4, "skl": 5, "spd": 5, "fort": 0, "grd": 2, "nrv": 1, "bld": 5, "mov": 5 },
+    "growthMod": { "skl": 10, "spd": 5 },
     "weapons": { "bow": 4, "dagger": 1 },
-    "growthMod": { "skl": 10, "spd": 5 }
+    "skills": ["steady-aim"],
+    "promotesTo": "marksman",
+    "promotionGain": { "hp": 6, "mgt": 3, "skl": 4, "spd": 3, "grd": 2, "nrv": 2, "bld": 2 },
+    "historical": { "name": "bowman", "label": "attested" },
+    "ledger": "CLS-BOW"
+  },
+  {
+    "id": "marksman",
+    "line": "bow",
+    "tier": 2,
+    "name": "Marksman",
+    "moveType": "foot",
+    "base": { "hp": 23, "mgt": 7, "skl": 9, "spd": 8, "fort": 0, "grd": 4, "nrv": 3, "bld": 7, "mov": 5 },
+    "weapons": { "bow": 5, "dagger": 2 },
+    "skills": ["steady-aim", "long-draw"],
+    "promotesTo": "master-archer",
+    "promotionGain": { "hp": 6, "mgt": 3, "skl": 4, "spd": 2, "grd": 2, "nrv": 2, "bld": 1 },
+    "ledger": "CLS-BOW"
+  },
+  {
+    "id": "master-archer",
+    "line": "bow",
+    "tier": 3,
+    "name": "Master Archer",
+    "moveType": "foot",
+    "base": { "hp": 29, "mgt": 10, "skl": 13, "spd": 10, "fort": 0, "grd": 6, "nrv": 5, "bld": 8, "mov": 5 },
+    "weapons": { "bow": 5, "dagger": 2 },
+    "skills": ["long-draw", "deadeye"],
+    "ledger": "CLS-BOW"
   },
   {
     "id": "horse-archer",
@@ -65,8 +251,40 @@
     "name": "Horse Archer",
     "moveType": "mounted",
     "base": { "hp": 17, "mgt": 4, "skl": 5, "spd": 7, "fort": 0, "grd": 2, "nrv": 1, "bld": 5, "mov": 7 },
+    "growthMod": { "skl": 5, "spd": 10 },
     "weapons": { "bow": 4, "sabre": 2, "javelin": 1 },
-    "growthMod": { "skl": 5, "spd": 10 }
+    "skills": ["wheel"],
+    "promotesTo": "horse-marksman",
+    "promotionGain": { "hp": 6, "mgt": 3, "skl": 4, "spd": 4, "grd": 2, "nrv": 2, "bld": 2, "mov": 1 },
+    "historical": { "name": "Turkmen Horse Archer", "label": "attested" },
+    "ledger": "CLS-HORSEARCHER"
+  },
+  {
+    "id": "horse-marksman",
+    "line": "horse-archer",
+    "tier": 2,
+    "name": "Horse Marksman",
+    "moveType": "mounted",
+    "base": { "hp": 23, "mgt": 7, "skl": 9, "spd": 11, "fort": 0, "grd": 4, "nrv": 3, "bld": 7, "mov": 8 },
+    "weapons": { "bow": 5, "sabre": 3, "javelin": 2 },
+    "skills": ["wheel", "swift"],
+    "promotesTo": "steppe-lord",
+    "promotionGain": { "hp": 6, "mgt": 3, "skl": 3, "spd": 3, "grd": 2, "nrv": 2, "bld": 1 },
+    "historical": { "name": "Furusiyya Master", "label": "game-label" },
+    "ledger": "CLS-HORSEARCHER"
+  },
+  {
+    "id": "steppe-lord",
+    "line": "horse-archer",
+    "tier": 3,
+    "name": "Steppe Lord",
+    "moveType": "mounted",
+    "base": { "hp": 29, "mgt": 10, "skl": 12, "spd": 14, "fort": 0, "grd": 6, "nrv": 5, "bld": 8, "mov": 8 },
+    "caps": { "spd": 44 },
+    "weapons": { "bow": 5, "sabre": 4, "javelin": 3 },
+    "skills": ["swift", "skirmish"],
+    "historical": { "name": "Turkmen Amir", "label": "game-label" },
+    "ledger": "CLS-HORSEARCHER"
   },
   {
     "id": "horseman",
@@ -75,8 +293,39 @@
     "name": "Horseman",
     "moveType": "mounted",
     "base": { "hp": 20, "mgt": 5, "skl": 4, "spd": 5, "fort": 0, "grd": 4, "nrv": 0, "bld": 8, "mov": 7 },
+    "growthMod": { "hp": 5, "mgt": 5, "grd": 5 },
     "weapons": { "spear": 3, "sabre": 3, "mace": 1 },
-    "growthMod": { "hp": 5, "mgt": 5, "grd": 5 }
+    "skills": ["shock"],
+    "promotesTo": "mounted-knight",
+    "promotionGain": { "hp": 8, "mgt": 4, "skl": 3, "spd": 3, "grd": 4, "nrv": 2, "bld": 4, "mov": 1 },
+    "historical": { "name": "Mamluk Cavalry", "label": "attested" },
+    "ledger": "CLS-CAVALRY"
+  },
+  {
+    "id": "mounted-knight",
+    "line": "cavalry",
+    "tier": 2,
+    "name": "Mounted Knight",
+    "moveType": "mounted",
+    "base": { "hp": 28, "mgt": 9, "skl": 7, "spd": 8, "fort": 0, "grd": 8, "nrv": 2, "bld": 12, "mov": 8 },
+    "weapons": { "spear": 5, "sabre": 4, "mace": 3 },
+    "skills": ["shock", "presence"],
+    "promotesTo": "cavalry-marshal",
+    "promotionGain": { "hp": 8, "mgt": 3, "skl": 3, "spd": 2, "grd": 3, "nrv": 2, "bld": 2 },
+    "historical": { "name": "Faris", "label": "attested" },
+    "ledger": "CLS-CAVALRY"
+  },
+  {
+    "id": "cavalry-marshal",
+    "line": "cavalry",
+    "tier": 3,
+    "name": "Cavalry Marshal",
+    "moveType": "mounted",
+    "base": { "hp": 36, "mgt": 12, "skl": 10, "spd": 10, "fort": 0, "grd": 11, "nrv": 4, "bld": 14, "mov": 8 },
+    "weapons": { "spear": 5, "sabre": 5, "mace": 4 },
+    "skills": ["presence", "pursuit"],
+    "historical": { "name": "Amir", "label": "attested" },
+    "ledger": "CLS-CAVALRY"
   },
   {
     "id": "crossbowman",
@@ -85,8 +334,37 @@
     "name": "Crossbowman",
     "moveType": "foot",
     "base": { "hp": 18, "mgt": 5, "skl": 4, "spd": 3, "fort": 0, "grd": 3, "nrv": 0, "bld": 7, "mov": 5 },
+    "growthMod": { "mgt": 5, "skl": 5, "spd": -5 },
     "weapons": { "crossbow": 4, "dagger": 1 },
-    "growthMod": { "mgt": 5, "skl": 5, "spd": -5 }
+    "skills": ["piercing-bolt"],
+    "promotesTo": "arbalester",
+    "promotionGain": { "hp": 7, "mgt": 4, "skl": 3, "spd": 2, "grd": 3, "nrv": 1, "bld": 3 },
+    "historical": { "name": "arbalist", "label": "attested" },
+    "ledger": "CLS-CROSSBOW"
+  },
+  {
+    "id": "arbalester",
+    "line": "crossbow",
+    "tier": 2,
+    "name": "Arbalester",
+    "moveType": "foot",
+    "base": { "hp": 25, "mgt": 9, "skl": 7, "spd": 5, "fort": 0, "grd": 6, "nrv": 1, "bld": 10, "mov": 5 },
+    "weapons": { "crossbow": 5, "dagger": 2 },
+    "skills": ["piercing-bolt", "bolt-volley"],
+    "promotesTo": "crossbow-master",
+    "promotionGain": { "hp": 7, "mgt": 4, "skl": 3, "spd": 1, "grd": 3, "nrv": 2, "bld": 2 },
+    "ledger": "CLS-CROSSBOW"
+  },
+  {
+    "id": "crossbow-master",
+    "line": "crossbow",
+    "tier": 3,
+    "name": "Crossbow Master",
+    "moveType": "foot",
+    "base": { "hp": 32, "mgt": 13, "skl": 10, "spd": 6, "fort": 0, "grd": 9, "nrv": 3, "bld": 12, "mov": 5 },
+    "weapons": { "crossbow": 5, "dagger": 3 },
+    "skills": ["bolt-volley", "siege-bolt"],
+    "ledger": "CLS-CROSSBOW"
   },
   {
     "id": "skirmisher",
@@ -95,8 +373,37 @@
     "name": "Skirmisher",
     "moveType": "light",
     "base": { "hp": 16, "mgt": 3, "skl": 5, "spd": 7, "fort": 0, "grd": 1, "nrv": 1, "bld": 4, "mov": 6 },
+    "growthMod": { "spd": 15, "skl": 5, "grd": -5 },
     "weapons": { "javelin": 4, "dagger": 2, "bow": 1 },
-    "growthMod": { "spd": 15, "skl": 5, "grd": -5 }
+    "skills": ["elusive"],
+    "promotesTo": "harrier",
+    "promotionGain": { "hp": 6, "mgt": 3, "skl": 3, "spd": 4, "grd": 2, "nrv": 2, "bld": 2, "mov": 1 },
+    "historical": { "name": "light-armed trooper", "label": "attested" },
+    "ledger": "CLS-SKIRMISH"
+  },
+  {
+    "id": "harrier",
+    "line": "skirmish",
+    "tier": 2,
+    "name": "Harrier",
+    "moveType": "light",
+    "base": { "hp": 22, "mgt": 6, "skl": 8, "spd": 11, "fort": 0, "grd": 3, "nrv": 3, "bld": 6, "mov": 7 },
+    "weapons": { "javelin": 5, "dagger": 3, "bow": 2 },
+    "skills": ["elusive", "harry"],
+    "promotesTo": "vanguard",
+    "promotionGain": { "hp": 6, "mgt": 2, "skl": 3, "spd": 4, "grd": 2, "nrv": 2, "bld": 1 },
+    "ledger": "CLS-SKIRMISH"
+  },
+  {
+    "id": "vanguard",
+    "line": "skirmish",
+    "tier": 3,
+    "name": "Vanguard",
+    "moveType": "light",
+    "base": { "hp": 28, "mgt": 8, "skl": 11, "spd": 15, "fort": 0, "grd": 5, "nrv": 5, "bld": 7, "mov": 7 },
+    "weapons": { "javelin": 5, "dagger": 4, "bow": 3 },
+    "skills": ["harry", "lightstep"],
+    "ledger": "CLS-SKIRMISH"
   },
   {
     "id": "fire-thrower",
@@ -105,8 +412,37 @@
     "name": "Fire Thrower",
     "moveType": "light",
     "base": { "hp": 16, "mgt": 2, "skl": 6, "spd": 5, "fort": 0, "grd": 1, "nrv": 2, "bld": 4, "mov": 6 },
+    "growthMod": { "skl": 10, "nrv": 10, "hp": -5 },
     "weapons": { "fire": 4, "dagger": 1 },
-    "growthMod": { "skl": 10, "nrv": 10, "hp": -5 }
+    "skills": ["ignite"],
+    "promotesTo": "fire-master",
+    "promotionGain": { "hp": 6, "mgt": 2, "skl": 4, "spd": 3, "grd": 2, "nrv": 2, "bld": 2 },
+    "historical": { "name": "Naffat", "label": "attested" },
+    "ledger": "CLS-FIRE"
+  },
+  {
+    "id": "fire-master",
+    "line": "fire",
+    "tier": 2,
+    "name": "Fire Master",
+    "moveType": "light",
+    "base": { "hp": 22, "mgt": 4, "skl": 10, "spd": 8, "fort": 0, "grd": 3, "nrv": 4, "bld": 6, "mov": 6 },
+    "weapons": { "fire": 5, "dagger": 2 },
+    "skills": ["ignite", "wildfire"],
+    "promotesTo": "master-of-flames",
+    "promotionGain": { "hp": 6, "mgt": 2, "skl": 4, "spd": 2, "grd": 2, "nrv": 3, "bld": 1 },
+    "ledger": "CLS-FIRE"
+  },
+  {
+    "id": "master-of-flames",
+    "line": "fire",
+    "tier": 3,
+    "name": "Master of Flames",
+    "moveType": "light",
+    "base": { "hp": 28, "mgt": 6, "skl": 14, "spd": 10, "fort": 0, "grd": 5, "nrv": 7, "bld": 7, "mov": 6 },
+    "weapons": { "fire": 5, "dagger": 2 },
+    "skills": ["wildfire", "fire-storm"],
+    "ledger": "CLS-FIRE"
   },
   {
     "id": "sapper",
@@ -115,8 +451,38 @@
     "name": "Sapper",
     "moveType": "foot",
     "base": { "hp": 18, "mgt": 4, "skl": 3, "spd": 3, "fort": 0, "grd": 3, "nrv": 1, "bld": 8, "mov": 5 },
+    "growthMod": { "hp": 5, "mgt": 5, "nrv": 5 },
     "weapons": { "mace": 3, "axe": 2, "spear": 2 },
-    "growthMod": { "hp": 5, "mgt": 5, "nrv": 5 }
+    "skills": ["sap"],
+    "promotesTo": "engineer",
+    "promotionGain": { "hp": 8, "mgt": 3, "skl": 3, "spd": 2, "grd": 3, "nrv": 2, "bld": 3 },
+    "historical": { "name": "Najjar", "label": "attested" },
+    "ledger": "CLS-ENGINEER"
+  },
+  {
+    "id": "engineer",
+    "line": "engineer",
+    "tier": 2,
+    "name": "Engineer",
+    "moveType": "foot",
+    "base": { "hp": 26, "mgt": 7, "skl": 6, "spd": 5, "fort": 0, "grd": 6, "nrv": 3, "bld": 11, "mov": 5 },
+    "weapons": { "mace": 4, "axe": 3, "spear": 3, "fire": 2 },
+    "skills": ["sap", "entrench"],
+    "promotesTo": "master-engineer",
+    "promotionGain": { "hp": 7, "mgt": 3, "skl": 3, "spd": 2, "grd": 3, "nrv": 2, "bld": 2 },
+    "historical": { "name": "Muhandis", "label": "game-label" },
+    "ledger": "CLS-ENGINEER"
+  },
+  {
+    "id": "master-engineer",
+    "line": "engineer",
+    "tier": 3,
+    "name": "Master Engineer",
+    "moveType": "foot",
+    "base": { "hp": 33, "mgt": 10, "skl": 9, "spd": 7, "fort": 0, "grd": 9, "nrv": 5, "bld": 13, "mov": 5 },
+    "weapons": { "mace": 5, "axe": 4, "spear": 3, "fire": 3 },
+    "skills": ["entrench", "mend"],
+    "ledger": "CLS-ENGINEER"
   },
   {
     "id": "healer",
@@ -125,8 +491,40 @@
     "name": "Healer",
     "moveType": "light",
     "base": { "hp": 15, "mgt": 1, "skl": 4, "spd": 4, "fort": 0, "grd": 1, "nrv": 4, "bld": 4, "mov": 6 },
+    "growthMod": { "nrv": 10, "skl": 5, "mgt": -5 },
     "weapons": { "remedy": 4, "dagger": 1 },
-    "growthMod": { "nrv": 10, "skl": 5, "mgt": -5 }
+    "skills": ["triage"],
+    "promotesTo": "physician",
+    "promotionGain": { "hp": 5, "mgt": 2, "skl": 4, "spd": 3, "grd": 2, "nrv": 4, "bld": 2 },
+    "historical": { "name": "Tabib", "label": "attested" },
+    "ledger": "CLS-MEDIC"
+  },
+  {
+    "id": "physician",
+    "line": "medic",
+    "tier": 2,
+    "name": "Physician",
+    "moveType": "light",
+    "base": { "hp": 20, "mgt": 3, "skl": 8, "spd": 7, "fort": 0, "grd": 3, "nrv": 8, "bld": 6, "mov": 6 },
+    "weapons": { "remedy": 5, "dagger": 1 },
+    "skills": ["triage", "cure"],
+    "promotesTo": "master-physician",
+    "promotionGain": { "hp": 6, "mgt": 2, "skl": 3, "spd": 2, "grd": 2, "nrv": 4, "bld": 1 },
+    "historical": { "name": "Hakim", "label": "game-label" },
+    "ledger": "CLS-MEDIC"
+  },
+  {
+    "id": "master-physician",
+    "line": "medic",
+    "tier": 3,
+    "name": "Master Physician",
+    "moveType": "light",
+    "base": { "hp": 26, "mgt": 5, "skl": 11, "spd": 9, "fort": 0, "grd": 5, "nrv": 12, "bld": 7, "mov": 6 },
+    "caps": { "nrv": 46 },
+    "weapons": { "remedy": 5, "dagger": 2 },
+    "skills": ["cure", "renewal"],
+    "historical": { "name": "chief physician", "label": "attested" },
+    "ledger": "CLS-MEDIC"
   },
   {
     "id": "scribe",
@@ -135,7 +533,48 @@
     "name": "Scribe",
     "moveType": "light",
     "base": { "hp": 14, "mgt": 1, "skl": 3, "spd": 4, "fort": 0, "grd": 1, "nrv": 5, "bld": 4, "mov": 6 },
+    "growthMod": { "nrv": 15, "skl": 5, "mgt": -10 },
     "weapons": { "remedy": 2, "dagger": 1 },
-    "growthMod": { "nrv": 15, "skl": 5, "mgt": -10 }
+    "skills": ["counsel"],
+    "promotesTo": "counselor",
+    "promotionGain": { "hp": 7, "mgt": 2, "skl": 4, "spd": 3, "grd": 2, "nrv": 4, "bld": 2 },
+    "historical": { "name": "Katib", "label": "attested" },
+    "ledger": "CLS-SCRIBE"
+  },
+  {
+    "id": "counselor",
+    "line": "scribe",
+    "tier": 2,
+    "name": "Counselor",
+    "moveType": "light",
+    "base": { "hp": 21, "mgt": 3, "skl": 7, "spd": 7, "fort": 0, "grd": 3, "nrv": 9, "bld": 6, "mov": 6 },
+    "weapons": { "remedy": 3, "dagger": 1 },
+    "skills": ["counsel", "dispatch"],
+    "promotesTo": "vizier",
+    "promotionGain": { "hp": 6, "mgt": 2, "skl": 3, "spd": 2, "grd": 2, "nrv": 4, "bld": 1 },
+    "historical": { "name": "Qadi", "label": "attested" },
+    "ledger": "CLS-SCRIBE"
+  },
+  {
+    "id": "vizier",
+    "line": "scribe",
+    "tier": 3,
+    "name": "Vizier",
+    "moveType": "light",
+    "base": { "hp": 27, "mgt": 5, "skl": 10, "spd": 9, "fort": 0, "grd": 5, "nrv": 13, "bld": 7, "mov": 6 },
+    "weapons": { "remedy": 4, "dagger": 2 },
+    "skills": ["dispatch", "decree"],
+    "historical": { "name": "Wazir", "label": "attested" },
+    "ledger": "CLS-SCRIBE"
+  },
+  {
+    "id": "structure",
+    "line": "structure",
+    "tier": 1,
+    "name": "Structure",
+    "moveType": "foot",
+    "base": { "hp": 1, "mgt": 0, "skl": 0, "spd": 0, "fort": 0, "grd": 0, "nrv": 0, "bld": 0, "mov": 0 },
+    "weapons": {},
+    "unique": true
   }
 ]

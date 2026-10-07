@@ -4,5 +4,6 @@
   "tierExpRate": { "1": 1.0, "2": 0.85, "3": 0.7 },
   "critMultiplier": 3,
   "doubleThreshold": 4,
-  "bossExpBonus": 40
+  "bossExpBonus": 40,
+  "promotionLevel": 10
 }

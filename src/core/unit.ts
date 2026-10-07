@@ -1,5 +1,7 @@
 import type { AiProfile } from './aiProfile';
 import type { ClassDef, ClassTable } from './classes';
+import type { ItemTable } from './items';
+import type { Status } from './status';
 import { addStats, TIER_CAPS, type MutableStats, type Stat, type Stats, type Tier } from './stats';
 import type { MoveType, Point, Side } from './types';
 import { gradeFromWexp, wexpForGrade, type WeaponDef, type WeaponKind, type WeaponTable } from './weapons';
@@ -8,9 +10,17 @@ import { gradeFromWexp, wexpForGrade, type WeaponDef, type WeaponKind, type Weap
 export const INVENTORY_SLOTS = 5;
 
 export interface ItemStack {
+  /** A weapon id or an item id. */
   readonly id: string;
-  /** Remaining uses; a weapon at 0 breaks and is removed. */
+  /** Remaining uses; a weapon at 0 breaks and is removed, and a used-up item is removed too. */
   uses: number;
+}
+
+/** The data a unit is built from. */
+export interface UnitCatalog {
+  readonly classes: ClassTable;
+  readonly weapons: WeaponTable;
+  readonly items: ItemTable;
 }
 
 /** A unit as authored in data (DESIGN §3.6). */
@@ -62,6 +72,8 @@ export interface UnitInstance {
   readonly boss: boolean;
   readonly chronicled: boolean;
   readonly fictional: boolean;
+  /** Gates, barricades and siege engines are units too, but never act as soldiers do. */
+  readonly kind: 'unit' | 'structure';
   /** Where the unit started: its post, for leashes and defensive behaviour. */
   readonly home: Point;
 
@@ -91,6 +103,13 @@ export interface UnitInstance {
   tags: string[];
   /** A defensive unit that has woken and stays awake. */
   triggered: boolean;
+  statuses: Status[];
+  /** Movement cost spent so far this turn; zero means the unit has not moved. */
+  travelled: number;
+  /** Tiles of movement still owed after an attack (Wheel, Skirmish, Pursuit). */
+  bonusMove: number;
+  /** Things this unit has already done this turn, for once-a-turn skills. */
+  turnFlags: string[];
 }
 
 export const maxHp = (unit: UnitInstance): number => unit.stats.hp;
@@ -145,23 +164,16 @@ export interface UnitOverrides {
   readonly tags?: readonly string[];
 }
 
-export function createUnit(
-  def: UnitDef,
-  id: string,
-  x: number,
-  y: number,
-  classes: ClassTable,
-  weapons: WeaponTable,
-  overrides: UnitOverrides = {},
-): UnitInstance {
+export function createUnit(def: UnitDef, id: string, x: number, y: number, catalog: UnitCatalog, overrides: UnitOverrides = {}): UnitInstance {
+  const { classes, weapons, items } = catalog;
   const classDef = classes.get(def.class);
   if (!classDef) throw new Error(`Unit "${def.id}" has unknown class "${def.class}"`);
   const stats = addStats(classDef.base, def.offset ?? {});
 
   const inventory: ItemStack[] = def.inventory.map((itemId) => {
-    const weapon = weapons.get(itemId);
-    if (!weapon) throw new Error(`Unit "${def.id}" carries unknown item "${itemId}"`);
-    return { id: itemId, uses: weapon.uses };
+    const found = weapons.get(itemId) ?? items.get(itemId);
+    if (!found) throw new Error(`Unit "${def.id}" carries unknown item "${itemId}"`);
+    return { id: itemId, uses: found.uses };
   });
   if (inventory.length > INVENTORY_SLOTS) throw new Error(`Unit "${def.id}" carries more than ${INVENTORY_SLOTS} items`);
 
@@ -189,6 +201,7 @@ export function createUnit(
     boss: def.boss ?? false,
     chronicled: def.chronicled ?? false,
     fictional: def.fictional ?? false,
+    kind: 'unit',
     home: { x, y },
     classId: classDef.id,
     tier: classDef.tier,
@@ -211,6 +224,10 @@ export function createUnit(
     ai: overrides.ai ?? def.ai ?? (def.side === 'player' ? null : { mode: 'aggressive' }),
     tags: [...(overrides.tags ?? def.tags ?? [])],
     triggered: false,
+    statuses: [],
+    travelled: 0,
+    bonusMove: 0,
+    turnFlags: [],
   };
   autoEquip(unit, weapons, classes);
   return unit;

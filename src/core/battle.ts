@@ -1,16 +1,21 @@
 import type { UnitPlan } from './ai';
 import type { AiWeights } from './aiProfile';
 import type { Balance } from './balance';
+import type { ItemTable } from './items';
 import type { ClassDef, ClassTable } from './classes';
-import { forecast, NO_BONUS, resolveStrikes, type Combatant, type Forecast, type HitMode, type StrikeEvent } from './combat';
+import { forecast, resolveStrikes, type Combatant, type Forecast, type HitMode, type StrikeEvent } from './combat';
 import { EventRunner, matchesKey, type EventAction, type PhaseSide, type SpawnSpec, type Trigger } from './events';
 import { awardExp, expForFight, expForHeal, grantWexp, type ExpResult, type WexpGain } from './exp';
 import { computeVisible } from './fog';
 import { manhattan, neighbors4, ring, tileKey } from './grid';
 import type { GameMap } from './map';
+import type { TerrainDef } from './terrain';
+import { checkPromotion, promote, type PromotionResult } from './promotion';
+import { adjustedCost, movementOf, rangeBonus, skillBonus, type CombatContext } from './skills';
 import { checkObjective, newProgress, type Checkpoint, type ObjectiveProgress, type Outcome } from './objectives';
 import { computeReach, pathTo, type ReachResult } from './pathfinding';
 import type { Rng } from './rng';
+import { applyStatus, hasExpired, type StatusId } from './status';
 import { areFriendly, areHostile, type Point, type Side } from './types';
 import { autoEquip, canEquip, createUnit, equippedWeapon, INVENTORY_SLOTS, maxHp, weaponStacks, type UnitInstance, type UnitTable } from './unit';
 import { canReach, isOffensive, type WeaponDef, type WeaponTable } from './weapons';
@@ -30,6 +35,7 @@ export const DEFAULT_RULES: BattleRules = { hitMode: 'honest', guaranteedProgres
 /** Static game data a battle needs. */
 export interface BattleTables {
   readonly weapons: WeaponTable;
+  readonly items: ItemTable;
   readonly classes: ClassTable;
   readonly balance: Balance;
   /** Unit definitions, for reinforcements and spawn events. */
@@ -64,10 +70,20 @@ export interface FightReport {
   readonly defeated: readonly UnitInstance[];
 }
 
+/** What using an item did. */
+export interface ItemUseReport {
+  readonly unit: UnitInstance;
+  readonly item: string;
+  readonly restored: number;
+  readonly cured: readonly StatusId[];
+  readonly promotion: PromotionResult | null;
+}
+
 export interface HealReport {
   readonly healer: UnitInstance;
   readonly target: UnitInstance;
   readonly restored: number;
+  readonly cured: readonly StatusId[];
   readonly expAward: ExpAward | null;
 }
 
@@ -115,6 +131,8 @@ export class BattleState {
   readonly progress: ObjectiveProgress = newProgress();
   /** Set once the chapter is won or lost. */
   outcome: Outcome | null = null;
+  /** Dinars of ransom earned this chapter (Clemency). */
+  ransom = 0;
   /** Dialogue and messages waiting for the player to read, oldest first. */
   readonly messages: BattleMessage[] = [];
   /** Units that appeared during play (by an event) and have not been shown yet. */
@@ -159,14 +177,28 @@ export class BattleState {
     return classDef;
   }
 
+  /** The terrain on a tile (dynamic changes, such as breaches, will be applied here). */
+  terrainAt(x: number, y: number): TerrainDef {
+    return this.map.terrainAt(x, y);
+  }
+
+  /** The cost for a unit to enter a tile: the terrain's cost for its movement type, adjusted by its skills. */
+  costFor(unit: UnitInstance): (x: number, y: number) => number | null {
+    return (x, y) => {
+      const terrain = this.terrainAt(x, y);
+      return adjustedCost(unit, terrain.id, terrain.cost[unit.moveType]);
+    };
+  }
+
   /** Where a unit can move this turn, given everyone else on the board. */
-  reachFor(unit: UnitInstance): ReachResult {
+  reachFor(unit: UnitInstance, mov: number = movementOf(unit)): ReachResult {
     return computeReach({
       map: this.map,
       start: { x: unit.x, y: unit.y },
       moveType: unit.moveType,
-      mov: unit.stats.mov,
+      mov,
       side: unit.side,
+      costFor: this.costFor(unit),
       occupantAt: (x, y) => {
         const other = this.unitAt(x, y);
         return other && other !== unit ? other.side : null;
@@ -184,7 +216,7 @@ export class BattleState {
 
   /** Hostile units a weapon would reach from `from`. */
   targetsFor(unit: UnitInstance, weapon: WeaponDef, from: Point): UnitInstance[] {
-    return ring(from, weapon.range[0], weapon.range[1], this.map.width, this.map.height)
+    return ring(from, weapon.range[0], weapon.range[1] + rangeBonus(unit, weapon, from), this.map.width, this.map.height)
       .map((p) => this.unitAt(p.x, p.y))
       .filter((u): u is UnitInstance => u !== undefined && u !== unit && areHostile(unit.side, u.side));
   }
@@ -208,7 +240,7 @@ export class BattleState {
     const seen = new Map<number, Point>();
     for (const stop of reach.stops) {
       for (const { weapon } of weapons) {
-        for (const p of ring(stop, weapon.range[0], weapon.range[1], this.map.width, this.map.height)) {
+        for (const p of ring(stop, weapon.range[0], weapon.range[1] + rangeBonus(unit, weapon, stop), this.map.width, this.map.height)) {
           seen.set(tileKey(p.x, p.y), p);
         }
       }
@@ -216,10 +248,29 @@ export class BattleState {
     return [...seen.values()];
   }
 
-  private combatant(unit: UnitInstance, at: Point, slot?: number): Combatant {
+  /** One side of an exchange: the unit's weapon, its ground, and what its skills, auras and statuses add. */
+  private combatant(unit: UnitInstance, at: Point, other: UnitInstance, role: 'attacker' | 'defender', distance: number, slot?: number): Combatant {
     const stack = unit.inventory[slot ?? unit.equipped];
     const weapon = stack && stack.uses > 0 ? (this.tables.weapons.get(stack.id) ?? null) : null;
-    return { unit, weapon, usesLeft: stack?.uses ?? 0, terrain: this.map.terrainAt(at.x, at.y), bonus: NO_BONUS };
+    const context: CombatContext = {
+      battle: this,
+      self: unit,
+      other,
+      role,
+      at,
+      distance,
+      weapon,
+      stationary: unit.travelled === 0 && at.x === unit.x && at.y === unit.y,
+      otherIsStructure: other.kind === 'structure',
+    };
+    return {
+      unit,
+      weapon,
+      usesLeft: stack?.uses ?? 0,
+      terrain: this.terrainAt(at.x, at.y),
+      bonus: skillBonus(context),
+      ...(unit.kind === 'structure' ? { structure: true } : {}),
+    };
   }
 
   /**
@@ -229,9 +280,10 @@ export class BattleState {
    */
   forecastFor(attacker: UnitInstance, defender: UnitInstance, options: { from?: Point; slot?: number } = {}): Forecast | null {
     const from = options.from ?? attacker;
-    const a = this.combatant(attacker, from, options.slot);
-    const d = this.combatant(defender, defender);
-    const fc = forecast(a, d, manhattan(from, defender), this.tables.balance);
+    const distance = manhattan(from, defender);
+    const a = this.combatant(attacker, from, defender, 'attacker', distance, options.slot);
+    const d = this.combatant(defender, defender, attacker, 'defender', distance);
+    const fc = forecast(a, d, distance, this.tables.balance);
     return fc.attacker.strike ? fc : null;
   }
 
@@ -264,6 +316,7 @@ export class BattleState {
     if (!reach.stops.some((p) => p.x === dest.x && p.y === dest.y)) return null;
     const path = pathTo(reach, dest);
     if (!path) return null;
+    unit.travelled += reach.nodes.get(tileKey(dest.x, dest.y))?.cost ?? 0;
     unit.x = dest.x;
     unit.y = dest.y;
     unit.moved = true;
@@ -351,8 +404,44 @@ export class BattleState {
       if (mine.length > 0 && kind) wexpGains.push({ unit, ...grantWexp(unit, kind, outcome.killed ? 2 : 1) });
     }
 
+    this.applyFightEffects(attacker, defender, events);
     this.finishAction(attacker);
     return { attacker, defender, forecast: fc, events, hpBefore, expAwards, wexpGains, brokenWeapons, defeated };
+  }
+
+  /** What skills do once a fight is over: statuses on those hit, ransom, and movement owed after an attack. */
+  private applyFightEffects(attacker: UnitInstance, defender: UnitInstance, events: readonly StrikeEvent[]): void {
+    for (const [unit, foe, key] of [[attacker, defender, 'a'], [defender, attacker, 'd']] as const) {
+      const mine = events.filter((e) => e.by === key);
+      const hits = mine.filter((e) => e.hit).length;
+      const killed = mine.some((e) => e.killed);
+      if (hits > 0 && !foe.retreated) {
+        if (unit.skills.includes('sunder')) for (let i = 0; i < hits; i++) this.addStatus(foe, 'sunder', 1);
+        if (unit.skills.includes('harry')) this.addStatus(foe, 'harry', 0);
+      }
+      if (killed && !foe.boss && unit.skills.includes('clemency')) this.ransom += 30;
+      if (key === 'a' && !unit.retreated) {
+        const pursues = killed && unit.skills.includes('pursuit') && !unit.turnFlags.includes('pursuit');
+        const owed = Math.max(unit.skills.includes('wheel') ? 2 : 0, unit.skills.includes('skirmish') ? 3 : 0, pursues ? 2 : 0);
+        if (owed > 0) unit.bonusMove = owed;
+        if (pursues) unit.turnFlags.push('pursuit');
+      }
+    }
+  }
+
+  /** Where a unit that owes a move after attacking (Wheel, Skirmish, Pursuit) may go; null if it owes none. */
+  bonusReach(unit: UnitInstance): ReachResult | null {
+    return unit.bonusMove > 0 && !unit.retreated ? this.reachFor(unit, unit.bonusMove) : null;
+  }
+
+  /** Make the move owed after an attack; the unit has used it up either way. */
+  bonusMoveTo(unit: UnitInstance, dest: Point): Point[] | null {
+    const reach = this.bonusReach(unit);
+    unit.bonusMove = 0;
+    if (!reach) return null;
+    const path = this.moveUnit(unit, dest, reach);
+    if (path) this.settle(unit);
+    return path;
   }
 
   /** A unit's HP after the fight: each event records the HP of whoever was struck, so the last strike *against* it decides. */
@@ -401,8 +490,14 @@ export class BattleState {
     const stack = healer.inventory[slot];
     const weapon = stack ? this.tables.weapons.get(stack.id) : undefined;
     if (!stack || !weapon || weapon.kind !== 'remedy' || stack.uses <= 0) throw new Error(`${healer.name} has no remedy in slot ${slot}`);
-    const restored = Math.min(weapon.might, maxHp(target) - target.hp);
+    // Triage heals more when the target is badly hurt
+    const triage = healer.skills.includes('triage') && target.hp * 2 < maxHp(target) ? 3 : 0;
+    const restored = Math.min(weapon.might + triage, maxHp(target) - target.hp);
     target.hp += restored;
+    // Cure clears the ailments a remedy cannot reach by itself
+    const ailments: readonly StatusId[] = ['thirst', 'heat', 'burn'];
+    const cured = healer.skills.includes('cure') ? target.statuses.filter((s) => ailments.includes(s.id)).map((s) => s.id) : [];
+    if (cured.length > 0) target.statuses = target.statuses.filter((s) => !cured.includes(s.id));
     stack.uses -= 1;
     if (stack.uses <= 0) {
       healer.inventory.splice(slot, 1);
@@ -416,7 +511,86 @@ export class BattleState {
       grantWexp(healer, 'remedy', 1);
     }
     this.finishAction(healer);
-    return { healer, target, restored, expAward };
+    return { healer, target, restored, cured, expAward };
+  }
+
+  // ------------------------------------------------------------------ items
+
+  /** Whether using the item in `slot` would do anything for the unit right now. */
+  canUseItem(unit: UnitInstance, slot: number): boolean {
+    const stack = unit.inventory[slot];
+    const item = stack ? this.tables.items.get(stack.id) : undefined;
+    if (!stack || !item || stack.uses <= 0) return false;
+    if (item.kind === 'promotion') {
+      const check = checkPromotion(unit, this.tables.classes, this.tables.balance);
+      return check.ok && unit.tier === item.promotes;
+    }
+    if (item.kind !== 'consumable') return false;
+    const heals = (item.heal ?? 0) > 0 && unit.hp < maxHp(unit);
+    const cures = (item.cures ?? []).some((id) => unit.statuses.some((s) => s.id === id));
+    return heals || cures;
+  }
+
+  /** Use an item: it takes effect, loses a use, and spends the unit's action. */
+  useItem(unit: UnitInstance, slot: number): ItemUseReport {
+    if (!this.canUseItem(unit, slot)) throw new Error(`${unit.name} cannot use the item in slot ${slot}`);
+    const stack = unit.inventory[slot];
+    const item = stack ? this.tables.items.get(stack.id) : undefined;
+    if (!stack || !item) throw new Error(`${unit.name} has no item in slot ${slot}`);
+    let restored = 0;
+    let cured: StatusId[] = [];
+    let promotion: PromotionResult | null = null;
+    if (item.kind === 'promotion') {
+      promotion = promote(unit, this.tables.classes);
+    } else {
+      restored = Math.min(item.heal ?? 0, maxHp(unit) - unit.hp);
+      unit.hp += restored;
+      const curable = new Set<StatusId>(item.cures ?? []);
+      cured = unit.statuses.filter((s) => curable.has(s.id)).map((s) => s.id);
+      unit.statuses = unit.statuses.filter((s) => !curable.has(s.id));
+    }
+    this.consume(unit, slot);
+    this.finishAction(unit);
+    return { unit, item: item.id, restored, cured, promotion };
+  }
+
+  /** Remove one use from the stack in `slot`, dropping it when it is used up and keeping `equipped` pointing at the same weapon. */
+  private consume(unit: UnitInstance, slot: number): void {
+    const stack = unit.inventory[slot];
+    if (!stack) return;
+    stack.uses -= 1;
+    if (stack.uses > 0) return;
+    unit.inventory.splice(slot, 1);
+    if (unit.equipped === slot) autoEquip(unit, this.tables.weapons, this.tables.classes);
+    else if (unit.equipped > slot) unit.equipped -= 1;
+  }
+
+  /** Whether the unit may be promoted by an item or a rank event at all. */
+  canPromote(unit: UnitInstance): boolean {
+    return checkPromotion(unit, this.tables.classes, this.tables.balance).ok;
+  }
+
+  /** Swap items between two adjacent friends; free, and it does not end either unit's action. */
+  trade(a: UnitInstance, slotA: number, b: UnitInstance, slotB: number): boolean {
+    if (a === b || manhattan(a, b) !== 1 || !areFriendly(a.side, b.side)) return false;
+    const stackA = a.inventory[slotA];
+    const stackB = b.inventory[slotB];
+    if (!stackA && !stackB) return false;
+    // a slot one past the end of a pack means "give": it needs room
+    if (!stackA && (slotA !== a.inventory.length || a.inventory.length >= INVENTORY_SLOTS)) return false;
+    if (!stackB && (slotB !== b.inventory.length || b.inventory.length >= INVENTORY_SLOTS)) return false;
+    const wasA = a.inventory[a.equipped];
+    const wasB = b.inventory[b.equipped];
+    if (stackA) a.inventory.splice(slotA, 1);
+    if (stackB) b.inventory.splice(slotB, 1);
+    if (stackB) a.inventory.splice(Math.min(slotA, a.inventory.length), 0, stackB);
+    if (stackA) b.inventory.splice(Math.min(slotB, b.inventory.length), 0, stackA);
+    for (const [unit, was] of [[a, wasA], [b, wasB]] as const) {
+      const index = was ? unit.inventory.indexOf(was) : -1;
+      if (index >= 0) unit.equipped = index;
+      else autoEquip(unit, this.tables.weapons, this.tables.classes);
+    }
+    return true;
   }
 
   // ------------------------------------------------------------------ Seize, Depart, Talk, Visit
@@ -505,7 +679,9 @@ export class BattleState {
     const action = plan.action;
     if (action.kind === 'attack') {
       this.equip(unit, action.slot);
-      return { unit, path, fight: this.fight(unit, action.target), heal: null, escaped: false };
+      const fight = this.fight(unit, action.target);
+      unit.bonusMove = 0; // the computer does not use the move owed after an attack
+      return { unit, path, fight, heal: null, escaped: false };
     }
     if (action.kind === 'heal') {
       return { unit, path, fight: null, heal: this.heal(unit, action.target, action.slot), escaped: false };
@@ -542,7 +718,7 @@ export class BattleState {
     let n = 1;
     while (taken.has(`${spec.def}#${n}`)) n += 1;
     const overrides = { ...(spec.ai ? { ai: spec.ai } : {}), ...(spec.tags ? { tags: spec.tags } : {}) };
-    const unit = createUnit(def, `${spec.def}#${n}`, spec.at[0], spec.at[1], this.tables.classes, this.tables.weapons, overrides);
+    const unit = createUnit(def, `${spec.def}#${n}`, spec.at[0], spec.at[1], this.tables, overrides);
     const tile = this.freeTileNear({ x: spec.at[0], y: spec.at[1] }, unit);
     if (!tile) throw new Error(`No free tile for "${spec.def}" near (${spec.at[0]}, ${spec.at[1]})`);
     unit.x = tile.x;
@@ -594,14 +770,23 @@ export class BattleState {
           }
         }
         break;
+      case 'promote':
+        for (const u of this.units) {
+          if (u.retreated || !matchesKey(u, action.unit)) continue;
+          if (this.canPromote(u)) promote(u, this.tables.classes);
+          else if (this.tables.items.has('charter-of-iqta') && u.inventory.length < INVENTORY_SLOTS && this.classOf(u).promotesTo) {
+            u.inventory.push({ id: 'charter-of-iqta', uses: 1 });
+          }
+        }
+        break;
       case 'flag':
         this.flags.add(action.name);
         break;
       case 'giveItem': {
-        const weapon = this.tables.weapons.get(action.item);
+        const given = this.tables.weapons.get(action.item) ?? this.tables.items.get(action.item);
         const unit = this.units.find((u) => !u.retreated && matchesKey(u, action.unit));
-        if (weapon && unit && unit.inventory.length < INVENTORY_SLOTS) {
-          unit.inventory.push({ id: weapon.id, uses: weapon.uses });
+        if (given && unit && unit.inventory.length < INVENTORY_SLOTS) {
+          unit.inventory.push({ id: given.id, uses: given.uses });
           if (unit.equipped < 0) autoEquip(unit, this.tables.weapons, this.tables.classes);
         } else {
           this.unhandled.push(action);
@@ -655,10 +840,32 @@ export class BattleState {
    * the turn. If the chapter is decided, the phase does not advance.
    */
   endPhase(): PhaseReport {
+    this.expireStatuses();
     this.check('phaseEnd');
     if (!this.outcome) this.advancePhase();
     if (this.outcome) return { turn: this.turn, phase: this.phase, healed: [], arrived: [] };
     return this.startPhase();
+  }
+
+  /** Remove the statuses whose time has run out with this phase. */
+  private expireStatuses(): void {
+    for (const unit of this.units) {
+      if (unit.statuses.length > 0) unit.statuses = unit.statuses.filter((s) => !hasExpired(s, this.turn, this.phase, this.phaseOrder));
+    }
+  }
+
+  /** Put a status on a unit for the rest of this phase and `phases` more after it. */
+  addStatus(unit: UnitInstance, id: StatusId, phasesAfterThis = 0): void {
+    let turn = this.turn;
+    let index = this.phaseIndex;
+    for (let i = 0; i < phasesAfterThis; i++) {
+      index += 1;
+      if (index >= this.phaseOrder.length) {
+        index = 0;
+        turn += 1;
+      }
+    }
+    applyStatus(unit.statuses, id, { turn, phase: this.phaseOrder[index] ?? this.phase });
   }
 
   private advancePhase(): void {
@@ -686,6 +893,9 @@ export class BattleState {
     for (const unit of this.livingUnits(phase)) {
       unit.moved = false;
       unit.acted = false;
+      unit.travelled = 0;
+      unit.bonusMove = 0;
+      unit.turnFlags = [];
     }
     const before = this.arrivals.length;
     for (const r of this.map.rules.reinforcements) {
@@ -699,6 +909,22 @@ export class BattleState {
       if (amount > 0) {
         unit.hp += amount;
         healed.push({ unit, amount });
+      }
+    }
+    // Warcry rallies nearby allies for the phase; Renewal binds the wounds of those beside it
+    for (const unit of this.livingUnits(phase)) {
+      if (unit.skills.includes('warcry')) {
+        for (const ally of this.livingUnits(phase)) if (ally !== unit && manhattan(unit, ally) <= 2) this.addStatus(ally, 'warcry', 0);
+      }
+      if (unit.skills.includes('renewal')) {
+        for (const ally of this.livingUnits(phase)) {
+          if (ally === unit || manhattan(unit, ally) !== 1) continue;
+          const amount = Math.min(5, maxHp(ally) - ally.hp);
+          if (amount > 0) {
+            ally.hp += amount;
+            healed.push({ unit: ally, amount });
+          }
+        }
       }
     }
     this.fire({ type: 'turnStart', turn, phase });

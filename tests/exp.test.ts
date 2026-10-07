@@ -270,7 +270,7 @@ describe('healing', () => {
   const setup = () => {
     const healer = unit({ id: 'h', class: 'healer', level: 2, inventory: ['salve'], x: 0 });
     const friend = unit({ id: 'f', x: 1 });
-    friend.hp = 5;
+    friend.hp = 9; // exactly half: the Healer's Triage only adds to targets below half
     return { healer, friend, battle: battleOf([healer, friend]) };
   };
 
@@ -278,7 +278,7 @@ describe('healing', () => {
     const { healer, friend, battle } = setup();
     const report = battle.heal(healer, friend, 0);
     expect(report.restored).toBe(8);
-    expect(friend.hp).toBe(13);
+    expect(friend.hp).toBe(17);
     expect(healer.inventory[0]?.uses).toBe(7);
     expect(healer).toMatchObject({ acted: true, moved: true });
     friend.hp = friend.stats.hp - 2;

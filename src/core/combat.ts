@@ -2,20 +2,47 @@ import type { Balance } from './balance';
 import type { Rng } from './rng';
 import type { TerrainDef } from './terrain';
 import type { UnitInstance } from './unit';
-import { canReach, isEffective, isOffensive, triangle, type WeaponDef } from './weapons';
+import { isEffective, isOffensive, triangle, type WeaponDef } from './weapons';
 
 /**
  * Combat arithmetic (DESIGN §5.2). Everything here is pure: formulas take plain values and
  * resolution takes a seeded `Rng`, so a fight can be replayed exactly.
  */
 
-/** Bonuses from supports and skills, added to the exchange (M5). */
+/** Bonuses from skills, auras, statuses and (M5) supports, added to one side of an exchange. */
 export interface Bonus {
   readonly hit: number;
   readonly avoid: number;
   readonly crit: number;
+  /** Added to the power of this side's strikes. */
+  readonly might: number;
+  /** Added to this side's Guard against physical weapons. */
+  readonly grd: number;
+  /** Guard this side's strikes ignore, on top of the weapon's own Pierce. */
+  readonly pierce: number;
+  /** Damage taken from physical weapons is reduced by this, never below zero. */
+  readonly reduction: number;
+  /** Added to the longest range of this side's weapon. */
+  readonly range: number;
+  /** This side's strikes cannot miss. */
+  readonly alwaysHit: boolean;
 }
-export const NO_BONUS: Bonus = { hit: 0, avoid: 0, crit: 0 };
+export const NO_BONUS: Bonus = { hit: 0, avoid: 0, crit: 0, might: 0, grd: 0, pierce: 0, reduction: 0, range: 0, alwaysHit: false };
+
+/** The sum of two bonuses. */
+export function addBonus(a: Bonus, b: Partial<Bonus>): Bonus {
+  return {
+    hit: a.hit + (b.hit ?? 0),
+    avoid: a.avoid + (b.avoid ?? 0),
+    crit: a.crit + (b.crit ?? 0),
+    might: a.might + (b.might ?? 0),
+    grd: a.grd + (b.grd ?? 0),
+    pierce: a.pierce + (b.pierce ?? 0),
+    reduction: a.reduction + (b.reduction ?? 0),
+    range: a.range + (b.range ?? 0),
+    alwaysHit: a.alwaysHit || (b.alwaysHit ?? false),
+  };
+}
 
 /** One side of a fight, with everything the formulas need. */
 export interface Combatant {
@@ -56,13 +83,13 @@ export function power(attacker: Combatant, defender: Combatant, tri: number): nu
   const weapon = attacker.weapon;
   if (!weapon) return 0;
   const stat = weapon.kind === 'fire' ? attacker.unit.stats.skl : attacker.unit.stats.mgt;
-  return stat + effectiveMight(weapon, defender) + tri;
+  return stat + effectiveMight(weapon, defender) + tri + bonusOf(attacker).might;
 }
 
 /** Fire is resisted by Nerve and water; everything else by Guard and cover, less Pierce. */
-export function defence(weapon: WeaponDef, defender: Combatant): number {
+export function defence(weapon: WeaponDef, defender: Combatant, extraPierce = 0): number {
   if (weapon.kind === 'fire') return defender.unit.stats.nrv + (defender.terrain.quench ?? 0);
-  return defender.unit.stats.grd + defender.terrain.cover - (weapon.pierce ?? 0);
+  return defender.unit.stats.grd + bonusOf(defender).grd + defender.terrain.cover - (weapon.pierce ?? 0) - extraPierce;
 }
 
 export function accuracy(attacker: Combatant, tri: number, distance: number): number {
@@ -96,12 +123,15 @@ export interface StrikeStats {
 /** What a side's strike would do, or null if it cannot attack at this distance. */
 export function strikeStats(attacker: Combatant, defender: Combatant, distance: number): StrikeStats | null {
   const weapon = attacker.weapon;
-  if (!weapon || !isOffensive(weapon) || attacker.usesLeft <= 0 || !canReach(weapon, distance)) return null;
+  const range = weapon ? ([weapon.range[0], weapon.range[1] + bonusOf(attacker).range] as const) : null;
+  if (!weapon || !range || !isOffensive(weapon) || attacker.usesLeft <= 0 || distance < range[0] || distance > range[1]) return null;
   const tri = defender.weapon ? triangle(weapon.kind, defender.weapon.kind) : 0;
-  const damage = Math.max(0, power(attacker, defender, tri) - defence(weapon, defender));
+  // damage reduction (the Bulwark) applies to physical weapons only
+  const reduction = weapon.kind === 'fire' ? 0 : bonusOf(defender).reduction;
+  const damage = Math.max(0, power(attacker, defender, tri) - defence(weapon, defender, bonusOf(attacker).pierce) - reduction);
   return {
     damage,
-    hit: clamp(accuracy(attacker, tri, distance) - evasion(defender), 0, 100),
+    hit: bonusOf(attacker).alwaysHit ? 100 : clamp(accuracy(attacker, tri, distance) - evasion(defender), 0, 100),
     crit: critRate(attacker, defender),
   };
 }

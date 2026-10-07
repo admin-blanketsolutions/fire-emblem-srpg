@@ -40,6 +40,8 @@ export type EventAction =
   | { readonly type: 'spawn'; readonly units: readonly SpawnSpec[] }
   | { readonly type: 'setAi'; readonly unit: UnitKey; readonly ai: AiProfile }
   | { readonly type: 'recruit'; readonly unit: UnitKey }
+  /** A rank event: promote the unit, or hand it the Charter of Iqta' if it has not reached the promotion level. */
+  | { readonly type: 'promote'; readonly unit: UnitKey }
   | { readonly type: 'flag'; readonly name: string }
   | { readonly type: 'giveItem'; readonly unit: UnitKey; readonly item: string }
   | { readonly type: 'openGate'; readonly at: Tile }
@@ -223,6 +225,9 @@ function validateAction(a: EventAction, width: number, height: number, label: st
       validateAiProfile(a.ai, label);
       break;
     case 'recruit':
+      need(typeof a.unit === 'string', 'needs a unit');
+      break;
+    case 'promote':
       need(typeof a.unit === 'string', 'needs a unit');
       break;
     case 'flag':

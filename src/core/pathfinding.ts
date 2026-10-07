@@ -12,6 +12,8 @@ export interface PathRequest {
   readonly side: Side;
   /** The side of whoever stands on a tile (never the mover itself), or null if empty. */
   readonly occupantAt: (x: number, y: number) => Side | null;
+  /** The cost of entering a tile, or null if it cannot be entered; defaults to the map's cost for `moveType`. */
+  readonly costFor?: (x: number, y: number) => number | null;
 }
 
 export interface ReachNode {
@@ -112,7 +114,7 @@ export function computeReach(req: PathRequest): ReachResult {
       const nx = node.x + d.x;
       const ny = node.y + d.y;
       if (!map.inBounds(nx, ny)) continue;
-      const stepCost = map.costFor(nx, ny, moveType);
+      const stepCost = req.costFor ? req.costFor(nx, ny) : map.costFor(nx, ny, moveType);
       if (stepCost === null) continue;
       const occupant = occupantAt(nx, ny);
       if (occupant !== null && !areFriendly(side, occupant)) continue;
@@ -153,7 +155,7 @@ export function pathTo(result: ReachResult, dest: Point): Point[] | null {
  * beside a source is 0. Terrain the movement type cannot enter is never crossed. Units are
  * ignored, so the field is a map of the ground only. Used by the AI to decide which way to advance.
  */
-export function distanceField(map: GameMap, moveType: MoveType, sources: readonly Point[]): Map<number, number> {
+export function distanceField(map: GameMap, moveType: MoveType, sources: readonly Point[], costFor?: (x: number, y: number) => number | null): Map<number, number> {
   const dist = new Map<number, number>();
   const heap = new MinHeap();
   const isSource = new Set<number>();
@@ -172,7 +174,7 @@ export function distanceField(map: GameMap, moveType: MoveType, sources: readonl
     const x = keyX(entry.key);
     const y = keyY(entry.key);
     // stepping from a neighbour onto this tile means entering this tile (free if it is the source)
-    const enter = isSource.has(entry.key) ? 0 : map.costFor(x, y, moveType);
+    const enter = isSource.has(entry.key) ? 0 : costFor ? costFor(x, y) : map.costFor(x, y, moveType);
     if (enter === null) continue;
     for (const d of DIRS4) {
       const nx = x + d.x;

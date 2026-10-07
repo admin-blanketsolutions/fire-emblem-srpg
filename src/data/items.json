@@ -1,0 +1,8 @@
+[
+  { "id": "bandage", "name": "Bandage", "kind": "consumable", "uses": 3, "price": 150, "heal": 10, "description": "Binds a wound: restores 10 HP." },
+  { "id": "water-skin", "name": "Water Skin", "kind": "consumable", "uses": 3, "price": 100, "cures": ["thirst"], "description": "A drink in the heat: cures Thirst." },
+  { "id": "rose-water-sherbet", "name": "Rose-water Sherbet", "kind": "consumable", "uses": 1, "price": 400, "heal": 10, "cures": ["heat"], "description": "Restores 10 HP and cures Heat." },
+  { "id": "charter-of-iqta", "name": "Charter of Iqta'", "kind": "promotion", "uses": 1, "price": 2500, "promotes": 1, "description": "A grant of revenue for service: promotes a Tier I unit of level 10 or more." },
+  { "id": "diploma-of-investiture", "name": "Diploma of Investiture", "kind": "promotion", "uses": 1, "price": 8000, "promotes": 2, "description": "Formal investiture: promotes a Tier II unit of level 10 or more." },
+  { "id": "gate-key", "name": "Gate Key", "kind": "key", "uses": 1, "price": 0, "description": "Opens a locked gate." }
+]

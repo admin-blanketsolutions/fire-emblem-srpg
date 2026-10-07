@@ -10,6 +10,8 @@ export interface Balance {
   /** A side attacks twice when its attack speed beats the other's by at least this much. */
   readonly doubleThreshold: number;
   readonly bossExpBonus: number;
+  /** The level a unit must reach before it can be promoted. */
+  readonly promotionLevel: number;
 }
 
 export function validateBalance(raw: unknown): Balance {
@@ -30,5 +32,6 @@ export function validateBalance(raw: unknown): Balance {
     critMultiplier: positive('critMultiplier'),
     doubleThreshold: positive('doubleThreshold'),
     bossExpBonus: positive('bossExpBonus'),
+    promotionLevel: positive('promotionLevel'),
   };
 }
