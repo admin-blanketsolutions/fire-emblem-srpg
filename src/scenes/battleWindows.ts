@@ -21,6 +21,9 @@ export interface Pen {
   readonly text: TextRenderer;
 }
 
+/** What the unit pages need to know: the data tables, a unit's class and its weapon. A battle has them; so does the camp. */
+export type UnitSource = Pick<BattleState, 'classOf' | 'tables' | 'weaponOf'>
+
 const GOLD: TextStyle = { color: COLORS.gold };
 const PLAIN: TextStyle = { color: COLORS.text };
 const DIM: TextStyle = { color: COLORS.textDim };
@@ -30,7 +33,7 @@ const DIM: TextStyle = { color: COLORS.textDim };
 /** The statuses on a unit as one line: "Burning, Sundered x2". */
 export const statusLine = (unit: UnitInstance): string => unit.statuses.map((s) => `${STATUS_NAMES[s.id]}${s.amount > 1 ? ` x${s.amount}` : ''}`).join(', ');
 
-export function drawUnitWindow(pen: Pen, battle: BattleState, unit: UnitInstance, onRight: boolean): void {
+export function drawUnitWindow(pen: Pen, battle: UnitSource, unit: UnitInstance, onRight: boolean): void {
   const { ctx, text } = pen;
   const classLine = unit.kind === 'structure' ? `Guard ${unit.stats.grd}` : `${battle.classOf(unit).name}  Lv ${unit.level}`;
   const statuses = statusLine(unit);
@@ -64,7 +67,7 @@ export function drawTerrainWindow(pen: Pen, terrain: TerrainDef, onRight: boolea
 }
 
 /** What a structure is, in a few lines: its Guard, how it stops movement, what hurts it and what it fires. */
-function drawStructurePage(pen: Pen, battle: BattleState, unit: UnitInstance, onRight: boolean): void {
+function drawStructurePage(pen: Pen, battle: UnitSource, unit: UnitInstance, onRight: boolean): void {
   const { ctx, text } = pen;
   const def = battle.tables.structures.get(unit.defId);
   const weapon = battle.weaponOf(unit);
@@ -89,7 +92,7 @@ function drawStructurePage(pen: Pen, battle: BattleState, unit: UnitInstance, on
 }
 
 /** The full unit page: every stat, EXP, skills and the inventory. */
-export function drawInfoPage(pen: Pen, battle: BattleState, unit: UnitInstance, onRight: boolean): void {
+export function drawInfoPage(pen: Pen, battle: UnitSource, unit: UnitInstance, onRight: boolean, hint = 'Info or Back to close'): void {
   if (unit.kind === 'structure') {
     drawStructurePage(pen, battle, unit, onRight);
     return;
@@ -107,25 +110,25 @@ export function drawInfoPage(pen: Pen, battle: BattleState, unit: UnitInstance, 
   text.draw(ctx, battle.classOf(unit).name, left, y + 17, DIM);
   if (unit.side === 'player') text.drawRight(ctx, `EXP ${unit.exp}/${battle.tables.balance.expPerLevel}`, right, y + 17, DIM);
   text.draw(ctx, 'HP', left, y + 29, GOLD);
-  drawGauge(ctx, left + 16, y + 30, 64, unit.hp, maxHp(unit), 4);
-  text.draw(ctx, `${unit.hp}/${maxHp(unit)}`, left + 86, y + 29, PLAIN);
+  drawGauge(ctx, left + 16, y + 30, 56, unit.hp, maxHp(unit), 4);
+  text.draw(ctx, `${unit.hp}/${maxHp(unit)}`, left + 78, y + 29, PLAIN);
 
   const rows: ReadonlyArray<readonly [Stat, Stat]> = [['mgt', 'grd'], ['skl', 'nrv'], ['spd', 'bld'], ['fort', 'mov']];
   rows.forEach(([a, b], i) => {
     const ry = y + 43 + i * 10;
     text.draw(ctx, STAT_LABELS[a], left, ry, GOLD);
-    text.drawRight(ctx, String(unit.stats[a]), left + 46, ry, PLAIN);
-    text.draw(ctx, STAT_LABELS[b], left + 56, ry, GOLD);
-    text.drawRight(ctx, String(unit.stats[b]), left + 102, ry, PLAIN);
+    text.drawRight(ctx, String(unit.stats[a]), left + 54, ry, PLAIN);
+    text.draw(ctx, STAT_LABELS[b], left + 62, ry, GOLD);
+    text.drawRight(ctx, String(unit.stats[b]), left + 108, ry, PLAIN);
   });
 
-  const itemX = left + 112;
+  const itemX = left + 120;
   text.draw(ctx, 'Items', itemX, y + 29, GOLD);
   unit.inventory.slice(0, 5).forEach((stack, i) => {
-    const weapon = battle.tables.weapons.get(stack.id);
+    const name = battle.tables.weapons.get(stack.id)?.name ?? battle.tables.items.get(stack.id)?.name ?? stack.id;
     const ry = y + 43 + i * 10;
     if (i === unit.equipped) text.draw(ctx, '→', itemX - 7, ry, GOLD);
-    text.draw(ctx, weapon?.name ?? stack.id, itemX, ry, PLAIN);
+    text.draw(ctx, name, itemX, ry, PLAIN);
     text.drawRight(ctx, String(stack.uses), right, ry, DIM);
   });
   // skills, as many whole names as fit, and any statuses
@@ -143,7 +146,7 @@ export function drawInfoPage(pen: Pen, battle: BattleState, unit: UnitInstance, 
     text.draw(ctx, 'Status', left, y + 107, GOLD);
     text.draw(ctx, statuses, left + 40, y + 107, { color: COLORS.bad });
   }
-  text.drawCentered(ctx, `${unit.moveType} · Info or Back to close`, x + w / 2, y + h - 12, DIM);
+  text.drawCentered(ctx, hint ? `${unit.moveType} · ${hint}` : unit.moveType, x + w / 2, y + h - 12, DIM);
 }
 
 // ---------------------------------------------------------------- weapons
@@ -365,25 +368,10 @@ export function drawTalkPrompt(pen: Pen, speaker: UnitInstance, listener: UnitIn
 // ---------------------------------------------------------------- items, trading and class actions
 
 /** The pack: every stack with its uses, the equipped weapon marked, and a line about the one highlighted. */
-export function drawItemList(pen: Pen, battle: BattleState, unit: UnitInstance, index: number, note: string | null): void {
+export function drawItemList(pen: Pen, battle: UnitSource, unit: UnitInstance, index: number, note: string | null): void {
   const { ctx, text } = pen;
   const rows = Math.max(1, unit.inventory.length);
   const w = 204;
-  const h = rows * 10 + 42;
-  const x = Math.round((LOGICAL_WIDTH - w) / 2);
-  const y = LOGICAL_HEIGHT - h - 4;
-  drawPanel(ctx, x, y, w, h);
-  text.draw(ctx, `${unit.name}'s pack`, x + 9, y + 5, DIM);
-  if (unit.inventory.length === 0) text.draw(ctx, 'Nothing carried', x + 12, y + 16, DIM);
-  unit.inventory.forEach((stack, i) => {
-    const ry = y + 16 + i * 10;
-    const weapon = battle.tables.weapons.get(stack.id);
-    const name = weapon?.name ?? battle.tables.items.get(stack.id)?.name ?? stack.id;
-    if (i === index) text.draw(ctx, '→', x + 4, ry, GOLD);
-    text.draw(ctx, name, x + 12, ry, PLAIN);
-    if (i === unit.equipped) text.draw(ctx, 'E', x + 118, ry, GOLD);
-    text.drawRight(ctx, String(stack.uses), x + w - 8, ry, DIM);
-  });
   const stack = unit.inventory[index];
   const weapon = stack ? battle.tables.weapons.get(stack.id) : undefined;
   const item = stack ? battle.tables.items.get(stack.id) : undefined;
@@ -392,11 +380,26 @@ export function drawItemList(pen: Pen, battle: BattleState, unit: UnitInstance, 
       ? `Heals ${weapon.might}  Range ${rangeText(weapon)}`
       : `${kindLabel(weapon.kind)} ${roman(weapon.grade)}  Might ${weapon.might}  Hit ${weapon.hit}  Wt ${weapon.weight}`
     : (item?.description ?? '');
-  const fy = y + h - 22;
+  const lines = text.wrap(note ?? detail, w - 18).slice(0, 2);
+  const h = rows * 10 + 32 + lines.length * 10;
+  const x = Math.round((LOGICAL_WIDTH - w) / 2);
+  const y = LOGICAL_HEIGHT - h - 4;
+  drawPanel(ctx, x, y, w, h);
+  text.draw(ctx, `${unit.name}'s pack`, x + 9, y + 5, DIM);
+  if (unit.inventory.length === 0) text.draw(ctx, 'Nothing carried', x + 12, y + 16, DIM);
+  unit.inventory.forEach((s, i) => {
+    const ry = y + 16 + i * 10;
+    const name = battle.tables.weapons.get(s.id)?.name ?? battle.tables.items.get(s.id)?.name ?? s.id;
+    if (i === index) text.draw(ctx, '→', x + 4, ry, GOLD);
+    text.draw(ctx, name, x + 12, ry, PLAIN);
+    if (i === unit.equipped) text.draw(ctx, 'E', x + 118, ry, GOLD);
+    text.drawRight(ctx, String(s.uses), x + w - 8, ry, DIM);
+  });
+  const fy = y + 16 + rows * 10 + 2;
   ctx.fillStyle = COLORS.panelInner;
-  ctx.fillRect(x + 6, fy - 3, w - 12, 1);
-  text.draw(ctx, note ?? detail, x + 9, fy + 1, note ? { color: COLORS.bad } : DIM);
-  text.draw(ctx, weapon ? 'OK Equip   Back' : 'OK Use   Back', x + 9, fy + 10, DIM);
+  ctx.fillRect(x + 6, fy - 2, w - 12, 1);
+  lines.forEach((line, i) => text.draw(ctx, line, x + 9, fy + 2 + i * 10, note ? { color: COLORS.bad } : DIM));
+  text.draw(ctx, weapon ? 'OK Equip   Back' : 'OK Use   Back', x + 9, fy + 2 + lines.length * 10, DIM);
 }
 
 export interface TradeView {
@@ -408,7 +411,7 @@ export interface TradeView {
 }
 
 /** Two packs side by side: pick a stack, then pick where it goes (a stack there swaps, the first empty slot takes it). */
-export function drawTrade(pen: Pen, battle: BattleState, a: UnitInstance, b: UnitInstance, view: TradeView): void {
+export function drawTrade(pen: Pen, battle: UnitSource, a: UnitInstance, b: UnitInstance, view: TradeView): void {
   const { ctx, text } = pen;
   const w = 236;
   const h = 96;

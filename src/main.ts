@@ -1,4 +1,5 @@
-import { createSiegeDemo } from './data/demos';
+import { createCampDemo, createSiegeDemo } from './data/demos';
+import { shops } from './data';
 import { createProvingBattle, PROVING_OBJECTIVES } from './data/proving';
 import { Assets } from './engine/assets';
 import { Display } from './engine/display';
@@ -7,6 +8,7 @@ import { Input } from './engine/input';
 import { TextRenderer } from './engine/text';
 import { installTouchControls } from './engine/touch';
 import { BattleScene } from './scenes/battleScene';
+import { CampScene } from './scenes/campScene';
 
 /** Show a startup failure on the page instead of leaving a blank screen. */
 function showFatal(error: unknown): void {
@@ -31,6 +33,10 @@ async function boot(): Promise<void> {
   const params = new URLSearchParams(window.location.search);
   const objective = PROVING_OBJECTIVES.find((o) => o === params.get('objective')) ?? 'rout';
   const seed = Number(params.get('seed'));
+  const makeSiege = (): BattleScene => {
+    const battle = createSiegeDemo(params.has('seed') && Number.isFinite(seed) ? { seed } : undefined);
+    return new BattleScene({ battle, assets, text, onRestart: () => game.setScene(makeSiege()) });
+  };
   const makeScene = (): BattleScene => {
     const options = params.has('seed') && Number.isFinite(seed) ? { seed } : undefined;
     const battle =
@@ -40,6 +46,14 @@ async function boot(): Promise<void> {
     if (import.meta.env.DEV) Object.assign(window, { sultan: { battle, scene, assets } });
     return scene;
   };
+  // ?demo=camp opens the camp: units, the convoy and the shops, and from there the siege demo
+  if (params.get('demo') === 'camp') {
+    const { army, tables } = createCampDemo();
+    const camp = new CampScene({ army, tables, shops, assets, text, title: 'Camp', continueLabel: 'Ride to the siege', onContinue: () => game.setScene(makeSiege()) });
+    if (import.meta.env.DEV) Object.assign(window, { sultan: { scene: camp, army, assets } });
+    game.run(camp);
+    return;
+  }
   game.run(makeScene());
 }
 
