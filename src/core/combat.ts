@@ -211,3 +211,66 @@ export function resolveStrikes(fc: Forecast, aHp: number, dHp: number, rng: Rng,
   }
   return events;
 }
+
+/** What an exchange is worth to the attacker, averaged over every way the rolls could fall. */
+export interface Expectation {
+  /** Chance the defender is defeated. */
+  readonly pKill: number;
+  /** Chance the attacker is defeated. */
+  readonly pDeath: number;
+  /** Expected HP the defender loses. */
+  readonly damageDealt: number;
+  /** Expected HP the attacker loses. */
+  readonly damageTaken: number;
+}
+
+/**
+ * The exact expectation of a forecast's exchange. Every strike is a miss, a hit or a critical hit
+ * with the chances the forecast shows, and the sequence stops when a unit falls, just as
+ * `resolveStrikes` plays it. There are at most four strikes, so the enumeration is tiny.
+ */
+export function expectOutcome(fc: Forecast, aHp: number, dHp: number, balance: Balance): Expectation {
+  type State = { a: number; d: number; p: number };
+  let states = new Map<string, State>([[`${aHp}|${dHp}`, { a: aHp, d: dHp, p: 1 }]]);
+  const add = (into: Map<string, State>, a: number, d: number, p: number): void => {
+    const key = `${a}|${d}`;
+    const known = into.get(key);
+    if (known) known.p += p;
+    else into.set(key, { a, d, p });
+  };
+  for (const by of fc.order) {
+    const stats = (by === 'a' ? fc.attacker : fc.defender).strike;
+    if (!stats) continue;
+    const hit = stats.hit / 100;
+    const crit = stats.crit / 100;
+    const outcomes: ReadonlyArray<readonly [number, number]> = [
+      [1 - hit, 0],
+      [hit * (1 - crit), stats.damage],
+      [hit * crit, stats.damage * balance.critMultiplier],
+    ];
+    const next = new Map<string, State>();
+    for (const s of states.values()) {
+      if (s.a <= 0 || s.d <= 0) {
+        add(next, s.a, s.d, s.p);
+        continue;
+      }
+      for (const [chance, damage] of outcomes) {
+        if (chance <= 0) continue;
+        if (by === 'a') add(next, s.a, Math.max(0, s.d - damage), s.p * chance);
+        else add(next, Math.max(0, s.a - damage), s.d, s.p * chance);
+      }
+    }
+    states = next;
+  }
+  let pKill = 0;
+  let pDeath = 0;
+  let aLeft = 0;
+  let dLeft = 0;
+  for (const s of states.values()) {
+    if (s.d <= 0) pKill += s.p;
+    if (s.a <= 0) pDeath += s.p;
+    aLeft += s.a * s.p;
+    dLeft += s.d * s.p;
+  }
+  return { pKill, pDeath, damageDealt: dHp - dLeft, damageTaken: aHp - aLeft };
+}

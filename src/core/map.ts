@@ -1,11 +1,27 @@
+import { validateAiProfile, type AiProfile } from './aiProfile';
+import { validateEvents, type EventDef, type PhaseSide, type SpawnSpec } from './events';
 import { MAX_MAP_SIZE } from './grid';
+import { validateObjective, type ObjectiveDef } from './objectives';
 import type { TerrainDef, TerrainTable } from './terrain';
-import type { MoveType } from './types';
+import type { MoveType, Tile } from './types';
 
 export interface SpawnJson {
   readonly unit: string;
-  readonly at: readonly [number, number];
+  readonly at: Tile;
+  /** Overrides the unit definition's behaviour for this placement. */
+  readonly ai?: AiProfile;
+  /** Extra tags for this placement (`lord`, `boss`, `guards`, …). */
+  readonly tags?: readonly string[];
 }
+
+/** Units that arrive at the start of a phase. */
+export interface Reinforcement {
+  readonly turn: number;
+  readonly phase: PhaseSide;
+  readonly units: readonly SpawnSpec[];
+}
+
+const PHASE_SIDES: readonly PhaseSide[] = ['player', 'ally', 'enemy'];
 
 /** The on-disk map format: one string per row, one character per tile, plus a legend. */
 export interface MapJson {
@@ -20,7 +36,38 @@ export interface MapJson {
     readonly ally?: readonly SpawnJson[];
     readonly enemy?: readonly SpawnJson[];
   };
+  /** The order sides act in each turn; a side with no units is skipped. Default player, ally, enemy. */
+  readonly phaseOrder?: readonly PhaseSide[];
+  /** Fog of war (DESIGN §4.5). */
+  readonly fog?: boolean;
+  /** Vision lost to darkness or weather, in tiles. */
+  readonly visionPenalty?: number;
+  /** Tiles where fleeing units leave the map. */
+  readonly exits?: readonly Tile[];
+  readonly reinforcements?: readonly Reinforcement[];
+  readonly objective?: ObjectiveDef;
+  readonly events?: readonly EventDef[];
 }
+
+export interface MapRules {
+  readonly phaseOrder: readonly PhaseSide[];
+  readonly fog: boolean;
+  readonly visionPenalty: number;
+  readonly exits: readonly Tile[];
+  readonly reinforcements: readonly Reinforcement[];
+  readonly objective: ObjectiveDef | null;
+  readonly events: readonly EventDef[];
+}
+
+export const DEFAULT_MAP_RULES: MapRules = {
+  phaseOrder: PHASE_SIDES,
+  fog: false,
+  visionPenalty: 0,
+  exits: [],
+  reinforcements: [],
+  objective: null,
+  events: [],
+};
 
 export class GameMap {
   readonly id: string;
@@ -28,6 +75,7 @@ export class GameMap {
   readonly width: number;
   readonly height: number;
   readonly spawns: NonNullable<MapJson['spawns']>;
+  readonly rules: MapRules;
   private readonly tiles: readonly TerrainDef[];
 
   constructor(
@@ -37,6 +85,7 @@ export class GameMap {
     height: number,
     tiles: readonly TerrainDef[],
     spawns: NonNullable<MapJson['spawns']>,
+    rules: Partial<MapRules> = {},
   ) {
     this.id = id;
     this.name = name;
@@ -44,6 +93,7 @@ export class GameMap {
     this.height = height;
     this.tiles = tiles;
     this.spawns = spawns;
+    this.rules = { ...DEFAULT_MAP_RULES, ...rules };
   }
 
   inBounds(x: number, y: number): boolean {
@@ -100,7 +150,38 @@ export function parseMap(json: MapJson, table: TerrainTable): GameMap {
       if (sx < 0 || sy < 0 || sx >= width || sy >= height) {
         throw new Error(`${where}: ${side} spawn "${spawn.unit}" at (${sx}, ${sy}) is outside the map`);
       }
+      if (spawn.ai) validateAiProfile(spawn.ai, `${where}: ${side} spawn "${spawn.unit}"`);
     }
   }
-  return new GameMap(json.id, json.name, width, height, tiles, spawns);
+
+  const inside = (t: Tile): boolean => Array.isArray(t) && t.length === 2 && Number.isInteger(t[0]) && Number.isInteger(t[1]) && t[0] >= 0 && t[1] >= 0 && t[0] < width && t[1] < height;
+  const phaseOrder = json.phaseOrder ?? PHASE_SIDES;
+  if (!phaseOrder.includes('player') || new Set(phaseOrder).size !== phaseOrder.length || phaseOrder.some((p) => !PHASE_SIDES.includes(p))) {
+    throw new Error(`${where}: phaseOrder must list player, ally and enemy at most once each, and include player`);
+  }
+  const visionPenalty = json.visionPenalty ?? 0;
+  if (!Number.isInteger(visionPenalty) || visionPenalty < 0 || visionPenalty > 3) throw new Error(`${where}: visionPenalty must be an integer from 0 to 3`);
+  const exits = json.exits ?? [];
+  for (const exit of exits) if (!inside(exit)) throw new Error(`${where}: exit (${String(exit)}) is outside the map`);
+  const reinforcements = json.reinforcements ?? [];
+  reinforcements.forEach((r, i) => {
+    const label = `${where}: reinforcement #${i}`;
+    if (!Number.isInteger(r.turn) || r.turn < 1) throw new Error(`${label} needs a turn of 1 or more`);
+    if (!PHASE_SIDES.includes(r.phase)) throw new Error(`${label} has an unknown phase "${String(r.phase)}"`);
+    if (!Array.isArray(r.units) || r.units.length === 0) throw new Error(`${label} needs units`);
+    for (const u of r.units) {
+      if (typeof u.def !== 'string' || !inside(u.at)) throw new Error(`${label} needs a def and an in-bounds tile for each unit`);
+      if (u.ai) validateAiProfile(u.ai, label);
+    }
+  });
+  const rules: MapRules = {
+    phaseOrder,
+    fog: json.fog ?? false,
+    visionPenalty,
+    exits,
+    reinforcements,
+    objective: validateObjective(json.objective, width, height, where),
+    events: validateEvents(json.events, width, height, where),
+  };
+  return new GameMap(json.id, json.name, width, height, tiles, spawns, rules);
 }

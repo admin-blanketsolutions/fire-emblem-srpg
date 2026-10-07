@@ -1,6 +1,6 @@
 # Sultan of Two Banners — Decisions Log
 
-**Status:** v0.4 · 2026-10-06
+**Status:** v0.5 · 2026-10-07
 Every place where I had to make a judgment call about history, sensitivity or engineering. Where it was a close call, I chose the **more conservative, source-backed option** and recorded it here. Entries marked **Approved** were confirmed by the project owner on 2026-10-06; the rest are policies I follow unless told otherwise.
 
 Companion documents: [DESIGN.md](DESIGN.md) · [SOURCES.md](SOURCES.md)
@@ -35,6 +35,7 @@ Companion documents: [DESIGN.md](DESIGN.md) · [SOURCES.md](SOURCES.md)
 | D-026 | Art pipeline as built (M1) | Policy |
 | D-027 | No religious emblems on generic art | Policy |
 | D-028 | Combat and progression as built (M2) | Policy |
+| D-029 | Phases, AI, fog and objectives as built (M3) | Policy |
 
 ---
 
@@ -233,6 +234,19 @@ They appear in the Codex and in carefully framed scenes, never as spectacle.
 - **Healing** is a class action using a remedy: it restores the remedy's Might in HP (never above maximum), uses one charge, spends the unit's action, and earns `min(30, 5 + HP restored)` EXP.
 - **Deferred.** The 32×32 *battle scene* presentation (DESIGN §5.6) needs battle sprites and is not in the slice; map animation is. Skills, supports, structures and fire's *Ignite* arrive in later milestones; the formulas already accept support bonuses and a structure flag.
 - **Data.** The proving ground now uses real classes and the §5.4 weapon list (29 items); the first Tier II and III classes arrive with promotion in M4.
+
+## D-029 Phases, AI, fog and objectives as built (M3)
+
+- **Two terms added to the AI score** (DESIGN §10.2). A penalty of `50·P(the attacker falls)` stops units throwing themselves away, and `+100·P(kill)` when the target is *critical* (a Lord, the unit being escorted, the unit being defended) makes a sure chapter-deciding kill beat any other. The second came from a test: without it, an enemy beside a 1-HP Lord preferred to kill a sturdier 21-HP unit, because the formula rewards damage dealt and a 1-HP Lord has almost none to give.
+- **The AI is exact, not sampled.** Kill and death probabilities and expected damage come from enumerating every hit, miss and critical hit in the strike order, with the same chances the forecast shows. Ties go to the tile with less exposure, then the shorter move, then a fixed position order, so a battle replays identically.
+- **Units are planned one at a time,** each seeing the board as the last unit left it; leaders and bosses move last.
+- **Lord retreat loses every objective** (a unit tagged `lord`), and defeat is judged before victory. A unit that leaves by an exit *escaped*: it did not fall.
+- **Escort uses an explicit *Depart* action,** like *Seize*, rather than ending the chapter the moment a unit touches an exit. A player who has moved onto the exit can still take the move back.
+- **Events fire when an action finishes,** not mid-move, for the same reason. Events live in the map file, not a separate file, while a chapter is small; they can move out when one grows.
+- **Fog.** The AI is omniscient unless a unit says `respectsFog`. Allies share the player's sight. The danger zone only includes enemies the player can see, so it cannot reveal them.
+- **Reinforcements** arrive at the start of their phase, ready to act, on the nearest free tile if theirs is taken.
+- **The proving ground** is playable under each objective type (`?objective=seize`, `?fog=1`, `?seed=42`). These presets are test data, not campaign content.
+- **Deferred to later milestones:** structures and flames (M4), class actions (M4), and the dialogue engine, which will play the `dialogue` actions that for now queue a placeholder (M5).
 
 ## Confirmed and open
 

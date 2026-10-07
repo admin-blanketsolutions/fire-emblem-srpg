@@ -1,4 +1,5 @@
 import { BattleState, DEFAULT_RULES, type BattleRules } from '../src/core/battle';
+import type { AiProfile } from '../src/core/aiProfile';
 import { parseMap, type GameMap, type MapJson } from '../src/core/map';
 import { createRng, type Rng } from '../src/core/rng';
 import type { Side } from '../src/core/types';
@@ -18,6 +19,8 @@ export interface UnitSpec {
   readonly inventory?: string[];
   readonly weaponGrades?: UnitDef['weaponGrades'];
   readonly boss?: boolean;
+  readonly ai?: AiProfile;
+  readonly tags?: string[];
   readonly x?: number;
   readonly y?: number;
 }
@@ -35,6 +38,8 @@ export function unit(spec: UnitSpec = {}): UnitInstance {
     growth: spec.growth ?? {},
     ...(spec.weaponGrades ? { weaponGrades: spec.weaponGrades } : {}),
     ...(spec.boss ? { boss: true } : {}),
+    ...(spec.ai ? { ai: spec.ai } : {}),
+    ...(spec.tags ? { tags: spec.tags } : {}),
     inventory: spec.inventory ?? ['iron-sabre'],
     faction: 'ayyubid',
     skin: 's1',
@@ -88,4 +93,14 @@ export function counting(seed: number): Rng & { readonly drawn: () => number } {
     restore: (state) => inner.restore(state),
     drawn: () => count,
   };
+}
+
+/** A map from explicit rows with map rules (objective, events, reinforcements, fog, exits…). */
+export function mapOf(rows: string[], extra: Partial<MapJson> = {}, legend: Record<string, string> = { '.': 'plain', G: 'grove', '~': 'river', '^': 'crag', '+': 'hospice', h: 'hill', H: 'house' }): GameMap {
+  return parseMap({ id: 'rules', name: 'Rules', size: [rows[0]?.length ?? 1, rows.length], terrain: rows, legend, ...extra } as MapJson, terrain);
+}
+
+/** An open map of the given size with map rules. */
+export function openMap(width: number, height: number, extra: Partial<MapJson> = {}): GameMap {
+  return mapOf(Array(height).fill('.'.repeat(width)) as string[], extra);
 }

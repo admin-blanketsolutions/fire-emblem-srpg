@@ -1,4 +1,4 @@
-import { createTestBattle } from './data';
+import { createProvingBattle, PROVING_OBJECTIVES } from './data/proving';
 import { Assets } from './engine/assets';
 import { Display } from './engine/display';
 import { Game } from './engine/game';
@@ -24,11 +24,19 @@ async function boot(): Promise<void> {
   const input = new Input(display);
   installTouchControls(input);
   const game = new Game({ display, input, assets, text });
-  const battle = createTestBattle();
-  const scene = new BattleScene({ battle, assets, text });
-  game.run(scene);
-  // A handle for poking at a running battle from the browser console while developing.
-  if (import.meta.env.DEV) Object.assign(window, { sultan: { battle, scene, assets } });
+
+  // The proving ground can be played under each objective: ?objective=seize, ?fog=1, ?seed=42
+  const params = new URLSearchParams(window.location.search);
+  const objective = PROVING_OBJECTIVES.find((o) => o === params.get('objective')) ?? 'rout';
+  const seed = Number(params.get('seed'));
+  const makeScene = (): BattleScene => {
+    const battle = createProvingBattle(objective, params.has('seed') && Number.isFinite(seed) ? { seed } : undefined, params.get('fog') === '1' ? { fog: true } : undefined);
+    const scene = new BattleScene({ battle, assets, text, onRestart: () => game.setScene(makeScene()) });
+    // A handle for poking at a running battle from the browser console while developing.
+    if (import.meta.env.DEV) Object.assign(window, { sultan: { battle, scene, assets } });
+    return scene;
+  };
+  game.run(makeScene());
 }
 
 boot().catch(showFatal);

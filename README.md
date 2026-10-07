@@ -4,7 +4,7 @@ A browser-based tactical RPG in the feel of the Game Boy Advance era, telling th
 
 It takes inspiration from the *genre* and its mechanics only. All names, classes, items, art, music and text are original, and all art and audio are procedurally generated placeholders that can be replaced without code changes.
 
-**Status:** design approved; milestones M1 (engine foundations) and M2 (combat and levelling) complete, M3 next. See [Progress](#progress).
+**Status:** design approved; milestones M1 (engine), M2 (combat and levelling) and M3 (enemy AI, phases, fog, objectives) complete, M4 next. See [Progress](#progress).
 
 ## What it is
 
@@ -45,12 +45,26 @@ npm run sprites:preview   # the sprite preview page, with live reload
 
 Other sprite commands: `npm run sprites:gen` regenerates the placeholder sprites from the kits in `tools/sprites/kits/`, and `npm run sprites` exports PNG strips and contact sheets to `out/sprites/`.
 
-## Playing it (M2)
+## Playing it (M3)
 
-One test map, the *Proving Ground*, with seven player units and five enemies who do not move yet (enemy behaviour arrives in M3). You can select a unit, see where it can move and attack, walk it across terrain at the correct cost, and then Attack, Heal or Wait.
+One test map, the *Proving Ground*, with seven player units and five enemies. You can select a unit, see where it can move and attack, walk it across terrain at the correct cost, and then Attack, Heal, Wait, or, where the objective allows, Seize, Depart, Talk or Visit. When you end the turn the enemy plays its phase.
 
 - **Attack** offers each weapon that reaches someone, then the targets one at a time, with the forecast: damage, hit and crit chance, doubling, and expected HP for both sides. `Info` shows the working (attack speed, accuracy, evasion, cover).
 - Fights play out as map animation, then the EXP bar, any level-up and weapon grades earned. Weapons wear out and break. Healers restore HP with a remedy.
+- The enemy fights by mode (advance, hold a post until something comes near, shoot from a fixed spot, flee for an exit, guard a unit), picks the best attack by an exact expectation of the outcome, and goes for the Lord when it can kill him. Reinforcements can arrive, healing ground restores HP, and events can speak to you.
+- The map can be played under each of the seven objectives, with or without fog of war:
+
+  | Address | Objective |
+  |---|---|
+  | `/?objective=rout` | Defeat all enemies (default) |
+  | `/?objective=seize` | The Lord seizes the marked tile in the citadel |
+  | `/?objective=defend` | Defend until the end of turn 6 |
+  | `/?objective=hold-the-pass` | Keep the enemy from crossing the bridge until turn 6 |
+  | `/?objective=escort` | Take the healer to the marked exit and Depart |
+  | `/?objective=survive` | Survive until the end of turn 6 |
+  | `/?objective=persuade` | Talk the crossbowman round within 8 turns |
+
+  Add `&fog=1` for fog of war and `&seed=42` for a different set of dice.
 - The three-way weapon triangle (Spear beats Mace, Mace beats Sabre, Sabre beats Spear) shows as ▲ and ▼ on the forecast.
 
 | Action | Keyboard | Touch |
@@ -70,8 +84,8 @@ Confirm on an enemy unit shows its move and attack range. The touch pad appears 
 |---|---|---|
 | M1 | Renderer, tilemap, cursor, movement, attack, sprite tool, one test map | done |
 | M2 | Combat forecast and resolution, levelling, weapon triangle, terrain | done |
-| M3 | Enemy AI, phases, danger zone, fog, objectives | next |
-| M4 | Classes, promotion, inventory, convoy, shops | planned |
+| M3 | Enemy AI, phases, danger zone, fog, objectives | done |
+| M4 | Classes, promotion, inventory, convoy, shops | next |
 | M5 | Supports, Camp, dialogue and portraits | planned |
 | M6 | Save/load, Codex, title, settings, Classic/Casual | planned |
 | M7 | Prologue and Chapters 1–3 with source-backed dialogue | planned |

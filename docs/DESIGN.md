@@ -268,6 +268,8 @@ Event conditions: `turnStart(turn, phase)`, `unitEntersTile`, `unitDefeated(unit
 Event actions: `dialogue(sceneId)`, `spawn`, `setAi`, `openGate`, `giveItem`, `recruit`, `ignite(tile)`, `flag(name)`, `unlockCodex`, `endChapter(win|lose)`.
 Events are pure data; the event runner is pure and unit-tested.
 
+As built (`core/events.ts`): events live inline in the map's `events` array. A `when` is one condition or `{ all: [...] }` / `{ any: [...] }`. Triggers (`turnStart`, `enter`, `talk`, `visit`) are offered as they happen; conditions about defeats, HP and flags are checked against the battle each time anything changes. An event fires once unless `once: false`. Applying an action can satisfy another event, so the events are asked again, up to eight rounds. `enter` events fire when a unit *finishes* its action on the tile, never mid-move, so a move that is taken back cannot trigger them. Actions that need later systems (`openGate`, `ignite`, `unlockCodex`, and `giveItem` of a non-weapon or to a full pack) are recorded in `battle.unhandled` rather than failing. `dialogue` and `message` actions queue text for the player (the dialogue engine arrives in M5).
+
 ### 3.9 Save system
 
 - **Slots:** 3 manual slots + 1 autosave (chapter start) in `localStorage` under `s2b:v1:*`.
@@ -318,7 +320,9 @@ Light units are lightly armed skirmishers, fire throwers, healers and scribes on
 - Start of a phase: reinforcements, tile effects (healing tents, flames), status ticks, `turnStart` events.
 - A unit acts once: **move, then one action**. Menu: *Attack · Remedy · Item · Trade · Bear · Talk · Seize · Visit · Open · class action (Sap / Entrench / Mend / Counsel / Dispatch) · Wait*.
 - End of Player Phase prompts automatically when no unit can act, or via Start → *End Turn*.
-- After the Enemy Phase the turn counter increments; objective checks run after every action.
+- After the last phase of a turn the turn counter increments; objective checks run after every action, at the end of every phase and at the end of every turn. A side with no units is skipped, unless reinforcements are due on its phase.
+- A side's units are readied at the start of *its own* phase. Healing ground (the hospice) restores 10% of maximum HP, rounded up, to the units of the side whose phase begins.
+- Reinforcements arrive at the start of their phase on their tile, or on the nearest free tile if it is taken. Events that fire at a turn's start run after the reinforcements.
 
 ### 4.3 Actions
 
@@ -330,7 +334,8 @@ Light units are lightly armed skirmishers, fire throwers, healers and scribes on
 | **Trade** | Swap items with an adjacent ally (free). Convoy is only reachable in Camp. |
 | **Bear** | Rescue-style. Carrier's BLD must exceed the target's BLD. While carrying: carrier's SKL and SPD halved (round down), cannot use fire or remedies; carried unit cannot act and cannot be targeted. *Set down* or *give* to an adjacent unit. |
 | **Talk** | Adjacent to a flagged unit; plays a scene; may recruit, give an item, or reveal information. |
-| **Seize** | Lord on a `seize` tile. |
+| **Seize** | Lord (or the unit the objective names) on a seize tile; wins a Seize chapter. |
+| **Depart** | The escorted unit on an exit tile leaves the map; wins an Escort chapter. Explicit, like Seize, so a move can still be taken back. |
 | **Visit** / **Open** | Villages (reward, info); doors and chests (key or Sap). |
 | **Class actions** | See §6.4. |
 
@@ -343,13 +348,15 @@ A pure function `dangerZone(state, options) → { tiles, perUnit }`.
 - `defensive` enemies not yet triggered are drawn in a **different hatch** (yellow) so surprises are never hidden; active units are red.
 - Press **Danger** (`S`) to toggle all; with the cursor on an enemy, **Confirm** (`Z`) shows that unit's range alone. Selecting a player unit shows move (blue), attack (red), remedy (green) as usual.
 - Honours fog: only enemies the player can currently see contribute.
+- As built (`core/danger.ts`): a unit holding its post (stationary, or defensive and not yet woken) is *active* only over what its own tile can reach; a defensive unit's wider reach if it woke, and the reach of a unit that is not yet activated, is *latent*, drawn as yellow diagonal hatching (a pattern, so it does not rely on colour). `active` and `latent` never overlap.
 
 ### 4.5 Fog of war
 
 - Per-map flag, optionally per-phase (night streets, Ch. 3).
 - Vision radius (tiles): Foot 3, Light 4, Mounted 4, Armored 3; **+1** on hills and ramparts, **+3** from watchtowers; chapters may apply a night penalty of −1.
 - Unseen enemies are not drawn and not in the danger zone. Previously seen terrain stays drawn (explored memory); enemy positions do not.
-- AI is **omniscient by default**; `ai.respectsFog` can be set per map where history calls for ambush (e.g., the Isma'ili attempts in Ch. 5).
+- AI is **omniscient by default**; `ai.respectsFog` can be set per map where history calls for ambush (e.g., the Isma'ili attempts in Ch. 5). A unit that respects fog sees only what its own side can see.
+- As built: allies share the player's vision; the map's `visionPenalty` (0–3) models night; vision bonuses are a terrain field (`vision`, +1 on hills and ramparts). Vision is a diamond (Manhattan radius); there is no line-of-sight blocking.
 
 ### 4.6 Structures and dynamic terrain
 
@@ -381,6 +388,15 @@ Structures are *units with `kind: 'structure'`*: HP, GRD, optional attack, no ac
 | **Persuade** (Talk puzzle) | `targets[]`, `turns` | all targets recruited | turns exhausted (Ch. 3 council) |
 
 Maps have one primary objective, optional secondary objectives (rewards), and optional extra fail conditions. Objective evaluation is pure and tested.
+
+As built (`core/objectives.ts`):
+
+- **Defeat is judged before victory,** so a Lord who falls on the action that would have won still loses. A unit tagged `lord` falling loses *every* objective type; a unit that leaves by an exit has *escaped*, not fallen.
+- **Checkpoints:** after every action, at the end of a phase, and at the end of a turn. "The end of turn N" is decided before the counter advances, so the chapter ends on turn N.
+- **Rout** and **Hold the Pass** wait for reinforcements still to come before they count the enemy as gone.
+- **Hold the Pass** has `anchors`, `leakLimit` (more than this many *distinct* enemies reaching an anchor loses), `holdLimit` (enemies standing on this many anchors at the end of an enemy phase loses) and `turns`; at least one of the three is required.
+- **Defend** may name an `anchor`: a unit (lost if it falls) or a tile (lost if an enemy stands on it at the end of the enemy phase).
+- **Persuade** wins when every target has been recruited by a *Talk* event, and loses at the end of turn N.
 
 ### 4.8 Retreat and permadeath
 
@@ -949,6 +965,15 @@ score(option) = 100·P(kill)
 
 Weights live in `src/data/ai.json`. Healers and allied supports use a similar scoring over remedy targets. Ally-phase units use the same code with sides swapped.
 
+**As built**, two terms were added to the formula (DECISIONS D-029):
+
+```
+              − 50·P(death)                           the attacker falls
+              + 100·P(kill)  if the target is critical   the Lord, the escort, or the defended unit
+```
+
+An exact expectation (`expectOutcome`) supplies `P(kill)`, `P(death)`, `E[damage]` and `E[counterDamage]` by enumerating every hit, miss and critical hit of the strike order. Units are planned one at a time, each seeing the result of the one before; leaders and bosses go last. A unit with no option moves by mode: toward the nearest opponent by walking cost (`distanceField`), toward the exit (`flee`), within two tiles of its charge (`guard`), or home if it has strayed past its `leash`. A defensive unit wakes when an opponent comes within *move + weapon range + aggroRange* (Manhattan) or when it has been hurt, and stays awake. Units with `activateOnTurn` or `activateOnFlag` do nothing until then.
+
 ### 10.3 Behaviours at a glance
 
 | Mode | Behaviour |
@@ -1148,7 +1173,7 @@ Each milestone ends with tests green, a production build, and a commit (the repo
 |---|---|---|
 | **M1** | Vite + TS strict + Vitest scaffold; layering lint; canvas renderer, camera, integer scaling; ASCII map loader; terrain and cost table; cursor; unit movement with range display; basic attack (no forecast); sprite tool v0 (build, preview, lint) with the first sprites and the font; one test map | Walk a unit across terrain with correct costs; attack; sprites render from definitions; preview page works; tests (grid-path) pass |
 | **M2** | Combat resolution and forecast; weapon triangle and all ten weapon types; terrain cover/avoid; durability; EXP and levelling with growths; battle scene (map animation first) | The §5.2 worked example reproduced by a test; level-ups deterministic with a seed |
-| **M3** | Phases (Player/Ally/Enemy); AI modes; danger zone; fog; **all objective types**; event runner | Play the test map to victory and defeat under every objective type; AI test table passes |
+| **M3** | Phases (Player/Ally/Enemy); AI modes; danger zone; fog; **all objective types**; event runner | Play the test map to victory and defeat under every objective type; AI test table passes. *(Done: `tests/simulation.test.ts` plays the proving ground to a win and a loss under each of the seven; `tests/ai.test.ts` is the AI table; the proving ground can be played under any objective with `?objective=`.)* |
 | **M4** | Classes (fourteen lines, three tiers), skills, promotion with the classic reset (items and rank events); inventory, convoy, shops; **structures and flames; class actions (Sap, Entrench, Mend, Ignite, Counsel, Dispatch)** | Promotion tests; shop and convoy flows; a structure/fire demo map |
 | **M5** | Support system; Camp / Majlis hub; dialogue and portrait engine; source markers | A support pair advances C→B in play; scenes show ◆/◇; ledger lint runs |
 | **M6** | Save/load (slots + suspend); Codex; title screen; settings; Classic/Casual; touch controls; placeholder audio | Suspend/resume reproduces RNG; Casual returns wounded units; Codex shows differ-blocks; touch playable |

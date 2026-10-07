@@ -28,7 +28,7 @@
   ],
   "spawns": {
     "player": [
-      { "unit": "lord", "at": [3, 7] },
+      { "unit": "lord", "at": [3, 7], "tags": ["lord"] },
       { "unit": "pikeman", "at": [4, 6] },
       { "unit": "axeman", "at": [4, 8] },
       { "unit": "horse-archer", "at": [2, 6] },
@@ -40,7 +40,7 @@
       { "unit": "soldier", "at": [14, 6] },
       { "unit": "soldier", "at": [14, 8] },
       { "unit": "crossbowman", "at": [17, 6] },
-      { "unit": "enemy-pikeman", "at": [17, 7] },
+      { "unit": "enemy-pikeman", "at": [17, 7], "tags": ["leader"] },
       { "unit": "enemy-horseman", "at": [13, 3] }
     ]
   }

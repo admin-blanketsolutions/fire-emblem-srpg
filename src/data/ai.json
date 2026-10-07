@@ -1,0 +1,15 @@
+{
+  "kill": 100,
+  "damage": 1,
+  "tag": 15,
+  "counter": 0.5,
+  "counterAvoid": 0.7,
+  "death": 50,
+  "criticalKill": 100,
+  "cover": 2,
+  "avoid": 0.1,
+  "exposure": 5,
+  "heal": 1,
+  "healMin": 3,
+  "guardRadius": 2
+}

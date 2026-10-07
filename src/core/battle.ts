@@ -1,16 +1,22 @@
+import type { UnitPlan } from './ai';
+import type { AiWeights } from './aiProfile';
 import type { Balance } from './balance';
 import type { ClassDef, ClassTable } from './classes';
 import { forecast, NO_BONUS, resolveStrikes, type Combatant, type Forecast, type HitMode, type StrikeEvent } from './combat';
+import { EventRunner, matchesKey, type EventAction, type PhaseSide, type SpawnSpec, type Trigger } from './events';
 import { awardExp, expForFight, expForHeal, grantWexp, type ExpResult, type WexpGain } from './exp';
-import { manhattan, ring, tileKey } from './grid';
+import { computeVisible } from './fog';
+import { manhattan, neighbors4, ring, tileKey } from './grid';
 import type { GameMap } from './map';
+import { checkObjective, newProgress, type Checkpoint, type ObjectiveProgress, type Outcome } from './objectives';
 import { computeReach, pathTo, type ReachResult } from './pathfinding';
 import type { Rng } from './rng';
 import { areFriendly, areHostile, type Point, type Side } from './types';
-import { autoEquip, canEquip, equippedWeapon, maxHp, weaponStacks, type UnitInstance } from './unit';
+import { autoEquip, canEquip, createUnit, equippedWeapon, INVENTORY_SLOTS, maxHp, weaponStacks, type UnitInstance, type UnitTable } from './unit';
 import { canReach, isOffensive, type WeaponDef, type WeaponTable } from './weapons';
 
-export type Phase = 'player' | 'enemy';
+/** The phases a turn is made of; each is played by one side. */
+export type Phase = PhaseSide;
 
 /** Player-facing rule settings that change outcomes (DESIGN §16). */
 export interface BattleRules {
@@ -26,6 +32,9 @@ export interface BattleTables {
   readonly weapons: WeaponTable;
   readonly classes: ClassTable;
   readonly balance: Balance;
+  /** Unit definitions, for reinforcements and spawn events. */
+  readonly units: UnitTable;
+  readonly ai: AiWeights;
 }
 
 /** A weapon the unit could attack with from a tile, and whom it would reach. */
@@ -62,9 +71,32 @@ export interface HealReport {
   readonly expAward: ExpAward | null;
 }
 
+/** What happened as a phase began: terrain healing and units arriving. */
+export interface PhaseReport {
+  readonly turn: number;
+  readonly phase: Phase;
+  readonly healed: ReadonlyArray<{ readonly unit: UnitInstance; readonly amount: number }>;
+  readonly arrived: readonly UnitInstance[];
+}
+
+/** Something for the player to read: a scene to play, or plain text. */
+export type BattleMessage = { readonly kind: 'dialogue'; readonly scene: string } | { readonly kind: 'message'; readonly text: string };
+
+/** The result of carrying out a computer-controlled unit's plan. */
+export interface PlanResult {
+  readonly unit: UnitInstance;
+  readonly path: Point[];
+  readonly fight: FightReport | null;
+  readonly heal: HealReport | null;
+  /** The unit left the map by an exit. */
+  readonly escaped: boolean;
+}
+
 /**
- * The battle rules: occupancy, movement, attack ranges, forecasts, fights with EXP and
- * durability, healing and the phase flags. Every random draw comes from the battle's seeded Rng.
+ * The battle rules: occupancy, movement, forecasts, fights with EXP and durability, healing,
+ * phases with reinforcements and terrain effects, events, objectives, fog of war, and the
+ * special actions (Seize, Depart, Talk, Visit). Every random draw comes from the battle's
+ * seeded Rng, so a battle replays exactly from its seed.
  */
 export class BattleState {
   readonly map: GameMap;
@@ -73,7 +105,26 @@ export class BattleState {
   readonly rng: Rng;
   readonly rules: BattleRules;
   turn = 1;
-  phase: Phase = 'player';
+  phase: Phase;
+  readonly phaseOrder: readonly Phase[];
+  private phaseIndex = 0;
+  private begun = false;
+
+  readonly events: EventRunner;
+  readonly flags = new Set<string>();
+  readonly progress: ObjectiveProgress = newProgress();
+  /** Set once the chapter is won or lost. */
+  outcome: Outcome | null = null;
+  /** Dialogue and messages waiting for the player to read, oldest first. */
+  readonly messages: BattleMessage[] = [];
+  /** Units that appeared during play (by an event) and have not been shown yet. */
+  readonly arrivals: UnitInstance[] = [];
+  /** Event actions that need systems from later milestones (gates, flames, the Codex). */
+  readonly unhandled: EventAction[] = [];
+
+  /** Tiles the player's side has seen, and tiles it sees now (fog of war). */
+  explored = new Set<number>();
+  visible = new Set<number>();
 
   constructor(map: GameMap, units: UnitInstance[], tables: BattleTables, rng: Rng, rules: BattleRules = DEFAULT_RULES) {
     this.map = map;
@@ -81,6 +132,10 @@ export class BattleState {
     this.tables = tables;
     this.rng = rng;
     this.rules = rules;
+    this.phaseOrder = map.rules.phaseOrder;
+    this.phase = this.phaseOrder[0] ?? 'player';
+    this.events = new EventRunner(map.rules.events);
+    this.updateVisibility();
   }
 
   // ------------------------------------------------------------------ queries
@@ -180,6 +235,28 @@ export class BattleState {
     return fc.attacker.strike ? fc : null;
   }
 
+  // ------------------------------------------------------------------ fog of war
+
+  /** Recompute what the player's side can see and remember it. */
+  updateVisibility(): void {
+    this.visible = computeVisible(this, ['player', 'ally']);
+    for (const key of this.visible) this.explored.add(key);
+  }
+
+  /** Whether the player can see a tile now; always true without fog. */
+  isVisible(x: number, y: number): boolean {
+    return !this.map.rules.fog || this.visible.has(tileKey(x, y));
+  }
+
+  isExplored(x: number, y: number): boolean {
+    return !this.map.rules.fog || this.explored.has(tileKey(x, y));
+  }
+
+  /** The units the player can see: its own side, and others standing in sight. */
+  visibleUnits(): UnitInstance[] {
+    return this.livingUnits().filter((u) => u.side === 'player' || u.side === 'ally' || this.isVisible(u.x, u.y));
+  }
+
   // ------------------------------------------------------------------ actions
 
   /** Move a unit along its cheapest path to `dest`. Returns the path, or null if unreachable. */
@@ -190,13 +267,13 @@ export class BattleState {
     unit.x = dest.x;
     unit.y = dest.y;
     unit.moved = true;
+    this.updateVisibility();
     return path;
   }
 
   /** Mark a unit as finished for the phase. */
   wait(unit: UnitInstance): void {
-    unit.moved = true;
-    unit.acted = true;
+    this.finishAction(unit);
   }
 
   /** Equip the weapon in an inventory slot if the unit may wield it. */
@@ -206,6 +283,27 @@ export class BattleState {
     if (!stack || !weapon || stack.uses <= 0 || !canEquip(unit, weapon, this.classOf(unit))) return false;
     unit.equipped = slot;
     return true;
+  }
+
+  /**
+   * The end of a unit's action: it is spent, what it stands on takes effect, and the state of
+   * the battle (events, objectives, what the player can see) is brought up to date.
+   */
+  private finishAction(unit: UnitInstance): void {
+    unit.moved = true;
+    unit.acted = true;
+    this.settle(unit);
+  }
+
+  private settle(unit: UnitInstance): void {
+    if (!unit.retreated) this.fire({ type: 'enter', unit, tile: { x: unit.x, y: unit.y } });
+    this.afterChange();
+  }
+
+  private afterChange(): void {
+    this.updateVisibility();
+    this.fire({ type: 'update' });
+    this.check('action');
   }
 
   /**
@@ -253,8 +351,7 @@ export class BattleState {
       if (mine.length > 0 && kind) wexpGains.push({ unit, ...grantWexp(unit, kind, outcome.killed ? 2 : 1) });
     }
 
-    attacker.acted = true;
-    attacker.moved = true;
+    this.finishAction(attacker);
     return { attacker, defender, forecast: fc, events, hpBefore, expAwards, wexpGains, brokenWeapons, defeated };
   }
 
@@ -318,9 +415,224 @@ export class BattleState {
       expAward = { unit: healer, amount, ...awardExp(healer, amount, this.classOf(healer), this.tables.balance, this.rng, this.rules.guaranteedProgress) };
       grantWexp(healer, 'remedy', 1);
     }
-    healer.acted = true;
-    healer.moved = true;
+    this.finishAction(healer);
     return { healer, target, restored, expAward };
+  }
+
+  // ------------------------------------------------------------------ Seize, Depart, Talk, Visit
+
+  /** Whether the unit may Seize where it stands (the Seize objective). */
+  canSeize(unit: UnitInstance): boolean {
+    const o = this.map.rules.objective;
+    if (!o || o.type !== 'seize' || unit.side !== 'player' || unit.retreated) return false;
+    if (!o.tiles.some((t) => t[0] === unit.x && t[1] === unit.y)) return false;
+    const by = o.by ?? 'lord';
+    return by === 'any' || (by === 'lord' ? unit.tags.includes('lord') : matchesKey(unit, by));
+  }
+
+  seize(unit: UnitInstance): void {
+    if (!this.canSeize(unit)) throw new Error(`${unit.name} cannot seize from here`);
+    this.progress.seized = true;
+    this.finishAction(unit);
+  }
+
+  /** Whether the escorted unit stands on an exit and may Depart (the Escort objective). */
+  canDepart(unit: UnitInstance): boolean {
+    const o = this.map.rules.objective;
+    return !!o && o.type === 'escort' && !unit.retreated && matchesKey(unit, o.unit) && o.exit.some((t) => t[0] === unit.x && t[1] === unit.y);
+  }
+
+  /** The escorted unit leaves the map, safe. */
+  depart(unit: UnitInstance): void {
+    if (!this.canDepart(unit)) throw new Error(`${unit.name} cannot depart from here`);
+    this.leaveMap(unit);
+    this.finishAction(unit);
+  }
+
+  private leaveMap(unit: UnitInstance): void {
+    unit.escaped = true;
+    unit.retreated = true;
+    this.progress.escaped.add(unit.id);
+  }
+
+  /** Units adjacent to `from` that the unit has a conversation waiting with. */
+  talkTargets(unit: UnitInstance, from: Point = unit): UnitInstance[] {
+    const pending = this.events.pendingTalks();
+    if (pending.length === 0) return [];
+    return this.livingUnits().filter(
+      (other) =>
+        other !== unit &&
+        manhattan(from, other) === 1 &&
+        pending.some((t) => (matchesKey(unit, t.a) && matchesKey(other, t.b)) || (matchesKey(unit, t.b) && matchesKey(other, t.a))),
+    );
+  }
+
+  talk(unit: UnitInstance, other: UnitInstance): void {
+    this.fire({ type: 'talk', a: unit, b: other });
+    this.finishAction(unit);
+  }
+
+  /** Whether a visit event waits on the tile the unit stands on. */
+  canVisit(unit: UnitInstance): boolean {
+    return unit.side === 'player' && this.events.pendingVisits().some((t) => t[0] === unit.x && t[1] === unit.y);
+  }
+
+  visit(unit: UnitInstance): void {
+    this.fire({ type: 'visit', unit, tile: { x: unit.x, y: unit.y } });
+    this.finishAction(unit);
+  }
+
+  // ------------------------------------------------------------------ computer-controlled units
+
+  /** Carry out a plan from `planUnit`: move, then act. Returns what happened, for the scene to show. */
+  executePlan(plan: UnitPlan): PlanResult {
+    const { unit } = plan;
+    const here = { x: unit.x, y: unit.y };
+    let path: Point[] = [here];
+    if (plan.dest.x !== here.x || plan.dest.y !== here.y) {
+      const moved = this.moveUnit(unit, plan.dest, this.reachFor(unit));
+      if (!moved) throw new Error(`${unit.name} cannot reach (${plan.dest.x}, ${plan.dest.y})`);
+      path = moved;
+    }
+    unit.moved = true;
+    if (plan.wakes) unit.triggered = true;
+    if (plan.escape) {
+      this.leaveMap(unit);
+      unit.acted = true;
+      this.afterChange();
+      return { unit, path, fight: null, heal: null, escaped: true };
+    }
+    const action = plan.action;
+    if (action.kind === 'attack') {
+      this.equip(unit, action.slot);
+      return { unit, path, fight: this.fight(unit, action.target), heal: null, escaped: false };
+    }
+    if (action.kind === 'heal') {
+      return { unit, path, fight: null, heal: this.heal(unit, action.target, action.slot), escaped: false };
+    }
+    this.wait(unit);
+    return { unit, path, fight: null, heal: null, escaped: false };
+  }
+
+  // ------------------------------------------------------------------ units arriving
+
+  /** The nearest free tile to `at` that the unit could stand on, or null if the map is full. */
+  private freeTileNear(at: Point, unit: UnitInstance): Point | null {
+    const seen = new Set<number>([tileKey(at.x, at.y)]);
+    const queue: Point[] = [at];
+    for (let i = 0; i < queue.length; i++) {
+      const p = queue[i] as Point;
+      if (this.map.costFor(p.x, p.y, unit.moveType) !== null && !this.unitAt(p.x, p.y)) return p;
+      for (const n of neighbors4(p, this.map.width, this.map.height)) {
+        const key = tileKey(n.x, n.y);
+        if (!seen.has(key)) {
+          seen.add(key);
+          queue.push(n);
+        }
+      }
+    }
+    return null;
+  }
+
+  /** Bring a unit onto the map; if its tile is taken it appears on the nearest free one. */
+  spawn(spec: SpawnSpec): UnitInstance {
+    const def = this.tables.units[spec.def];
+    if (!def) throw new Error(`Cannot spawn unknown unit "${spec.def}"`);
+    const taken = new Set(this.units.map((u) => u.id));
+    let n = 1;
+    while (taken.has(`${spec.def}#${n}`)) n += 1;
+    const overrides = { ...(spec.ai ? { ai: spec.ai } : {}), ...(spec.tags ? { tags: spec.tags } : {}) };
+    const unit = createUnit(def, `${spec.def}#${n}`, spec.at[0], spec.at[1], this.tables.classes, this.tables.weapons, overrides);
+    const tile = this.freeTileNear({ x: spec.at[0], y: spec.at[1] }, unit);
+    if (!tile) throw new Error(`No free tile for "${spec.def}" near (${spec.at[0]}, ${spec.at[1]})`);
+    unit.x = tile.x;
+    unit.y = tile.y;
+    this.units.push(unit);
+    this.arrivals.push(unit);
+    return unit;
+  }
+
+  // ------------------------------------------------------------------ events and objectives
+
+  /**
+   * Offer a trigger to the events and carry out whatever comes due. Carrying out an action can
+   * satisfy another event (a flag, a defeat), so the events are asked again, a few rounds at most.
+   */
+  fire(trigger: Trigger): void {
+    let actions = this.events.run(trigger, { units: this.units, flags: this.flags });
+    for (let round = 0; round < 8 && actions.length > 0; round++) {
+      for (const action of actions) this.apply(action);
+      actions = this.events.run({ type: 'update' }, { units: this.units, flags: this.flags });
+    }
+  }
+
+  private apply(action: EventAction): void {
+    switch (action.type) {
+      case 'dialogue':
+        this.messages.push({ kind: 'dialogue', scene: action.scene });
+        break;
+      case 'message':
+        this.messages.push({ kind: 'message', text: action.text });
+        break;
+      case 'spawn':
+        for (const spec of action.units) this.spawn(spec);
+        break;
+      case 'setAi':
+        for (const u of this.units) {
+          if (!u.retreated && matchesKey(u, action.unit)) {
+            u.ai = action.ai;
+            u.triggered = false;
+          }
+        }
+        break;
+      case 'recruit':
+        for (const u of this.units) {
+          if (!u.retreated && matchesKey(u, action.unit)) {
+            u.side = 'player';
+            u.ai = null;
+            this.progress.recruited.add(u.id);
+          }
+        }
+        break;
+      case 'flag':
+        this.flags.add(action.name);
+        break;
+      case 'giveItem': {
+        const weapon = this.tables.weapons.get(action.item);
+        const unit = this.units.find((u) => !u.retreated && matchesKey(u, action.unit));
+        if (weapon && unit && unit.inventory.length < INVENTORY_SLOTS) {
+          unit.inventory.push({ id: weapon.id, uses: weapon.uses });
+          if (unit.equipped < 0) autoEquip(unit, this.tables.weapons, this.tables.classes);
+        } else {
+          this.unhandled.push(action);
+        }
+        break;
+      }
+      case 'endChapter':
+        this.outcome ??= { result: action.result, reason: action.reason ?? (action.result === 'won' ? 'The chapter is won.' : 'The chapter is lost.') };
+        break;
+      case 'openGate':
+      case 'ignite':
+      case 'unlockCodex':
+        this.unhandled.push(action);
+        break;
+    }
+  }
+
+  /** Judge the objective at a checkpoint. Once the chapter is decided it stays decided. */
+  check(checkpoint: Checkpoint): void {
+    const objective = this.map.rules.objective;
+    if (this.outcome || !objective) return;
+    this.outcome = checkObjective(this, objective, this.progress, checkpoint);
+  }
+
+  /** True while reinforcements are still to come. */
+  hasFutureReinforcements(): boolean {
+    return this.map.rules.reinforcements.some((r) => r.turn > this.turn || (r.turn === this.turn && this.phaseOrder.indexOf(r.phase) > this.phaseIndex));
+  }
+
+  private reinforcementsDue(phase: Phase): boolean {
+    return this.map.rules.reinforcements.some((r) => r.turn === this.turn && r.phase === phase);
   }
 
   // ------------------------------------------------------------------ phases
@@ -330,18 +642,68 @@ export class BattleState {
     return this.livingUnits(side).every((u) => u.acted);
   }
 
-  /** Close the player phase. Enemy behaviour arrives in M3, so the enemy phase is a no-op here. */
-  endPlayerPhase(): void {
-    this.phase = 'enemy';
+  /** Begin the battle: the first phase starts, with its reinforcements, terrain effects and events. A second call does nothing. */
+  begin(): PhaseReport {
+    if (this.begun) return { turn: this.turn, phase: this.phase, healed: [], arrived: [] };
+    this.begun = true;
+    return this.startPhase();
   }
 
-  /** Close the enemy phase, advance the turn and ready every unit. */
-  endEnemyPhase(): void {
-    this.phase = 'player';
-    this.turn += 1;
-    for (const unit of this.units) {
+  /**
+   * Close the current phase and start the next one. A side with no units is skipped, the turn
+   * advances after the last phase, and the objective is checked at the end of the phase and of
+   * the turn. If the chapter is decided, the phase does not advance.
+   */
+  endPhase(): PhaseReport {
+    this.check('phaseEnd');
+    if (!this.outcome) this.advancePhase();
+    if (this.outcome) return { turn: this.turn, phase: this.phase, healed: [], arrived: [] };
+    return this.startPhase();
+  }
+
+  private advancePhase(): void {
+    const order = this.phaseOrder;
+    let i = this.phaseIndex;
+    for (let guard = 0; guard < order.length * 2 + 2; guard++) {
+      i += 1;
+      if (i >= order.length) {
+        this.check('turnEnd');
+        if (this.outcome) return;
+        this.turn += 1;
+        i = 0;
+      }
+      const phase = order[i] as Phase;
+      if (phase === 'player' || this.livingUnits(phase).length > 0 || this.reinforcementsDue(phase)) {
+        this.phaseIndex = i;
+        this.phase = phase;
+        return;
+      }
+    }
+  }
+
+  private startPhase(): PhaseReport {
+    const { turn, phase } = this;
+    for (const unit of this.livingUnits(phase)) {
       unit.moved = false;
       unit.acted = false;
     }
+    const before = this.arrivals.length;
+    for (const r of this.map.rules.reinforcements) {
+      if (r.turn === turn && r.phase === phase) for (const spec of r.units) this.spawn(spec);
+    }
+    const healed: Array<{ unit: UnitInstance; amount: number }> = [];
+    for (const unit of this.livingUnits(phase)) {
+      const share = this.map.terrainAt(unit.x, unit.y).heals;
+      if (!share) continue;
+      const amount = Math.min(Math.ceil(maxHp(unit) * share), maxHp(unit) - unit.hp);
+      if (amount > 0) {
+        unit.hp += amount;
+        healed.push({ unit, amount });
+      }
+    }
+    this.fire({ type: 'turnStart', turn, phase });
+    const arrived = this.arrivals.splice(before);
+    this.afterChange();
+    return { turn, phase, healed, arrived };
   }
 }

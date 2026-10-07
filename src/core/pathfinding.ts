@@ -146,3 +146,45 @@ export function pathTo(result: ReachResult, dest: Point): Point[] | null {
   }
   return path.reverse();
 }
+
+/**
+ * How far each tile is, in movement cost, from standing next to the nearest of `sources`: the
+ * cost of the tiles a walker would enter on the way, not counting the source tile itself. A tile
+ * beside a source is 0. Terrain the movement type cannot enter is never crossed. Units are
+ * ignored, so the field is a map of the ground only. Used by the AI to decide which way to advance.
+ */
+export function distanceField(map: GameMap, moveType: MoveType, sources: readonly Point[]): Map<number, number> {
+  const dist = new Map<number, number>();
+  const heap = new MinHeap();
+  const isSource = new Set<number>();
+  for (const s of sources) {
+    if (!map.inBounds(s.x, s.y)) continue;
+    const key = tileKey(s.x, s.y);
+    isSource.add(key);
+    dist.set(key, 0);
+    heap.push(0, key);
+  }
+  while (heap.size > 0) {
+    const entry = heap.pop();
+    if (!entry) break;
+    const known = dist.get(entry.key);
+    if (known === undefined || entry.cost > known) continue; // stale heap entry
+    const x = keyX(entry.key);
+    const y = keyY(entry.key);
+    // stepping from a neighbour onto this tile means entering this tile (free if it is the source)
+    const enter = isSource.has(entry.key) ? 0 : map.costFor(x, y, moveType);
+    if (enter === null) continue;
+    for (const d of DIRS4) {
+      const nx = x + d.x;
+      const ny = y + d.y;
+      if (!map.inBounds(nx, ny)) continue;
+      const key = tileKey(nx, ny);
+      const total = entry.cost + enter;
+      const old = dist.get(key);
+      if (old !== undefined && old <= total) continue;
+      dist.set(key, total);
+      heap.push(total, key);
+    }
+  }
+  return dist;
+}

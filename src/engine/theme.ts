@@ -19,4 +19,10 @@ export const COLORS = {
   attack: 'rgba(235, 55, 45, 0.55)',
   danger: 'rgba(235, 55, 45, 0.32)',
   path: '#f0c24a',
+  latent: 'rgba(240, 200, 60, 0.34)',
+  talk: 'rgba(240, 194, 74, 0.5)',
+  fogSeen: 'rgba(16, 12, 30, 0.58)',
+  fogUnseen: '#0d0a14',
+  victory: '#f0c24a',
+  defeat: '#f08a78',
 } as const;

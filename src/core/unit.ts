@@ -51,7 +51,8 @@ export interface UnitInstance {
   readonly id: string;
   readonly defId: string;
   readonly name: string;
-  readonly side: Side;
+  /** Changes when a unit is won over (Talk, recruit). */
+  side: Side;
   readonly spriteId: string;
   readonly faction: string;
   readonly skin: string;

@@ -245,9 +245,9 @@ describe('phases', () => {
   it('runs player phase, enemy phase, then the next turn with everyone ready', () => {
     const battle = battleOf([unit({ id: 'a' }), unit({ id: 'e', side: 'enemy', x: 5 })]);
     battle.wait(battle.units[0]!);
-    battle.endPlayerPhase();
+    expect(battle.endPhase()).toMatchObject({ turn: 1, phase: 'enemy' }); // the ally phase is skipped: nobody is on that side
     expect(battle.phase).toBe('enemy');
-    battle.endEnemyPhase();
+    expect(battle.endPhase()).toMatchObject({ turn: 2, phase: 'player' });
     expect(battle.phase).toBe('player');
     expect(battle.turn).toBe(2);
     expect(battle.units.every((u) => !u.moved && !u.acted)).toBe(true);

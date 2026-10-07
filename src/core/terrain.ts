@@ -14,6 +14,8 @@ export interface TerrainDef {
   readonly flammable?: boolean;
   /** Share of max HP restored at the start of the occupant's phase. */
   readonly heals?: number;
+  /** Added to the vision radius of a unit standing here (hills, ramparts, watchtowers). */
+  readonly vision?: number;
   readonly tags?: readonly string[];
 }
 
@@ -34,6 +36,9 @@ export function buildTerrainTable(defs: readonly TerrainDef[]): TerrainTable {
     }
     if (!Number.isInteger(def.cover) || !Number.isInteger(def.avoid)) {
       throw new Error(`Terrain "${def.id}" needs integer cover and avoid`);
+    }
+    if (def.vision !== undefined && (!Number.isInteger(def.vision) || def.vision < 0)) {
+      throw new Error(`Terrain "${def.id}" needs a non-negative integer vision bonus`);
     }
     table.set(def.id, def);
   }

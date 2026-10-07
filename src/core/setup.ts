@@ -24,8 +24,11 @@ export function buildBattle(map: GameMap, defs: UnitTable, tables: BattleTables,
     const n = (seen.get(spawn.unit) ?? 0) + 1;
     seen.set(spawn.unit, n);
     const id = (totals.get(spawn.unit) ?? 1) > 1 ? `${spawn.unit}#${n}` : spawn.unit;
-    return createUnit(def, id, spawn.at[0], spawn.at[1], tables.classes, tables.weapons);
+    const overrides = { ...(spawn.ai ? { ai: spawn.ai } : {}), ...(spawn.tags ? { tags: spawn.tags } : {}) };
+    return createUnit(def, id, spawn.at[0], spawn.at[1], tables.classes, tables.weapons, overrides);
   });
   const rng = createRng(options.seed ?? hashSeed('battle', map.id));
-  return new BattleState(map, units, tables, rng, { ...DEFAULT_RULES, ...options.rules });
+  const battle = new BattleState(map, units, tables, rng, { ...DEFAULT_RULES, ...options.rules });
+  battle.begin();
+  return battle;
 }

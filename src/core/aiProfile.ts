@@ -44,3 +44,41 @@ export function validateAiProfile(raw: unknown, where: string): AiProfile {
   if (p.mode === 'guard' && p.guard === undefined) throw new Error(`${where}: guard mode needs ai.guard`);
   return p as AiProfile;
 }
+
+/** The numbers the AI weighs when it scores an option (DESIGN §10.2; data in `ai.json`). */
+export interface AiWeights {
+  /** Per unit of kill probability. */
+  readonly kill: number;
+  /** Per point of expected damage. */
+  readonly damage: number;
+  /** For attacking a preferred target; scaled 0 to 1 by the unit's priority list. */
+  readonly tag: number;
+  /** Per point of expected counter-damage. */
+  readonly counter: number;
+  /** The same, for units that avoid counters. */
+  readonly counterAvoid: number;
+  /** Per unit of probability that the attacker falls. */
+  readonly death: number;
+  /** Extra per unit of kill probability when the target is critical: the Lord, an escort, a defended unit. Defeating one decides the chapter. */
+  readonly criticalKill: number;
+  readonly cover: number;
+  readonly avoid: number;
+  /** Per opposing unit that could strike the tile. */
+  readonly exposure: number;
+  /** Per HP a healer would restore. */
+  readonly heal: number;
+  /** Healing less than this is not worth a turn. */
+  readonly healMin: number;
+  /** How close a guarding unit stays to what it guards. */
+  readonly guardRadius: number;
+}
+
+export function validateAiWeights(raw: unknown): AiWeights {
+  const w = raw as Record<string, unknown>;
+  const keys: ReadonlyArray<keyof AiWeights> = ['kill', 'damage', 'tag', 'counter', 'counterAvoid', 'death', 'criticalKill', 'cover', 'avoid', 'exposure', 'heal', 'healMin', 'guardRadius'];
+  for (const key of keys) {
+    const v = w?.[key];
+    if (typeof v !== 'number' || !Number.isFinite(v) || v < 0) throw new Error(`ai weights: "${key}" must be a non-negative number`);
+  }
+  return w as unknown as AiWeights;
+}

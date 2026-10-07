@@ -280,3 +280,30 @@ export function drawMessage(pen: Pen, lines: readonly string[]): void {
   lines.forEach((line, i) => text.drawCentered(ctx, line, x + w / 2, y + 8 + i * 11, PLAIN));
 }
 
+
+/** The end of the chapter: a veil, the verdict, and why. */
+export function drawOutcome(pen: Pen, result: 'won' | 'lost', reason: string, canContinue: boolean): void {
+  const { ctx, text } = pen;
+  ctx.fillStyle = 'rgba(13, 10, 20, 0.72)';
+  ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+  const top = 46;
+  ctx.fillStyle = result === 'won' ? COLORS.victory : COLORS.defeat;
+  ctx.fillRect(0, top, LOGICAL_WIDTH, 1);
+  ctx.fillRect(0, top + 66, LOGICAL_WIDTH, 1);
+  text.drawCentered(ctx, result === 'won' ? 'Victory' : 'Defeat', LOGICAL_WIDTH / 2, top + 10, { color: result === 'won' ? COLORS.victory : COLORS.defeat, shadow: COLORS.ink, scale: 3 });
+  text.wrap(reason, 200).forEach((line, i) => text.drawCentered(ctx, line, LOGICAL_WIDTH / 2, top + 38 + i * 10, PLAIN));
+  if (canContinue) text.drawCentered(ctx, 'OK to play again', LOGICAL_WIDTH / 2, top + 76, DIM);
+}
+
+/** Who is about to speak with whom. */
+export function drawTalkPrompt(pen: Pen, speaker: UnitInstance, listener: UnitInstance, atTop: boolean): void {
+  const { ctx, text } = pen;
+  const line = `${speaker.name} speaks with ${listener.name}`;
+  const w = text.width(line) + 24;
+  const h = 34;
+  const x = Math.round((LOGICAL_WIDTH - w) / 2);
+  const y = atTop ? 3 : LOGICAL_HEIGHT - h - 3;
+  drawPanel(ctx, x, y, w, h);
+  text.drawCentered(ctx, line, x + w / 2, y + 7, PLAIN);
+  text.drawCentered(ctx, 'OK Talk   Back', x + w / 2, y + 19, DIM);
+}
