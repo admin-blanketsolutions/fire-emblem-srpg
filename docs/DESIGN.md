@@ -844,6 +844,13 @@ interface SupportDef {
 }
 ```
 
+As built (M5, `core/supports.ts`):
+
+- Points are earned at the end of each **Player Phase** only, by player units still on the field: +2 adjacent, +1 within three tiles, +1 if both fought within two tiles of each other that phase (each at the place it last fought), +2 if one healed, mended or dispatched the other. A pair earns at most its pace's cap in a chapter; the cap is counted afresh when the chapter's battle begins.
+- The **rank is the highest whose scene has been viewed**. A pair that has reached a threshold only has a scene *waiting*; `available` also checks the scene's `availableFrom` chapter against the chapter order and its `requiresFlags`. Pairs of friends stop at A; only `bondKind` pairs go on to Bond. Viewing adds the talk's 10 points; skipping a scene counts as viewing it (its flags still fire).
+- **Adjacent Aid** is part of the forecast, so the numbers shown include it: each supported unit beside the tile where a unit fights lends the bonus of the rank they have viewed, the best two counting; a pair's own `aid` replaces the default for a rank. It applies to player units only, because only they have supports.
+- The tracker belongs to the **army** and the battle is given it (`battle.supports`), so points persist from chapter to chapter; `snapshot`/`restore` make it a plain record for the save.
+
 ---
 
 ## 8. Camp / Majlis hub
@@ -862,6 +869,14 @@ Between chapters the player is in the **Majlis** (the gathering). Screens:
 | **Casualty roll** | Classic mode: those who left the army, with their chapter |
 | **Save** | Manual save slots; autosave runs at chapter start |
 | **Begin chapter** | Autosave, then briefing and battle |
+
+As built (M5, `core/camp.ts`, `scenes/campScene.ts`): the camp has *Preparations, Units, Convoy,* each shop, *Majlis talks, Maydan, Class,* the *Casualty roll* (once someone has left the army) and the way on. Saving, the Codex and *Begin chapter* with its autosave arrive with M6 and M7.
+
+- **Majlis talks:** the scenes whose pair has the points, both units in the army, up to three a camp; the scene plays, and the rank takes effect when it ends.
+- **Maydan:** each unit may drill once a camp for 4 weapon EXP in the kind of weapon it holds.
+- **Class:** lists units that have reached level 10 and hold, or whose convoy holds, the Charter of Iqta' (Tier I) or the Diploma of Investiture (Tier II); one press promotes and shows the new stats. (The Units page does the same through *Item*.)
+- **Preparations:** choose who takes the field; the Lord always goes; the map's `deployLimit` is the most.
+- **Casualty roll:** who left the army under the Classic rules, and in which chapter.
 
 ---
 
@@ -883,6 +898,8 @@ type LineKind = 'documented' | 'dramatized' | 'narration';
 ```
 
 Text box: 224×40 px, 3 lines of ~37 characters in the 5×7 font, typewriter effect (speed setting), `Z` (Confirm) advances or completes the line, `Enter` (Menu) skips the scene, `A` (Info) opens the backlog. Portrait slots are 32×32 (placeholders), left and right.
+
+As built (M5): `core/dialogue.ts` validates scenes and runs them (`DialogueRunner` has no clock and no canvas: it hands out the next line or pause and collects flags, unlocks and sounds); `scenes/dialoguePlayer.ts` draws them. Every command has exactly one key. A `say` line's `who` must be a character (`core/characters.ts`) or the narrator, narration is spoken only by the narrator, and a line longer than three lines of the box is split into pages at line breaks. Portraits are drawn at twice their size on the left, centre or right, the speaker lit and the others dimmed; with the *names only* setting no portrait is drawn. Backdrops are two-colour placeholders by name. *Menu* skips a scene (its flags and unlocks still happen), *Info* opens the backlog, any tap counts as Confirm. A scene may be played in battle (an event's `dialogue` action) or in camp (a support scene).
 
 ### 9.2 Source markers (the "documented / dramatized" rule)
 
@@ -1175,6 +1192,8 @@ Everything is a **placeholder** behind a manifest; real assets replace entries w
 
 ---
 
+As built (M5, `tools/lint-sources.ts`, run by `npm run lint`): the ledger's tables are read for the ids in their first column (a row ending in `*` stands for a family, as `CHR-GEN-*` does for generic troops). Over the campaign's story data (`characters.json`, `scenes/`, `supports.json`) it checks that every character, scene and support names rows that exist; that a documented line cites; that nothing cites an `UNV-` or `EXC-` row; that every support's scene exists and carries its `SUP-` row; and that no data file contains Arabic script. The demos' data under `src/data/test/` is checked for structure but not for rows, and says in its own text that it is not history. A slice support in the ledger with no scene written yet is reported as a warning, which becomes an error when the slice is declared complete.
+
 ## 15. Milestones
 
 Each milestone ends with tests green, a production build, and a commit (the repository is initialised at M1 once you pick a folder).
@@ -1185,7 +1204,7 @@ Each milestone ends with tests green, a production build, and a commit (the repo
 | **M2** | Combat resolution and forecast; weapon triangle and all ten weapon types; terrain cover/avoid; durability; EXP and levelling with growths; battle scene (map animation first) | The §5.2 worked example reproduced by a test; level-ups deterministic with a seed |
 | **M3** | Phases (Player/Ally/Enemy); AI modes; danger zone; fog; **all objective types**; event runner | Play the test map to victory and defeat under every objective type; AI test table passes. *(Done: `tests/simulation.test.ts` plays the proving ground to a win and a loss under each of the seven; `tests/ai.test.ts` is the AI table; the proving ground can be played under any objective with `?objective=`.)* |
 | **M4** | Classes (fourteen lines, three tiers), skills, promotion with the classic reset (items and rank events); inventory, convoy, shops; **structures and flames; class actions (Sap, Entrench, Mend, Ignite, Counsel, Dispatch)** | Promotion tests; shop and convoy flows; a structure/fire demo map. *(Done: `tests/promotion.test.ts`, `tests/army.test.ts`, `tests/camp.test.ts` (the camp walked with key presses), `tests/structures.test.ts`, `tests/fire.test.ts`, `tests/classActions.test.ts`, `tests/art.test.ts`; `?demo=siege` is the structure and fire demo and `?demo=camp` the camp.)* |
-| **M5** | Support system; Camp / Majlis hub; dialogue and portrait engine; source markers | A support pair advances C→B in play; scenes show ◆/◇; ledger lint runs |
+| **M5** | Support system; Camp / Majlis hub; dialogue and portrait engine; source markers | A support pair advances C→B in play; scenes show ◆/◇; ledger lint runs. *(Done: `tests/supports.test.ts` plays a pair from C to B over two chapters; `tests/dialogue.test.ts`, `tests/dialoguePlayer.test.ts`, `tests/majlis.test.ts`, `tests/majlisScreens.test.ts`, `tests/sources.test.ts`; `?demo=camp` has a talk waiting.)* |
 | **M6** | Save/load (slots + suspend); Codex; title screen; settings; Classic/Casual; touch controls; placeholder audio | Suspend/resume reproduces RNG; Casual returns wounded units; Codex shows differ-blocks; touch playable |
 | **M7** | Content: Prologue + Ch.1–3 with source-backed dialogue, supports, Codex, art placeholders; README; final lint pass | Slice playable start to finish; every line traceable; production build deployed locally |
 

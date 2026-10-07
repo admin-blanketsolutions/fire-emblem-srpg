@@ -1,0 +1,18 @@
+{
+  "id": "demo.opening",
+  "title": "Demo: the opening of a scene",
+  "ledger": [],
+  "cmds": [
+    { "bg": "demo-camp" },
+    { "say": { "who": "narrator", "text": "Test data, not history: a scene is a list of commands, and each spoken line says what it is.", "kind": "narration" } },
+    { "show": { "who": "lord", "at": "left" } },
+    { "show": { "who": "pikeman", "at": "right" } },
+    { "say": { "who": "lord", "text": "This line is dramatized: invented for the scene, and marked with an open diamond.", "kind": "dramatized" } },
+    { "say": { "who": "pikeman", "text": "(Demo line.) A documented line would carry a filled diamond, and must cite the ledger.", "kind": "documented", "src": ["CH-00.E3"] } },
+    { "wait": 300 },
+    { "say": { "who": "lord", "text": "A long speech is split into pages of three lines each, so that nothing is ever cut off by the edge of the box. This one is long enough to need a second page, and the player advances with the confirm key.", "kind": "dramatized" } },
+    { "flag": "demo-opening-seen" },
+    { "hide": "pikeman" },
+    { "say": { "who": "narrator", "text": "The scene ends; the flag has been raised.", "kind": "narration" } }
+  ]
+}

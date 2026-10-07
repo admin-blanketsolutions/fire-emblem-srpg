@@ -1,0 +1,5 @@
+[
+  { "id": "lord", "name": "Young Lord", "ledger": "CHR-GEN-DEMO", "portrait": "portrait.demo-lord", "faction": "ayyubid", "fictional": true },
+  { "id": "pikeman", "name": "Pikeman", "ledger": "CHR-GEN-DEMO", "portrait": "portrait.demo-pike", "faction": "ayyubid", "fictional": true },
+  { "id": "scribe", "name": "Scribe", "ledger": "CHR-GEN-DEMO", "portrait": "portrait.demo-scribe", "faction": "ayyubid", "fictional": true }
+]

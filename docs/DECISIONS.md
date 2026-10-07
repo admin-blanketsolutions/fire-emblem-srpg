@@ -262,6 +262,16 @@ They appear in the Codex and in carefully framed scenes, never as spectacle.
 - **For the suspend-save (M6):** besides the units, a battle's state includes the terrain overlay, the flames and their turns, the chapter's counters (barricades raised, decrees given), burns from skipped phases, the event runner's fired set, the flags, the objective's progress and the explored tiles, all of which are plain data.
 - **Art.** Every one of the 42 classes has its own map sprite (a test fails if two look alike); Tier II adds armour or a pennon, Tier III a crest or crown. Armour keeps the faction's second colour as a tabard, so an armoured unit is still known by whose it is.
 
+## D-031 Supports, scenes and the Majlis as built (M5)
+
+- **The ledger is the join, and the lint enforces it.** A documented line must cite, and what it cites must be a ledger row that is not unverified or excluded. A scene names the rows it stands on. A support names its `SUP-` row. This is mechanical on purpose: no line of history can enter the game without a row to point at.
+- **The demos say what they are.** The stand-in scenes, characters and support under `src/data/test/` use invented characters and say in their own text that they are test data. They contain no dramatized dialogue put in a real person's mouth, and the one documented line is a labelled demo of the mark. The campaign's own files stay empty until M7, when each scene is written against its ledger row.
+- **Skipping counts as seeing.** A support scene that a player skips still takes effect. The alternative, making the player sit through a scene to progress a bond, punishes the player who has already read it, and the Codex lists every scene for anyone who wants it again.
+- **Supports are earned on the Player Phase only,** by units on the field, and the cap per chapter is by pace. Aid in the forecast is the rank *viewed*, never the points, so the scene always comes before the bonus.
+- **Portraits are generic.** No source says what Salah ad-Din or his family looked like (ledger UNV-05); a placeholder portrait never claims to be a likeness. They are drawn from a few features (hair, beard, headgear, age), in the character's faction colours, and are replaced through the same override manifest as any other art.
+- **Settings are defined now,** with defaults and tolerant reading, so that dialogue can honour text speed, the source markers and the portraits setting; the settings screen and their storage arrive with M6.
+- **Drills and talks are small.** A drill is 4 weapon EXP and a talk 10 support points, once a camp; the numbers are first drafts for the balance pass in M7.
+
 ## Confirmed and open
 
 **Confirmed 2026-10-06:** Canvas 2D (D-001); date display rule (D-002); Three Postures plus added weapon types (D-006, D-024); classic reset and three tiers (D-018); slice scope and the Tikrit Prologue (D-019).

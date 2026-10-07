@@ -1,0 +1,12 @@
+{
+  "id": "demo.support-b",
+  "title": "Demo: a second conversation",
+  "ledger": [],
+  "cmds": [
+    { "show": { "who": "lord", "at": "left" } },
+    { "show": { "who": "pikeman", "at": "right" } },
+    { "say": { "who": "pikeman", "text": "You asked me to stand beside you. I did not think you meant it.", "kind": "dramatized" } },
+    { "say": { "who": "lord", "text": "I always mean what I ask for. It saves a great deal of time.", "kind": "dramatized" } },
+    { "flag": "demo-support-b" }
+  ]
+}

@@ -119,6 +119,12 @@ export function skillBonus(ctx: CombatContext): Bonus {
       bonus = addBonus(bonus, aura.bonus);
     }
   }
+  // a supported friend beside the tile lends its rank's bonus (best two count)
+  const supports = ctx.battle.supports;
+  if (supports && ctx.self.kind === 'unit') {
+    const aid = supports.aidFor(ctx.self.defId, ctx.at, ctx.battle.livingUnits(ctx.self.side));
+    bonus = addBonus(bonus, { hit: aid.hit, avoid: aid.avoid, crit: aid.crit, grd: aid.grd });
+  }
   return bonus;
 }
 

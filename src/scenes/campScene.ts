@@ -1,8 +1,12 @@
 import { buy, CONVOY_SLOTS, sell, store, withdraw, type Army, type Result } from '../core/army';
 import type { BattleTables } from '../core/battle';
+import { availableTalks, completeTalk, deployedUnits, drill, isDeployed, promotable, promoteWithItem, toggleDeploy, type Talk } from '../core/camp';
+import type { Effect } from '../core/dialogue';
 import type { Action } from '../core/input';
 import { applyItem, canUseItem, equipWeapon, priceOf, sellValue, stackName, type InventoryEnv } from '../core/inventory';
 import { kindLabel, roman } from '../core/labels';
+import { DEFAULT_SETTINGS, type Settings } from '../core/settings';
+import type { SupportGate } from '../core/supports';
 import type { PromotionResult } from '../core/promotion';
 import type { ShopDef, ShopTable } from '../core/shop';
 import { INVENTORY_SLOTS, equippedWeapon, type ItemStack, type UnitInstance } from '../core/unit';
@@ -13,7 +17,9 @@ import type { Scene } from '../engine/game';
 import type { TextRenderer, TextStyle } from '../engine/text';
 import { COLORS } from '../engine/theme';
 import { drawMenu, drawPanel, menuSize, type MenuItem } from '../engine/ui';
+import type { Story } from '../data/story';
 import { drawInfoPage, drawItemList, drawPromotion, rangeText, type Pen, type UnitSource } from './battleWindows';
+import { DialoguePlayer } from './dialoguePlayer';
 
 /**
  * The camp between battles: the army's units and their packs, the baggage train (the convoy) and
@@ -32,7 +38,18 @@ type Mode =
   | { kind: 'unit'; unit: number; pack: boolean; slot: number; note: string | null }
   | { kind: 'convoy'; unit: number; col: 0 | 1; row: number; note: string | null }
   | { kind: 'shop'; shop: ShopDef; tab: 'buy' | 'sell'; index: number; buyer: number; note: string | null }
-  | { kind: 'promotion'; result: PromotionResult; back: Mode };
+  | { kind: 'promotion'; result: PromotionResult; back: Mode }
+  /** The simple list screens: conversations, the Maydan, the Class screen, the roll and the choice of who deploys. */
+  | { kind: 'list'; which: ListKind; index: number; note: string | null }
+  | { kind: 'scene'; player: DialoguePlayer; then: () => void };
+
+type ListKind = 'talks' | 'maydan' | 'class' | 'roll' | 'prepare';
+
+interface ListRow {
+  readonly label: string;
+  readonly right?: string;
+  readonly dim?: boolean;
+}
 
 export interface CampSceneOptions {
   readonly army: Army;
@@ -45,6 +62,15 @@ export interface CampSceneOptions {
   /** Adds a last entry to the main menu; called when it is chosen. */
   readonly onContinue?: () => void;
   readonly continueLabel?: string;
+  /** The people and scenes the camp can show; without it the Majlis has nothing to say. */
+  readonly story?: Story;
+  readonly settings?: Settings;
+  /** The chapter just finished (or about to begin), the chapters in order, and the flags raised so far: what decides which scenes may be shown. */
+  readonly chapter?: string | null;
+  readonly chapterOrder?: readonly string[];
+  readonly flags?: Set<string>;
+  /** A scene unlocked a Codex entry. */
+  readonly onUnlock?: (id: string) => void;
 }
 
 /** Where a stack for sale comes from. */
@@ -69,12 +95,26 @@ export class CampScene implements Scene {
   private readonly onContinue: (() => void) | undefined;
   private readonly continueLabel: string;
   private readonly source: UnitSource;
+  private readonly assets: Assets;
+  private readonly story: Story | undefined;
+  private readonly settings: Settings;
+  private readonly chapter: string | null;
+  private readonly chapterOrder: readonly string[];
+  private readonly flags: Set<string>;
+  private readonly onUnlock: ((id: string) => void) | undefined;
   private mode: Mode = { kind: 'main', index: 0 };
   /** The list rows on screen, for taps: filled as the scene is drawn. */
   private hits: Hit[] = [];
 
-  constructor({ army, tables, shops, text, title, onContinue, continueLabel }: CampSceneOptions) {
+  constructor({ army, tables, shops, assets, text, title, onContinue, continueLabel, story, settings, chapter, chapterOrder, flags, onUnlock }: CampSceneOptions) {
     this.army = army;
+    this.assets = assets;
+    this.story = story;
+    this.settings = settings ?? DEFAULT_SETTINGS;
+    this.chapter = chapter ?? null;
+    this.chapterOrder = chapterOrder ?? [];
+    this.flags = flags ?? new Set();
+    this.onUnlock = onUnlock;
     this.tables = tables;
     this.env = tables;
     this.shops = shops;
@@ -90,14 +130,25 @@ export class CampScene implements Scene {
         return found;
       },
       weaponOf: (u) => equippedWeapon(u, tables.weapons),
+      supports: army.supports,
+      get units() {
+        return army.units;
+      },
     };
   }
 
   // ---------------------------------------------------------------- update
 
-  update(_dtMs: number, actions: ReadonlySet<Action>, taps: readonly Point[]): void {
+  update(dtMs: number, actions: ReadonlySet<Action>, taps: readonly Point[]): void {
+    if (this.mode.kind === 'scene') {
+      this.mode.player.update(dtMs, actions, taps);
+      if (this.mode.player.done) this.mode.then();
+      return;
+    }
     const merged = this.withTaps(actions, taps);
     switch (this.mode.kind) {
+      case 'list':
+        return this.updateList(this.mode, merged);
       case 'main':
         return this.updateMain(this.mode, merged);
       case 'units':
@@ -130,22 +181,34 @@ export class CampScene implements Scene {
 
   private highlighted(): number {
     const m = this.mode;
-    return m.kind === 'main' || m.kind === 'units' || m.kind === 'shop' ? m.index : m.kind === 'unit' ? m.slot : m.kind === 'convoy' ? m.row : -1;
+    return m.kind === 'main' || m.kind === 'units' || m.kind === 'shop' || m.kind === 'list' ? m.index : m.kind === 'unit' ? m.slot : m.kind === 'convoy' ? m.row : -1;
   }
 
   private highlight(index: number): void {
     const m = this.mode;
-    if (m.kind === 'main' || m.kind === 'units' || m.kind === 'shop') m.index = index;
+    if (m.kind === 'main' || m.kind === 'units' || m.kind === 'shop' || m.kind === 'list') m.index = index;
     else if (m.kind === 'unit') m.slot = index;
     else if (m.kind === 'convoy') m.row = index;
   }
 
+  private gate(): SupportGate {
+    return { chapter: this.chapter, chapterOrder: this.chapterOrder, flags: this.flags };
+  }
+
   private mainItems(): Array<MenuItem & { run: () => void }> {
+    const list = (which: ListKind, index = 0): (() => void) => () => (this.mode = { kind: 'list', which, index, note: null });
+    const talks = availableTalks(this.army, this.gate()).length;
+    const ready = promotable(this.army, this.env).length;
     const items: Array<MenuItem & { run: () => void }> = [
+      { label: 'Preparations', run: list('prepare') },
       { label: 'Units', run: () => (this.mode = { kind: 'units', index: 0 }) },
       { label: `Convoy  ${this.army.convoy.length}/${CONVOY_SLOTS}`, run: () => (this.mode = { kind: 'convoy', unit: 0, col: 0, row: 0, note: null }) },
     ];
     for (const shop of this.shops.values()) items.push({ label: shop.name, run: () => (this.mode = { kind: 'shop', shop, tab: 'buy', index: 0, buyer: 0, note: null }) });
+    items.push({ label: `Majlis talks${talks > 0 ? `  (${talks})` : ''}`, run: list('talks') });
+    items.push({ label: 'Maydan', run: list('maydan') });
+    items.push({ label: `Class${ready > 0 ? `  (${ready})` : ''}`, run: list('class') });
+    if (this.army.fallen.length > 0) items.push({ label: 'Casualty roll', run: list('roll') });
     const next = this.onContinue;
     if (next) items.push({ label: this.continueLabel, run: next });
     return items;
@@ -162,7 +225,7 @@ export class CampScene implements Scene {
     const n = this.army.units.length;
     if (actions.has('up')) mode.index = wrap(mode.index, -1, n);
     if (actions.has('down')) mode.index = wrap(mode.index, 1, n);
-    if (actions.has('cancel')) this.mode = { kind: 'main', index: 0 };
+    if (actions.has('cancel')) this.mode = { kind: 'main', index: 1 };
     else if (actions.has('confirm') && n > 0) this.mode = { kind: 'unit', unit: mode.index, pack: false, slot: 0, note: null };
   }
 
@@ -234,7 +297,7 @@ export class CampScene implements Scene {
       mode.note = null;
     }
     if (actions.has('cancel')) {
-      this.mode = { kind: 'main', index: 1 };
+      this.mode = { kind: 'main', index: 2 };
       return;
     }
     if (!actions.has('confirm')) return;
@@ -242,6 +305,111 @@ export class CampScene implements Scene {
     mode.note = result.ok ? null : result.reason;
     const left = mode.col === 0 ? unit.inventory.length : this.army.convoy.length;
     mode.row = Math.max(0, Math.min(left - 1, mode.row));
+  }
+
+  // ---------------------------------------------------------------- the list screens
+
+  private mainIndexOf(which: ListKind): number {
+    const base = 3 + this.shops.size;
+    return which === 'prepare' ? 0 : which === 'talks' ? base : which === 'maydan' ? base + 1 : which === 'class' ? base + 2 : base + 3;
+  }
+
+  private listRows(which: ListKind): ListRow[] {
+    const { army } = this;
+    switch (which) {
+      case 'talks':
+        return availableTalks(army, this.gate()).map((t) => ({ label: `${t.a.name} and ${t.b.name}`, right: `Rank ${t.rank}` }));
+      case 'maydan':
+        return army.units.map((u) => {
+          const weapon = equippedWeapon(u, this.tables.weapons);
+          const drilled = army.camp.drilled.has(u.id);
+          return { label: u.name, right: drilled ? 'drilled' : weapon ? kindLabel(weapon.kind) : 'no weapon', dim: drilled || !weapon };
+        });
+      case 'class':
+        return promotable(army, this.env).map((p) => ({ label: p.unit.name, right: `to ${p.targetName}` }));
+      case 'roll':
+        return army.fallen.map((u) => ({ label: u.name, right: `lost in ${army.fallenIn.get(u.id) ?? 'battle'}`, dim: true }));
+      case 'prepare':
+        return army.units.map((u) => ({ label: `${isDeployed(army, u) ? '✔' : '  '} ${u.name}`, right: `${this.source.classOf(u).name}  Lv ${u.level}`, dim: !isDeployed(army, u) }));
+    }
+  }
+
+  private updateList(mode: Extract<Mode, { kind: 'list' }>, actions: ReadonlySet<Action>): void {
+    const rows = this.listRows(mode.which);
+    if (actions.has('up')) mode.index = wrap(mode.index, -1, rows.length);
+    if (actions.has('down')) mode.index = wrap(mode.index, 1, rows.length);
+    if (actions.has('cancel')) {
+      this.mode = { kind: 'main', index: this.mainIndexOf(mode.which) };
+      return;
+    }
+    if (!actions.has('confirm') || rows.length === 0) return;
+    mode.index = Math.min(mode.index, rows.length - 1);
+    const { army } = this;
+    switch (mode.which) {
+      case 'talks': {
+        const talk = availableTalks(army, this.gate())[mode.index];
+        if (talk) this.startTalk(talk, mode);
+        return;
+      }
+      case 'maydan': {
+        const unit = army.units[mode.index];
+        if (!unit) return;
+        const result = drill(army, unit, this.env);
+        mode.note = result.ok ? `${unit.name}: ${kindLabel(result.gain.kind)} +${result.gain.amount}${result.gain.gradeUp ? `, grade ${roman(result.gain.gradeUp)}!` : ''}` : result.reason;
+        return;
+      }
+      case 'class': {
+        const entry = promotable(army, this.env)[mode.index];
+        if (!entry) return;
+        const outcome = promoteWithItem(army, entry.unit, this.env);
+        if (outcome.ok) {
+          mode.index = 0;
+          this.mode = { kind: 'promotion', result: outcome.result, back: mode };
+        } else mode.note = outcome.reason;
+        return;
+      }
+      case 'roll':
+        return;
+      case 'prepare': {
+        const unit = army.units[mode.index];
+        if (!unit) return;
+        const result = toggleDeploy(army, unit);
+        mode.note = result.ok ? null : result.reason;
+        return;
+      }
+    }
+  }
+
+  /** Show a support scene; when it is over the rank takes effect. */
+  private startTalk(talk: Talk, back: Extract<Mode, { kind: 'list' }>): void {
+    const scene = this.story?.scenes.get(talk.scene.scene);
+    if (!this.story || !scene) {
+      back.note = 'That scene has not been written yet.';
+      return;
+    }
+    const player = new DialoguePlayer({
+      scene,
+      characters: this.story.characters,
+      assets: this.assets,
+      text: this.text,
+      settings: this.settings,
+      onEffect: (effect) => this.apply(effect),
+    });
+    this.mode = {
+      kind: 'scene',
+      player,
+      then: () => {
+        completeTalk(this.army, talk, this.gate());
+        back.index = 0;
+        back.note = `${talk.a.name} and ${talk.b.name}: rank ${talk.rank}`;
+        this.mode = back;
+      },
+    };
+  }
+
+  private apply(effect: Effect): void {
+    if ('flag' in effect) this.flags.add(effect.flag);
+    else if ('unlock' in effect) this.onUnlock?.(effect.unlock);
   }
 
   /** What the Sell tab offers: the buyer's pack, then the convoy. */
@@ -269,7 +437,7 @@ export class CampScene implements Scene {
     }
     if (actions.has('cancel')) {
       const at = [...this.shops.values()].indexOf(mode.shop);
-      this.mode = { kind: 'main', index: 2 + Math.max(0, at) };
+      this.mode = { kind: 'main', index: 3 + Math.max(0, at) };
       return;
     }
     if (!actions.has('confirm')) return;
@@ -326,6 +494,12 @@ export class CampScene implements Scene {
       case 'promotion':
         drawPromotion(pen, mode.result);
         break;
+      case 'list':
+        this.drawList(ctx, mode);
+        break;
+      case 'scene':
+        mode.player.draw(ctx);
+        break;
     }
   }
 
@@ -337,21 +511,59 @@ export class CampScene implements Scene {
     return `${cut}.`;
   }
 
+  private drawList(ctx: CanvasRenderingContext2D, mode: Extract<Mode, { kind: 'list' }>): void {
+    const rows = this.listRows(mode.which);
+    const titles: Record<ListKind, string> = { talks: 'Majlis talks', maydan: 'The Maydan', class: 'Class', roll: 'Casualty roll', prepare: 'Preparations' };
+    drawPanel(ctx, 4, 14, LOGICAL_WIDTH - 8, 132);
+    this.text.draw(ctx, titles[mode.which], 12, 19, GOLD);
+    const header =
+      mode.which === 'talks'
+        ? `Talks left ${Math.max(0, 3 - this.army.camp.talks)}`
+        : mode.which === 'prepare'
+          ? `Deployed ${deployedUnits(this.army).length}/${Math.min(this.army.deployLimit, this.army.units.length)}`
+          : mode.which === 'roll'
+            ? 'Those who left the army'
+            : `Dinars ${this.army.dinars}`;
+    this.text.drawRight(ctx, header, LOGICAL_WIDTH - 12, 19, mode.which === 'roll' ? DIM : GOLD);
+    ctx.fillStyle = COLORS.panelInner;
+    ctx.fillRect(10, 30, LOGICAL_WIDTH - 20, 1);
+    const visible = 10;
+    const top = Math.max(0, Math.min(rows.length - visible, mode.index - Math.floor(visible / 2)));
+    rows.slice(top, top + visible).forEach((row, i) => {
+      const index = top + i;
+      const y = 35 + i * ROW;
+      if (index === mode.index && mode.which !== 'roll') this.text.draw(ctx, '→', 9, y, GOLD);
+      this.text.draw(ctx, row.label, 18, y, row.dim ? DIM : PLAIN);
+      if (row.right) this.text.drawRight(ctx, row.right, LOGICAL_WIDTH - 12, y, row.dim ? DIM : { color: COLORS.good });
+      this.hits.push({ x: 8, y, w: LOGICAL_WIDTH - 16, index });
+    });
+    if (rows.length === 0) {
+      const empty: Record<ListKind, string[]> = {
+        talks: ['No one has anything to say yet.', 'Friends who fight side by side talk more.'],
+        maydan: ['There is no one to drill.'],
+        class: ['No one is ready for promotion.', 'A unit needs level 10 and a Charter or a Diploma.'],
+        roll: ['No one has left the army.'],
+        prepare: ['There is no one to choose.'],
+      };
+      empty[mode.which].forEach((line, i) => this.text.draw(ctx, line, 18, 38 + i * 11, DIM));
+    }
+    const hint: Record<ListKind, string> = { talks: 'OK Hear the talk   Back', maydan: 'OK Drill   Back', class: 'OK Promote   Back', roll: 'Back', prepare: 'OK Choose or release   Back' };
+    this.text.drawCentered(ctx, mode.note ?? hint[mode.which], LOGICAL_WIDTH / 2, LOGICAL_HEIGHT - 12, mode.note ? { color: COLORS.good } : DIM);
+  }
+
   private dinars(ctx: CanvasRenderingContext2D): void {
     this.text.drawRight(ctx, `Dinars ${this.army.dinars}`, LOGICAL_WIDTH - 8, 7, GOLD);
   }
 
   private drawMain(ctx: CanvasRenderingContext2D, mode: Extract<Mode, { kind: 'main' }>): void {
     const items = this.mainItems();
-    this.text.drawCentered(ctx, this.title, LOGICAL_WIDTH / 2, 14, { color: COLORS.text, shadow: COLORS.ink, scale: 2 });
+    this.text.drawCentered(ctx, this.title, LOGICAL_WIDTH / 2, 12, { color: COLORS.text, shadow: COLORS.ink, scale: 2 });
     this.dinars(ctx);
-    const { w, h } = menuSize(this.text, items);
+    const { w } = menuSize(this.text, items);
     const x = Math.round((LOGICAL_WIDTH - w) / 2);
-    const y = 46;
+    const y = 36;
     drawMenu(ctx, this.text, items, mode.index, x, y);
     items.forEach((_, i) => this.hits.push({ x, y: y + 5 + i * 11, w, index: i }));
-    const living = this.army.units.length;
-    this.text.drawCentered(ctx, `${living} ${living === 1 ? 'soldier' : 'soldiers'} in the army`, LOGICAL_WIDTH / 2, y + h + 8, DIM);
   }
 
   private drawUnits(ctx: CanvasRenderingContext2D, mode: Extract<Mode, { kind: 'units' }>): void {
