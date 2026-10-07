@@ -56,6 +56,8 @@ export interface Combatant {
   readonly bonus?: Bonus;
   /** A structure (gate, barricade): it has no attack speed, so its evasion is terrain alone. */
   readonly structure?: boolean;
+  /** A structure that burns: fire attacks do double Might against it. */
+  readonly fireWeak?: boolean;
 }
 
 export type HitMode = 'honest' | 'weighted';
@@ -73,7 +75,7 @@ export function attackSpeed(c: Combatant): number {
 /** Might of the weapon against this target: doubled if effective, plus any flat bonus. */
 export function effectiveMight(weapon: WeaponDef, target: Combatant): number {
   const classes = target.structure ? (['structure'] as const) : ([target.unit.moveType] as const);
-  const isEff = classes.some((c) => isEffective(weapon, c));
+  const isEff = classes.some((c) => isEffective(weapon, c)) || (weapon.kind === 'fire' && target.fireWeak === true);
   const flat = classes.reduce((sum, c) => sum + (weapon.vsBonus?.[c] ?? 0), 0);
   return weapon.might * (isEff ? 2 : 1) + flat;
 }

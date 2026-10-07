@@ -5,5 +5,6 @@
   "critMultiplier": 3,
   "doubleThreshold": 4,
   "bossExpBonus": 40,
-  "promotionLevel": 10
+  "promotionLevel": 10,
+  "spreadChance": 0.4
 }

@@ -127,6 +127,7 @@ export function currentGrade(unit: UnitInstance, classDef: ClassDef, kind: Weapo
 }
 
 export function canEquip(unit: UnitInstance, weapon: WeaponDef, classDef: ClassDef): boolean {
+  if (unit.kind === 'structure') return true;
   if (weapon.mountedOnly && unit.moveType !== 'mounted') return false;
   return weapon.grade <= currentGrade(unit, classDef, weapon.kind);
 }

@@ -1,0 +1,18 @@
+[
+  {
+    "id": "bazaar",
+    "name": "The Bazaar",
+    "stock": [
+      "levy-spear", "brace-spear", "iron-sabre", "iron-mace", "hatchet", "knife", "short-bow", "light-crossbow",
+      "javelin", "naphtha-pot", "salve", "bandage", "water-skin", "rose-water-sherbet"
+    ]
+  },
+  {
+    "id": "armoury",
+    "name": "The Armoury",
+    "stock": [
+      "steel-head-spear", "syrian-sabre", "flanged-mace", "tabarzin", "khanjar", "composite-bow", "frankish-crossbow",
+      "heavy-javelin", "flame-jar", "cordial"
+    ]
+  }
+]

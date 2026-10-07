@@ -10,7 +10,7 @@ export const VISION: Readonly<Record<MoveType, number>> = { foot: 3, light: 4, m
 
 /** A unit's vision radius: its movement type's, plus the terrain bonus, less the map's penalty; at least 1. */
 export function visionRadius(battle: BattleState, unit: UnitInstance): number {
-  const bonus = battle.map.terrainAt(unit.x, unit.y).vision ?? 0;
+  const bonus = battle.terrainAt(unit.x, unit.y).vision ?? 0;
   return Math.max(1, VISION[unit.moveType] + bonus - battle.map.rules.visionPenalty);
 }
 
@@ -19,7 +19,7 @@ export function computeVisible(battle: BattleState, sides: readonly Side[]): Set
   const seen = new Set<number>();
   const { width, height } = battle.map;
   for (const unit of battle.units) {
-    if (unit.retreated || !sides.includes(unit.side)) continue;
+    if (unit.retreated || unit.kind !== 'unit' || !sides.includes(unit.side)) continue;
     const r = visionRadius(battle, unit);
     for (let dy = -r; dy <= r; dy++) {
       const span = r - Math.abs(dy);

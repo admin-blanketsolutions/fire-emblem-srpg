@@ -183,7 +183,7 @@ export function drawForecast(pen: Pen, battle: BattleState, fc: Forecast, a: Uni
     row('CRT', stat(fc.attacker, 'crit'), stat(fc.defender, 'crit'), 3, sideColor(fc.attacker), sideColor(fc.defender));
     text.drawCentered(ctx, 'OK Fight   Back   Info Details', mid, y + h - 12, DIM);
   } else {
-    const terrain = battle.map.terrainAt(d.x, d.y);
+    const terrain = battle.terrainAt(d.x, d.y);
     row('SPD', String(fc.attacker.attackSpeed), String(fc.defender.attackSpeed), 0);
     row('ACC', String(fc.attacker.accuracy), String(fc.defender.accuracy), 1);
     row('EVA', String(fc.attacker.evasion), String(fc.defender.evasion), 2);

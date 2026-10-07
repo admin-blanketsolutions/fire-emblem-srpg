@@ -400,5 +400,19 @@
     "range": [1, 1],
     "uses": 4,
     "price": 104
+  },
+  {
+    "id": "mangonel-stone",
+    "name": "Mangonel Stone",
+    "kind": "javelin",
+    "grade": 5,
+    "might": 14,
+    "hit": 65,
+    "crit": 0,
+    "weight": 0,
+    "range": [3, 5],
+    "uses": 99,
+    "price": 0,
+    "tags": ["siege", "thrown"]
   }
 ]

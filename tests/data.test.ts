@@ -19,6 +19,8 @@ describe('the weapon table', () => {
       'short-bow', 'composite-bow', 'great-composite-bow',
       'light-crossbow', 'frankish-crossbow', 'winch-crossbow',
       'javelin', 'heavy-javelin', 'mizraq', 'naphtha-pot', 'flame-jar', 'salve', 'cordial', 'theriac',
+      // siege engines fire their own stone and are never sold
+      'mangonel-stone',
     ];
     for (const id of expected) expect(weapons.has(id), id).toBe(true);
     expect(weapons.size).toBe(expected.length);
@@ -48,7 +50,7 @@ describe('the weapon table', () => {
 
   it('grades a weapon no higher than the grade its group reaches', () => {
     for (const w of weapons.values()) expect(w.grade).toBeGreaterThanOrEqual(1);
-    for (const w of weapons.values()) expect(w.price).toBeGreaterThan(0);
+    for (const w of weapons.values()) if (!w.tags?.includes('siege')) expect(w.price, w.id).toBeGreaterThan(0);
   });
 });
 

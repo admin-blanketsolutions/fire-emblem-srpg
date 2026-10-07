@@ -27,8 +27,10 @@ export type Condition =
 export type When = Condition | { readonly all: readonly Condition[] } | { readonly any: readonly Condition[] };
 
 export interface SpawnSpec {
-  /** A unit definition id. */
+  /** A unit or structure definition id. */
   readonly def: string;
+  /** For a structure: whose it is (default enemy). Units take their side from their definition. */
+  readonly side?: Side;
   readonly at: Tile;
   readonly ai?: AiProfile;
   readonly tags?: readonly string[];

@@ -205,7 +205,7 @@ export function planUnit(battle: BattleState, unit: UnitInstance): UnitPlan {
   const choices: Choice[] = [];
   for (const stop of stops) {
     const key = tileKey(stop.x, stop.y);
-    const terrain = battle.map.terrainAt(stop.x, stop.y);
+    const terrain = battle.terrainAt(stop.x, stop.y);
     const exposure = threat.get(key) ?? 0;
     const position = weights.cover * terrain.cover + weights.avoid * terrain.avoid - weights.exposure * exposure;
     const cost = reach.nodes.get(key)?.cost ?? 0;
@@ -237,7 +237,7 @@ export function planUnit(battle: BattleState, unit: UnitInstance): UnitPlan {
   if (holding) return stay(wakes);
   const toward = (sources: readonly Point[]): UnitPlan => {
     if (sources.length === 0) return stay(wakes);
-    const field = distanceField(battle.map, unit.moveType, sources);
+    const field = distanceField(battle.map, unit.moveType, sources, battle.costFor(unit));
     const value = (p: Point): number => field.get(tileKey(p.x, p.y)) ?? Number.POSITIVE_INFINITY;
     const ranked = stops
       .map((p) => ({ dest: p, score: -value(p), exposure: threat.get(tileKey(p.x, p.y)) ?? 0, cost: reach.nodes.get(tileKey(p.x, p.y))?.cost ?? 0 }))

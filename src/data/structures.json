@@ -1,0 +1,6 @@
+[
+  { "id": "gate", "name": "Closed Gate", "hp": 24, "grd": 4, "tags": ["gate", "blocks"], "sprite": "unit.gate" },
+  { "id": "wall-segment", "name": "Wall", "hp": 30, "grd": 6, "tags": ["wall", "blocks"], "breach": "plain", "sprite": "unit.wall-segment" },
+  { "id": "barricade", "name": "Barricade", "hp": 12, "grd": 2, "tags": ["barricade", "blocks"], "fireWeak": true, "crossable": ["foot", "light"], "sprite": "unit.barricade" },
+  { "id": "mangonel", "name": "Mangonel", "hp": 20, "grd": 3, "weapon": "mangonel-stone", "tags": ["engine", "siege"], "fireWeak": true, "sprite": "unit.mangonel" }
+]

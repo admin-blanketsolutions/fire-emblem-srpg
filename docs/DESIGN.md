@@ -714,9 +714,9 @@ Each class has one or two skills. A line has three skills (`s1`, `s2`, `s3`): Ti
 | `triage` | Remedy heals +3 if the target is below 50% HP |
 | `cure` | Remedy also clears Thirst, Heat and Burn |
 | `renewal` | Adjacent allies regain 5 HP at the start of the Player Phase |
-| `counsel` | Action: one ally within 3 gains +10 accuracy and +10 avoid until the next phase |
+| `counsel` | Action: one ally within 3 gains +10 accuracy and +10 avoid until the end of the next enemy phase |
 | `dispatch` | Action: an ally within 2 acts again (once per turn; not on Lords) |
-| `decree` | Action, once per chapter: all allies gain +10 accuracy and +10 avoid for one phase |
+| `decree` | Action, once per chapter: all allies gain +10 accuracy and +10 avoid until the end of the next enemy phase |
 
 ### 6.6 Promotion (the classic reset)
 

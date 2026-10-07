@@ -37,7 +37,7 @@
   {"id": "triage", "name": "Triage", "kind": "passive", "description": "Remedies heal 3 more if the target is below 50% HP."},
   {"id": "cure", "name": "Cure", "kind": "passive", "description": "Remedies also clear Thirst, Heat and Burning."},
   {"id": "renewal", "name": "Renewal", "kind": "trigger", "description": "Adjacent allies regain 5 HP at the start of the unit's phase."},
-  {"id": "counsel", "name": "Counsel", "kind": "action", "description": "Action: one ally within 3 gains +10 accuracy and +10 avoid until the next phase."},
+  {"id": "counsel", "name": "Counsel", "kind": "action", "description": "Action: one ally within 3 gains +10 accuracy and +10 avoid until the end of the next enemy phase."},
   {"id": "dispatch", "name": "Dispatch", "kind": "action", "description": "Action: an ally within 2 acts again (once per turn; not on Lords)."},
-  {"id": "decree", "name": "Decree", "kind": "action", "description": "Action, once per chapter: all allies gain +10 accuracy and +10 avoid for one phase."}
+  {"id": "decree", "name": "Decree", "kind": "action", "description": "Action, once per chapter: all allies gain +10 accuracy and +10 avoid until the end of the next enemy phase."}
 ]

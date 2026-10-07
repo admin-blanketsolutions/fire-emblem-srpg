@@ -12,6 +12,8 @@ export interface Balance {
   readonly bossExpBonus: number;
   /** The level a unit must reach before it can be promoted. */
   readonly promotionLevel: number;
+  /** The chance each burning tile ignites a flammable neighbour at the start of a phase (1 makes fire deterministic). */
+  readonly spreadChance: number;
 }
 
 export function validateBalance(raw: unknown): Balance {
@@ -19,6 +21,11 @@ export function validateBalance(raw: unknown): Balance {
   const positive = (key: keyof Balance): number => {
     const value = b[key];
     if (typeof value !== 'number' || !(value > 0)) throw new Error(`balance.${key} must be a positive number`);
+    return value;
+  };
+  const nonNegative = (key: keyof Balance): number => {
+    const value = b[key];
+    if (typeof value !== 'number' || !(value >= 0 && value <= 1)) throw new Error(`balance.${key} must be a number from 0 to 1`);
     return value;
   };
   const rate = b.tierExpRate;
@@ -33,5 +40,6 @@ export function validateBalance(raw: unknown): Balance {
     doubleThreshold: positive('doubleThreshold'),
     bossExpBonus: positive('bossExpBonus'),
     promotionLevel: positive('promotionLevel'),
+    spreadChance: nonNegative('spreadChance'),
   };
 }

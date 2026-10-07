@@ -1,16 +1,19 @@
 import type { UnitPlan } from './ai';
-import type { AiWeights } from './aiProfile';
+import type { AiProfile, AiWeights } from './aiProfile';
 import type { Balance } from './balance';
 import type { ItemTable } from './items';
+import { createStructure, type StructureTable } from './structures';
+import { availableActions, performAction, type ClassActionId, type ClassActionOption, type ClassActionReport } from './classActions';
 import type { ClassDef, ClassTable } from './classes';
-import { forecast, resolveStrikes, type Combatant, type Forecast, type HitMode, type StrikeEvent } from './combat';
+import { defence, forecast, power, resolveStrikes, type Combatant, type Forecast, type HitMode, type StrikeEvent } from './combat';
 import { EventRunner, matchesKey, type EventAction, type PhaseSide, type SpawnSpec, type Trigger } from './events';
 import { awardExp, expForFight, expForHeal, grantWexp, type ExpResult, type WexpGain } from './exp';
 import { computeVisible } from './fog';
-import { manhattan, neighbors4, ring, tileKey } from './grid';
+import { DIRS4, keyX, keyY, manhattan, neighbors4, ring, tileKey } from './grid';
 import type { GameMap } from './map';
-import type { TerrainDef } from './terrain';
-import { checkPromotion, promote, type PromotionResult } from './promotion';
+import type { TerrainDef, TerrainTable } from './terrain';
+import { applyItem, canUseItem, equipWeapon, swapItems, type ItemUseReport } from './inventory';
+import { checkPromotion, promote } from './promotion';
 import { adjustedCost, movementOf, rangeBonus, skillBonus, type CombatContext } from './skills';
 import { checkObjective, newProgress, type Checkpoint, type ObjectiveProgress, type Outcome } from './objectives';
 import { computeReach, pathTo, type ReachResult } from './pathfinding';
@@ -40,6 +43,8 @@ export interface BattleTables {
   readonly balance: Balance;
   /** Unit definitions, for reinforcements and spawn events. */
   readonly units: UnitTable;
+  readonly structures: StructureTable;
+  readonly terrain: TerrainTable;
   readonly ai: AiWeights;
 }
 
@@ -66,18 +71,15 @@ export interface FightReport {
   readonly wexpGains: ReadonlyArray<WexpGain & { readonly unit: UnitInstance }>;
   /** Weapons that ran out of uses and were removed. */
   readonly brokenWeapons: ReadonlyArray<{ readonly unit: UnitInstance; readonly weapon: WeaponDef }>;
-  /** Units that retreat wounded. */
+  /** Units that retreat wounded (and structures that are destroyed). */
   readonly defeated: readonly UnitInstance[];
+  /** Tiles set alight by the fight. */
+  readonly ignited: readonly Point[];
+  /** Fire Storm: other enemies beside the target who took half the damage. */
+  readonly splash: ReadonlyArray<{ readonly target: UnitInstance; readonly damage: number }>;
 }
 
-/** What using an item did. */
-export interface ItemUseReport {
-  readonly unit: UnitInstance;
-  readonly item: string;
-  readonly restored: number;
-  readonly cured: readonly StatusId[];
-  readonly promotion: PromotionResult | null;
-}
+export type { ItemUseReport } from './inventory';
 
 export interface HealReport {
   readonly healer: UnitInstance;
@@ -92,6 +94,8 @@ export interface PhaseReport {
   readonly turn: number;
   readonly phase: Phase;
   readonly healed: ReadonlyArray<{ readonly unit: UnitInstance; readonly amount: number }>;
+  /** Units hurt by flames as the previous phase ended. */
+  readonly burned: ReadonlyArray<{ readonly unit: UnitInstance; readonly damage: number }>;
   readonly arrived: readonly UnitInstance[];
 }
 
@@ -144,6 +148,23 @@ export class BattleState {
   explored = new Set<number>();
   visible = new Set<number>();
 
+  /** Tiles whose terrain has changed during the battle (a wall breached). */
+  private readonly overrides = new Map<number, TerrainDef>();
+  /** Bumped whenever terrain changes, so a view knows to redraw the map. */
+  terrainVersion = 0;
+  /** Burning tiles, each with the turns it has left (DESIGN §4.6). */
+  readonly flames = new Map<number, number>();
+  /** Counts of things done this chapter, for the limits on actions (barricades, decrees). */
+  private readonly counts = new Map<string, number>();
+
+  countOf(key: string): number {
+    return this.counts.get(key) ?? 0;
+  }
+
+  bump(key: string): void {
+    this.counts.set(key, this.countOf(key) + 1);
+  }
+
   constructor(map: GameMap, units: UnitInstance[], tables: BattleTables, rng: Rng, rules: BattleRules = DEFAULT_RULES) {
     this.map = map;
     this.units = units;
@@ -177,17 +198,111 @@ export class BattleState {
     return classDef;
   }
 
-  /** The terrain on a tile (dynamic changes, such as breaches, will be applied here). */
+  /** The terrain on a tile, with any change made during the battle. */
   terrainAt(x: number, y: number): TerrainDef {
-    return this.map.terrainAt(x, y);
+    return this.overrides.get(tileKey(x, y)) ?? this.map.terrainAt(x, y);
   }
 
-  /** The cost for a unit to enter a tile: the terrain's cost for its movement type, adjusted by its skills. */
+  /** Change a tile's terrain, as when a wall is breached. */
+  setTerrain(x: number, y: number, id: string): void {
+    const def = this.tables.terrain.get(id);
+    if (!def) throw new Error(`Unknown terrain "${id}"`);
+    if (!this.map.inBounds(x, y)) throw new RangeError(`Tile (${x}, ${y}) is outside the map`);
+    this.overrides.set(tileKey(x, y), def);
+    this.terrainVersion += 1;
+  }
+
+  /** The cost for a unit to enter a tile: the terrain's cost, adjusted by its skills; a burning tile cannot be entered. */
   costFor(unit: UnitInstance): (x: number, y: number) => number | null {
     return (x, y) => {
+      if (this.flames.has(tileKey(x, y))) return null;
       const terrain = this.terrainAt(x, y);
-      return adjustedCost(unit, terrain.id, terrain.cost[unit.moveType]);
+      const base = adjustedCost(unit, terrain.id, terrain.cost[unit.moveType]);
+      if (base === null) return null;
+      // climbing over a barricade costs one more
+      const blocker = this.unitAt(x, y);
+      return blocker && blocker !== unit && blocker.kind === 'structure' && this.crosses(unit, blocker) ? base + 1 : base;
     };
+  }
+
+  /** Whether the mover can climb over the structure (a barricade) rather than being stopped by it. */
+  private crosses(mover: UnitInstance, structure: UnitInstance): boolean {
+    return this.tables.structures.get(structure.defId)?.crossable?.includes(mover.moveType) ?? false;
+  }
+
+  // ------------------------------------------------------------------ flames
+
+  flameAt(x: number, y: number): boolean {
+    return this.flames.has(tileKey(x, y));
+  }
+
+  /** Whether a tile can hold flames: ground someone can walk on that is not water. */
+  canBurn(x: number, y: number): boolean {
+    const t = this.terrainAt(x, y);
+    if (t.flammable) return true;
+    return !t.quench && Object.values(t.cost).some((c) => c !== null);
+  }
+
+  /** Set a tile alight: two turns, three on flammable ground. */
+  ignite(x: number, y: number): boolean {
+    if (!this.map.inBounds(x, y) || !this.canBurn(x, y)) return false;
+    const turns = this.terrainAt(x, y).flammable ? 3 : 2;
+    const key = tileKey(x, y);
+    this.flames.set(key, Math.max(this.flames.get(key) ?? 0, turns));
+    return true;
+  }
+
+  /**
+   * At the start of a phase every burning tile may light the flammable tiles beside it, with the
+   * map's spread chance, raised by half in the direction of the wind. One draw is made for each
+   * flammable, unlit neighbour, in a fixed order; fires lit now do not spread until the next phase.
+   */
+  private spreadFlames(): void {
+    const chance = this.tables.balance.spreadChance;
+    const wind = this.map.rules.wind;
+    const downwind = wind === 'N' ? { x: 0, y: -1 } : wind === 'E' ? { x: 1, y: 0 } : wind === 'S' ? { x: 0, y: 1 } : wind === 'W' ? { x: -1, y: 0 } : null;
+    const lit: number[] = [];
+    for (const key of [...this.flames.keys()].sort((a, b) => a - b)) {
+      for (const d of DIRS4) {
+        const x = keyX(key) + d.x;
+        const y = keyY(key) + d.y;
+        if (!this.map.inBounds(x, y) || this.flames.has(tileKey(x, y)) || !this.terrainAt(x, y).flammable) continue;
+        const p = downwind && downwind.x === d.x && downwind.y === d.y ? Math.min(1, chance * 1.5) : chance;
+        if (this.rng.next() < p) lit.push(tileKey(x, y));
+      }
+    }
+    for (const key of lit) this.ignite(keyX(key), keyY(key));
+  }
+
+  /** Flames at the end of a phase hurt what the side has standing in them: 4 damage, 8 to a structure that burns. */
+  private burnUnits(side: Side): Array<{ unit: UnitInstance; damage: number }> {
+    const burned: Array<{ unit: UnitInstance; damage: number }> = [];
+    for (const unit of this.livingUnits(side)) {
+      if (!this.flames.has(tileKey(unit.x, unit.y))) continue;
+      const burns = unit.kind === 'structure' && this.tables.structures.get(unit.defId)?.fireWeak === true;
+      const damage = Math.min(burns ? 8 : 4, unit.hp);
+      unit.hp -= damage;
+      if (unit.kind === 'unit') this.addStatus(unit, 'burn', 1);
+      burned.push({ unit, damage });
+      if (unit.hp <= 0) this.defeat(unit);
+    }
+    return burned;
+  }
+
+  /** Flames burn down once a turn. */
+  private burnDown(): void {
+    for (const [key, left] of [...this.flames]) {
+      if (left <= 1) this.flames.delete(key);
+      else this.flames.set(key, left - 1);
+    }
+  }
+
+  /** A unit falls: it retreats wounded, and a structure is destroyed, perhaps leaving a breach where it stood. */
+  defeat(unit: UnitInstance): void {
+    unit.retreated = true;
+    if (unit.kind !== 'structure') return;
+    const breach = this.tables.structures.get(unit.defId)?.breach;
+    if (breach) this.setTerrain(unit.x, unit.y, breach);
   }
 
   /** Where a unit can move this turn, given everyone else on the board. */
@@ -201,7 +316,10 @@ export class BattleState {
       costFor: this.costFor(unit),
       occupantAt: (x, y) => {
         const other = this.unitAt(x, y);
-        return other && other !== unit ? other.side : null;
+        if (!other || other === unit) return null;
+        // a structure stops everyone, whoever owns it, unless the mover can climb over it
+        if (other.kind === 'structure') return this.crosses(unit, other) ? unit.side : 'neutral';
+        return other.side;
       },
     });
   }
@@ -270,6 +388,7 @@ export class BattleState {
       terrain: this.terrainAt(at.x, at.y),
       bonus: skillBonus(context),
       ...(unit.kind === 'structure' ? { structure: true } : {}),
+      ...(unit.kind === 'structure' && this.tables.structures.get(unit.defId)?.fireWeak ? { fireWeak: true } : {}),
     };
   }
 
@@ -331,11 +450,7 @@ export class BattleState {
 
   /** Equip the weapon in an inventory slot if the unit may wield it. */
   equip(unit: UnitInstance, slot: number): boolean {
-    const stack = unit.inventory[slot];
-    const weapon = stack ? this.tables.weapons.get(stack.id) : undefined;
-    if (!stack || !weapon || stack.uses <= 0 || !canEquip(unit, weapon, this.classOf(unit))) return false;
-    unit.equipped = slot;
-    return true;
+    return equipWeapon(unit, slot, this.tables);
   }
 
   /**
@@ -368,25 +483,28 @@ export class BattleState {
     const fc = this.forecastFor(attacker, defender);
     if (!fc) throw new Error(`${attacker.name} cannot attack ${defender.name} from here`);
     const hpBefore = { attacker: attacker.hp, defender: defender.hp };
-    // the weapon kinds are read now: a weapon that breaks mid-fight leaves the inventory
-    const kinds = { a: this.weaponOf(attacker)?.kind, d: this.weaponOf(defender)?.kind };
+    // the weapons are read now: one that breaks mid-fight leaves the inventory
+    const used = { a: this.weaponOf(attacker), d: this.weaponOf(defender) };
+    const kinds = { a: used.a?.kind, d: used.d?.kind };
     const events = resolveStrikes(fc, attacker.hp, defender.hp, this.rng, this.rules.hitMode, this.tables.balance);
 
     attacker.hp = this.hpAfter(events, 'a', hpBefore.attacker);
     defender.hp = this.hpAfter(events, 'd', hpBefore.defender);
+
+    // fire burns where it lands, and may strike the one beside; this reads the weapons before they wear
+    const defeated: UnitInstance[] = [];
+    const { ignited, splash } = this.fireEffects(attacker, defender, events, used);
+    for (const s of splash) if (s.target.hp <= 0 && !s.target.retreated) defeated.push(s.target);
 
     const brokenWeapons = [
       ...this.wearWeapon(attacker, events.filter((e) => e.by === 'a').length),
       ...this.wearWeapon(defender, events.filter((e) => e.by === 'd').length),
     ];
 
-    const defeated: UnitInstance[] = [];
     for (const unit of [defender, attacker]) {
-      if (unit.hp <= 0) {
-        unit.retreated = true;
-        defeated.push(unit);
-      }
+      if (unit.hp <= 0) defeated.push(unit);
     }
+    for (const unit of defeated) this.defeat(unit);
 
     const expAwards: ExpAward[] = [];
     const wexpGains: Array<WexpGain & { unit: UnitInstance }> = [];
@@ -395,18 +513,64 @@ export class BattleState {
       { unit: defender, opponent: attacker, key: 'd' as const },
     ];
     for (const { unit, opponent, key } of sides) {
-      if (unit.side !== 'player' || unit.retreated) continue;
+      if (unit.side !== 'player' || unit.retreated || unit.kind !== 'unit') continue;
       const mine = events.filter((e) => e.by === key);
       const outcome = { dealtDamage: mine.some((e) => e.hit && e.damage > 0), killed: mine.some((e) => e.killed) };
-      const amount = expForFight(unit, opponent, outcome, this.tables.balance);
-      expAwards.push({ unit, amount, ...awardExp(unit, amount, this.classOf(unit), this.tables.balance, this.rng, this.rules.guaranteedProgress) });
+      // there is no glory in a gate: structures give no EXP, though the weapon still learns
+      if (opponent.kind !== 'structure') {
+        const amount = expForFight(unit, opponent, outcome, this.tables.balance);
+        expAwards.push({ unit, amount, ...awardExp(unit, amount, this.classOf(unit), this.tables.balance, this.rng, this.rules.guaranteedProgress) });
+      }
       const kind = kinds[key];
       if (mine.length > 0 && kind) wexpGains.push({ unit, ...grantWexp(unit, kind, outcome.killed ? 2 : 1) });
     }
 
     this.applyFightEffects(attacker, defender, events);
     this.finishAction(attacker);
-    return { attacker, defender, forecast: fc, events, hpBefore, expAwards, wexpGains, brokenWeapons, defeated };
+    return { attacker, defender, forecast: fc, events, hpBefore, expAwards, wexpGains, brokenWeapons, defeated, ignited, splash };
+  }
+
+  /**
+   * Fire (DESIGN §4.6). A fire strike that hits leaves flames on the target's tile when the
+   * weapon is incendiary or its wielder has Ignite (Wildfire carries Ignite on); Wildfire lights
+   * one flammable tile beside it too. Fire Storm strikes the neighbour of the target who would
+   * take most, for half the damage. Splash gives no EXP.
+   */
+  private fireEffects(
+    attacker: UnitInstance,
+    defender: UnitInstance,
+    events: readonly StrikeEvent[],
+    used: { readonly a: WeaponDef | null; readonly d: WeaponDef | null },
+  ): { ignited: Point[]; splash: Array<{ target: UnitInstance; damage: number }> } {
+    const ignited: Point[] = [];
+    const splash: Array<{ target: UnitInstance; damage: number }> = [];
+    for (const [unit, foe, key] of [[attacker, defender, 'a'], [defender, attacker, 'd']] as const) {
+      const weapon = used[key];
+      if (!weapon || weapon.kind !== 'fire' || !events.some((e) => e.by === key && e.hit)) continue;
+      if (weapon.ignite || unit.skills.includes('ignite') || unit.skills.includes('wildfire')) {
+        if (this.ignite(foe.x, foe.y)) ignited.push({ x: foe.x, y: foe.y });
+        if (unit.skills.includes('wildfire')) {
+          const next = DIRS4.map((d) => ({ x: foe.x + d.x, y: foe.y + d.y })).find((p) => this.map.inBounds(p.x, p.y) && this.terrainAt(p.x, p.y).flammable && !this.flameAt(p.x, p.y));
+          if (next && this.ignite(next.x, next.y)) ignited.push(next);
+        }
+      }
+      if (unit.skills.includes('fire-storm')) {
+        let best: { target: UnitInstance; damage: number } | null = null;
+        for (const d of DIRS4) {
+          const other = this.unitAt(foe.x + d.x, foe.y + d.y);
+          if (!other || other === foe || !areHostile(unit.side, other.side)) continue;
+          const a = this.combatant(unit, unit, other, 'attacker', manhattan(unit, other));
+          const b = this.combatant(other, other, unit, 'defender', manhattan(unit, other));
+          const damage = Math.floor(Math.max(0, power(a, b, 0) - defence(weapon, b, a.bonus?.pierce ?? 0)) / 2);
+          if (damage > 0 && (!best || damage > best.damage)) best = { target: other, damage };
+        }
+        if (best) {
+          best.target.hp = Math.max(0, best.target.hp - best.damage);
+          splash.push(best);
+        }
+      }
+    }
+    return { ignited, splash };
   }
 
   /** What skills do once a fight is over: statuses on those hit, ransom, and movement owed after an attack. */
@@ -478,6 +642,7 @@ export class BattleState {
     return this.units.filter(
       (u) =>
         !u.retreated &&
+        u.kind === 'unit' &&
         u !== healer &&
         areFriendly(healer.side, u.side) &&
         u.hp < maxHp(u) &&
@@ -518,51 +683,14 @@ export class BattleState {
 
   /** Whether using the item in `slot` would do anything for the unit right now. */
   canUseItem(unit: UnitInstance, slot: number): boolean {
-    const stack = unit.inventory[slot];
-    const item = stack ? this.tables.items.get(stack.id) : undefined;
-    if (!stack || !item || stack.uses <= 0) return false;
-    if (item.kind === 'promotion') {
-      const check = checkPromotion(unit, this.tables.classes, this.tables.balance);
-      return check.ok && unit.tier === item.promotes;
-    }
-    if (item.kind !== 'consumable') return false;
-    const heals = (item.heal ?? 0) > 0 && unit.hp < maxHp(unit);
-    const cures = (item.cures ?? []).some((id) => unit.statuses.some((s) => s.id === id));
-    return heals || cures;
+    return canUseItem(unit, slot, this.tables);
   }
 
   /** Use an item: it takes effect, loses a use, and spends the unit's action. */
   useItem(unit: UnitInstance, slot: number): ItemUseReport {
-    if (!this.canUseItem(unit, slot)) throw new Error(`${unit.name} cannot use the item in slot ${slot}`);
-    const stack = unit.inventory[slot];
-    const item = stack ? this.tables.items.get(stack.id) : undefined;
-    if (!stack || !item) throw new Error(`${unit.name} has no item in slot ${slot}`);
-    let restored = 0;
-    let cured: StatusId[] = [];
-    let promotion: PromotionResult | null = null;
-    if (item.kind === 'promotion') {
-      promotion = promote(unit, this.tables.classes);
-    } else {
-      restored = Math.min(item.heal ?? 0, maxHp(unit) - unit.hp);
-      unit.hp += restored;
-      const curable = new Set<StatusId>(item.cures ?? []);
-      cured = unit.statuses.filter((s) => curable.has(s.id)).map((s) => s.id);
-      unit.statuses = unit.statuses.filter((s) => !curable.has(s.id));
-    }
-    this.consume(unit, slot);
+    const report = applyItem(unit, slot, this.tables);
     this.finishAction(unit);
-    return { unit, item: item.id, restored, cured, promotion };
-  }
-
-  /** Remove one use from the stack in `slot`, dropping it when it is used up and keeping `equipped` pointing at the same weapon. */
-  private consume(unit: UnitInstance, slot: number): void {
-    const stack = unit.inventory[slot];
-    if (!stack) return;
-    stack.uses -= 1;
-    if (stack.uses > 0) return;
-    unit.inventory.splice(slot, 1);
-    if (unit.equipped === slot) autoEquip(unit, this.tables.weapons, this.tables.classes);
-    else if (unit.equipped > slot) unit.equipped -= 1;
+    return report;
   }
 
   /** Whether the unit may be promoted by an item or a rank event at all. */
@@ -573,24 +701,7 @@ export class BattleState {
   /** Swap items between two adjacent friends; free, and it does not end either unit's action. */
   trade(a: UnitInstance, slotA: number, b: UnitInstance, slotB: number): boolean {
     if (a === b || manhattan(a, b) !== 1 || !areFriendly(a.side, b.side)) return false;
-    const stackA = a.inventory[slotA];
-    const stackB = b.inventory[slotB];
-    if (!stackA && !stackB) return false;
-    // a slot one past the end of a pack means "give": it needs room
-    if (!stackA && (slotA !== a.inventory.length || a.inventory.length >= INVENTORY_SLOTS)) return false;
-    if (!stackB && (slotB !== b.inventory.length || b.inventory.length >= INVENTORY_SLOTS)) return false;
-    const wasA = a.inventory[a.equipped];
-    const wasB = b.inventory[b.equipped];
-    if (stackA) a.inventory.splice(slotA, 1);
-    if (stackB) b.inventory.splice(slotB, 1);
-    if (stackB) a.inventory.splice(Math.min(slotA, a.inventory.length), 0, stackB);
-    if (stackA) b.inventory.splice(Math.min(slotB, b.inventory.length), 0, stackA);
-    for (const [unit, was] of [[a, wasA], [b, wasB]] as const) {
-      const index = was ? unit.inventory.indexOf(was) : -1;
-      if (index >= 0) unit.equipped = index;
-      else autoEquip(unit, this.tables.weapons, this.tables.classes);
-    }
-    return true;
+    return swapItems(a, slotA, b, slotB, this.tables);
   }
 
   // ------------------------------------------------------------------ Seize, Depart, Talk, Visit
@@ -636,6 +747,7 @@ export class BattleState {
     return this.livingUnits().filter(
       (other) =>
         other !== unit &&
+        other.kind === 'unit' &&
         manhattan(from, other) === 1 &&
         pending.some((t) => (matchesKey(unit, t.a) && matchesKey(other, t.b)) || (matchesKey(unit, t.b) && matchesKey(other, t.a))),
     );
@@ -654,6 +766,27 @@ export class BattleState {
   visit(unit: UnitInstance): void {
     this.fire({ type: 'visit', unit, tile: { x: unit.x, y: unit.y } });
     this.finishAction(unit);
+  }
+
+  // ------------------------------------------------------------------ gates and class actions
+
+  /** Open a closed gate at a tile (by key or by event): it is removed, and the way is clear. */
+  openGateAt(x: number, y: number): boolean {
+    const gate = this.units.find((u) => !u.retreated && u.kind === 'structure' && u.tags.includes('gate') && u.x === x && u.y === y);
+    if (!gate) return false;
+    this.defeat(gate);
+    this.afterChange();
+    return true;
+  }
+
+  /** The class actions (Sap, Entrench, Mend, Counsel, Dispatch, Decree) and Open the unit could take from `from`, with their targets. */
+  classActions(unit: UnitInstance, from: Point = unit): ClassActionOption[] {
+    return availableActions(this, unit, from);
+  }
+
+  /** Carry out a class action aimed at a tile (not needed for Decree). The unit's action is spent. */
+  doClassAction(unit: UnitInstance, id: ClassActionId, at?: Point): ClassActionReport {
+    return performAction(this, unit, id, at);
   }
 
   // ------------------------------------------------------------------ computer-controlled units
@@ -698,7 +831,7 @@ export class BattleState {
     const queue: Point[] = [at];
     for (let i = 0; i < queue.length; i++) {
       const p = queue[i] as Point;
-      if (this.map.costFor(p.x, p.y, unit.moveType) !== null && !this.unitAt(p.x, p.y)) return p;
+      if (this.terrainAt(p.x, p.y).cost[unit.moveType] !== null && !this.unitAt(p.x, p.y) && !this.flameAt(p.x, p.y)) return p;
       for (const n of neighbors4(p, this.map.width, this.map.height)) {
         const key = tileKey(n.x, n.y);
         if (!seen.has(key)) {
@@ -710,15 +843,43 @@ export class BattleState {
     return null;
   }
 
-  /** Bring a unit onto the map; if its tile is taken it appears on the nearest free one. */
-  spawn(spec: SpawnSpec): UnitInstance {
-    const def = this.tables.units[spec.def];
-    if (!def) throw new Error(`Cannot spawn unknown unit "${spec.def}"`);
+  /** The first unused `def#n` id. */
+  private freshId(def: string): string {
     const taken = new Set(this.units.map((u) => u.id));
     let n = 1;
-    while (taken.has(`${spec.def}#${n}`)) n += 1;
+    while (taken.has(`${def}#${n}`)) n += 1;
+    return `${def}#${n}`;
+  }
+
+  /**
+   * Put a structure on the map. It stands exactly where it is put, even on ground nobody could
+   * walk on (a wall), unless something is already there, when it takes the nearest free tile.
+   */
+  placeStructure(defId: string, at: Point, side: Side, tags: readonly string[] = [], ai?: AiProfile): UnitInstance {
+    const def = this.tables.structures.get(defId);
+    if (!def) throw new Error(`Unknown structure "${defId}"`);
+    const unit = createStructure(def, this.freshId(defId), at.x, at.y, side, this.tables, tags);
+    // only the computer plays a structure that fires
+    if (unit.ai) unit.ai = side === 'player' ? null : (ai ?? unit.ai);
+    const tile = this.unitAt(at.x, at.y) ? this.freeTileNear(at, unit) : at;
+    if (!tile) throw new Error(`No free tile for "${defId}" near (${at.x}, ${at.y})`);
+    unit.x = tile.x;
+    unit.y = tile.y;
+    this.units.push(unit);
+    return unit;
+  }
+
+  /** Bring a unit or a structure onto the map; if its tile is taken it appears on the nearest free one. */
+  spawn(spec: SpawnSpec): UnitInstance {
+    const def = this.tables.units[spec.def];
+    if (!def && this.tables.structures.has(spec.def)) {
+      const built = this.placeStructure(spec.def, { x: spec.at[0], y: spec.at[1] }, spec.side ?? 'enemy', spec.tags ?? [], spec.ai);
+      this.arrivals.push(built);
+      return built;
+    }
+    if (!def) throw new Error(`Cannot spawn unknown unit "${spec.def}"`);
     const overrides = { ...(spec.ai ? { ai: spec.ai } : {}), ...(spec.tags ? { tags: spec.tags } : {}) };
-    const unit = createUnit(def, `${spec.def}#${n}`, spec.at[0], spec.at[1], this.tables, overrides);
+    const unit = createUnit(def, this.freshId(spec.def), spec.at[0], spec.at[1], this.tables, overrides);
     const tile = this.freeTileNear({ x: spec.at[0], y: spec.at[1] }, unit);
     if (!tile) throw new Error(`No free tile for "${spec.def}" near (${spec.at[0]}, ${spec.at[1]})`);
     unit.x = tile.x;
@@ -797,7 +958,11 @@ export class BattleState {
         this.outcome ??= { result: action.result, reason: action.reason ?? (action.result === 'won' ? 'The chapter is won.' : 'The chapter is lost.') };
         break;
       case 'openGate':
+        if (!this.openGateAt(action.at[0], action.at[1])) this.unhandled.push(action);
+        break;
       case 'ignite':
+        if (!this.ignite(action.tile[0], action.tile[1])) this.unhandled.push(action);
+        break;
       case 'unlockCodex':
         this.unhandled.push(action);
         break;
@@ -822,14 +987,19 @@ export class BattleState {
 
   // ------------------------------------------------------------------ phases
 
+  /** The living units of a side that can take an action: soldiers, and structures that fire. */
+  actors(side: Side): UnitInstance[] {
+    return this.livingUnits(side).filter((u) => u.kind === 'unit' || u.ai !== null);
+  }
+
   /** True when no unit of the side can still act. */
   isSideSpent(side: Side): boolean {
-    return this.livingUnits(side).every((u) => u.acted);
+    return this.actors(side).every((u) => u.acted);
   }
 
   /** Begin the battle: the first phase starts, with its reinforcements, terrain effects and events. A second call does nothing. */
   begin(): PhaseReport {
-    if (this.begun) return { turn: this.turn, phase: this.phase, healed: [], arrived: [] };
+    if (this.begun) return { turn: this.turn, phase: this.phase, healed: [], burned: [], arrived: [] };
     this.begun = true;
     return this.startPhase();
   }
@@ -840,11 +1010,12 @@ export class BattleState {
    * the turn. If the chapter is decided, the phase does not advance.
    */
   endPhase(): PhaseReport {
+    const burned = this.burnUnits(this.phase);
     this.expireStatuses();
     this.check('phaseEnd');
     if (!this.outcome) this.advancePhase();
-    if (this.outcome) return { turn: this.turn, phase: this.phase, healed: [], arrived: [] };
-    return this.startPhase();
+    if (this.outcome) return { turn: this.turn, phase: this.phase, healed: [], burned, arrived: [] };
+    return { ...this.startPhase(), burned };
   }
 
   /** Remove the statuses whose time has run out with this phase. */
@@ -868,6 +1039,12 @@ export class BattleState {
     applyStatus(unit.statuses, id, { turn, phase: this.phaseOrder[index] ?? this.phase });
   }
 
+  /** Put a status on a unit that lasts to the end of the next time `through` is played: this turn if it is still to come, otherwise next turn. */
+  addStatusThrough(unit: UnitInstance, id: StatusId, through: Phase): void {
+    const at = this.phaseOrder.indexOf(through);
+    applyStatus(unit.statuses, id, { turn: at > this.phaseIndex ? this.turn : this.turn + 1, phase: through });
+  }
+
   private advancePhase(): void {
     const order = this.phaseOrder;
     let i = this.phaseIndex;
@@ -876,6 +1053,7 @@ export class BattleState {
       if (i >= order.length) {
         this.check('turnEnd');
         if (this.outcome) return;
+        this.burnDown();
         this.turn += 1;
         i = 0;
       }
@@ -898,12 +1076,14 @@ export class BattleState {
       unit.turnFlags = [];
     }
     const before = this.arrivals.length;
+    this.spreadFlames();
     for (const r of this.map.rules.reinforcements) {
       if (r.turn === turn && r.phase === phase) for (const spec of r.units) this.spawn(spec);
     }
     const healed: Array<{ unit: UnitInstance; amount: number }> = [];
     for (const unit of this.livingUnits(phase)) {
-      const share = this.map.terrainAt(unit.x, unit.y).heals;
+      if (unit.kind !== 'unit') continue;
+      const share = this.terrainAt(unit.x, unit.y).heals;
       if (!share) continue;
       const amount = Math.min(Math.ceil(maxHp(unit) * share), maxHp(unit) - unit.hp);
       if (amount > 0) {
@@ -914,11 +1094,11 @@ export class BattleState {
     // Warcry rallies nearby allies for the phase; Renewal binds the wounds of those beside it
     for (const unit of this.livingUnits(phase)) {
       if (unit.skills.includes('warcry')) {
-        for (const ally of this.livingUnits(phase)) if (ally !== unit && manhattan(unit, ally) <= 2) this.addStatus(ally, 'warcry', 0);
+        for (const ally of this.livingUnits(phase)) if (ally !== unit && ally.kind === 'unit' && manhattan(unit, ally) <= 2) this.addStatus(ally, 'warcry', 0);
       }
       if (unit.skills.includes('renewal')) {
         for (const ally of this.livingUnits(phase)) {
-          if (ally === unit || manhattan(unit, ally) !== 1) continue;
+          if (ally === unit || ally.kind !== 'unit' || manhattan(unit, ally) !== 1) continue;
           const amount = Math.min(5, maxHp(ally) - ally.hp);
           if (amount > 0) {
             ally.hp += amount;
@@ -930,6 +1110,6 @@ export class BattleState {
     this.fire({ type: 'turnStart', turn, phase });
     const arrived = this.arrivals.splice(before);
     this.afterChange();
-    return { turn, phase, healed, arrived };
+    return { turn, phase, healed, burned: [], arrived };
   }
 }

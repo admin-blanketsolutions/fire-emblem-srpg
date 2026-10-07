@@ -108,7 +108,8 @@ export function checkObjective(view: ObjectiveView, def: ObjectiveDef, progress:
   const { units } = view;
   const fallen = (u: UnitInstance): boolean => u.retreated && !u.escaped;
   if (lord(units).some(fallen)) return { result: 'lost', reason: 'The Lord has retreated wounded.' };
-  const enemies = units.filter((u) => u.side === 'enemy' && !u.retreated);
+  // gates, barricades and siege engines are not soldiers: they never hold a chapter open
+  const enemies = units.filter((u) => u.side === 'enemy' && !u.retreated && u.kind === 'unit');
 
   switch (def.type) {
     case 'rout': {
@@ -190,7 +191,7 @@ export function progressText(def: ObjectiveDef, view: ObjectiveView, progress: O
       return parts.filter(Boolean).join('; ');
     }
     case 'rout':
-      return `${view.units.filter((u) => u.side === 'enemy' && !u.retreated).length} enemies remain`;
+      return `${view.units.filter((u) => u.side === 'enemy' && !u.retreated && u.kind === 'unit').length} enemies remain`;
     default:
       return '';
   }

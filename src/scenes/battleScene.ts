@@ -1009,7 +1009,7 @@ export class BattleScene implements Scene {
       return;
     }
     if (unit) drawUnitWindow(pen, this.battle, unit, onRight);
-    if (this.battle.isExplored(this.cursor.x, this.cursor.y)) drawTerrainWindow(pen, this.battle.map.terrainAt(this.cursor.x, this.cursor.y), onRight);
+    if (this.battle.isExplored(this.cursor.x, this.cursor.y)) drawTerrainWindow(pen, this.battle.terrainAt(this.cursor.x, this.cursor.y), onRight);
   }
 
   private drawResultStep(pen: Pen, mode: Extract<Mode, { kind: 'results' }>): void {

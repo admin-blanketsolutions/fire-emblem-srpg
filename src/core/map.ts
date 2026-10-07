@@ -44,12 +44,15 @@ export interface MapJson {
   readonly visionPenalty?: number;
   /** Tiles where fleeing units leave the map. */
   readonly exits?: readonly Tile[];
+  /** The way the wind blows, which fire spreads along more readily. */
+  readonly wind?: 'N' | 'E' | 'S' | 'W';
   readonly reinforcements?: readonly Reinforcement[];
   readonly objective?: ObjectiveDef;
   readonly events?: readonly EventDef[];
 }
 
 export interface MapRules {
+  readonly wind: 'N' | 'E' | 'S' | 'W' | null;
   readonly phaseOrder: readonly PhaseSide[];
   readonly fog: boolean;
   readonly visionPenalty: number;
@@ -60,6 +63,7 @@ export interface MapRules {
 }
 
 export const DEFAULT_MAP_RULES: MapRules = {
+  wind: null,
   phaseOrder: PHASE_SIDES,
   fog: false,
   visionPenalty: 0,
@@ -174,7 +178,9 @@ export function parseMap(json: MapJson, table: TerrainTable): GameMap {
       if (u.ai) validateAiProfile(u.ai, label);
     }
   });
+  if (json.wind !== undefined && !['N', 'E', 'S', 'W'].includes(json.wind)) throw new Error(`${where}: wind must be N, E, S or W`);
   const rules: MapRules = {
+    wind: json.wind ?? null,
     phaseOrder,
     fog: json.fog ?? false,
     visionPenalty,
