@@ -234,6 +234,17 @@ They appear in the Codex and in carefully framed scenes, never as spectacle.
 - **Deferred.** The 32×32 *battle scene* presentation (DESIGN §5.6) needs battle sprites and is not in the slice; map animation is. Skills, supports, structures and fire's *Ignite* arrive in later milestones; the formulas already accept support bonuses and a structure flag.
 - **Data.** The proving ground now uses real classes and the §5.4 weapon list (29 items); the first Tier II and III classes arrive with promotion in M4.
 
+## D-029 Enemy AI as built (M3, first part)
+
+- **The planner is pure** (`core/ai.ts`): it reads the battle and returns a plan (a tile and an action) without changing anything. `BattleState` applies plans; the scene walks the unit, then plays the fight or heal. `runAiPhase` plays a whole phase headlessly for tests.
+- **Scoring is DESIGN §10.2,** with the weights in `src/data/ai.json`. Kill chance, expected damage and expected counter damage are exact expectations over every hit, miss and crit in the forecast's strike order, under the battle's hit mode (Honest or Weighted), not the forecast's all-hits figure.
+- **Target tags.** The first tag in the priority list is worth 1, falling linearly to 1/n for the last. A unit with no list uses `['lord']`, which is how "Lord = highest" is read; an explicit list replaces it. `lowestHp` is judged among the targets the unit is weighing this turn.
+- **Exposure** counts the opposing units whose threat range covers a tile, measured on the board as it stands before the unit moves.
+- **With nothing to attack,** a unit walks the cheapest path towards the nearest tile from which it could strike its chosen target (the nearest, or in priority mode the best-ranked) and stops at the furthest free tile it can reach. "Preferring safe tiles" applies to choosing between attack positions, where exposure is scored, but not to the approach, so a column on the march does not stall short of the player. Revisit if it plays badly.
+- **Modes.** *Defensive* wakes when an opponent stands within its threat range plus `aggroRange` tiles, and stays awake (`triggered`). *Guard* keeps within 2 tiles of a unit or tile, and walks back when out of position. A *leash* limits both where a unit attacks from and how far it advances. *Flee* heads for the battle's exit tiles and leaves the map there (counted as escaped, not fallen); with no exit it opens the distance. `activateOnTurn` and `activateOnFlag` hold a unit until then.
+- **Order and ties.** Units act in roster order with bosses and `leader`-tagged units last. Ties fall to lower exposure, a shorter move, the lower target id, then the tile, so a seed replays exactly.
+- **Not yet.** `respectsFog` is accepted and ignored until fog exists; exit tiles are set on the battle until the map format gains them; the ally phase will use the same planner with the sides swapped. Until objectives are wired in, a routed army ends play on a *Defeat* banner.
+
 ## Confirmed and open
 
 **Confirmed 2026-10-06:** Canvas 2D (D-001); date display rule (D-002); Three Postures plus added weapon types (D-006, D-024); classic reset and three tiers (D-018); slice scope and the Tikrit Prologue (D-019).

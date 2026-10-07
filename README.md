@@ -4,7 +4,7 @@ A browser-based tactical RPG in the feel of the Game Boy Advance era, telling th
 
 It takes inspiration from the *genre* and its mechanics only. All names, classes, items, art, music and text are original, and all art and audio are procedurally generated placeholders that can be replaced without code changes.
 
-**Status:** design approved; milestones M1 (engine foundations) and M2 (combat and levelling) complete, M3 next. See [Progress](#progress).
+**Status:** design approved; milestones M1 (engine foundations) and M2 (combat and levelling) complete; M3 in progress (the enemy AI and the enemy phase are in). See [Progress](#progress).
 
 ## What it is
 
@@ -45,9 +45,9 @@ npm run sprites:preview   # the sprite preview page, with live reload
 
 Other sprite commands: `npm run sprites:gen` regenerates the placeholder sprites from the kits in `tools/sprites/kits/`, and `npm run sprites` exports PNG strips and contact sheets to `out/sprites/`.
 
-## Playing it (M2)
+## Playing it (M3, in progress)
 
-One test map, the *Proving Ground*, with seven player units and five enemies who do not move yet (enemy behaviour arrives in M3). You can select a unit, see where it can move and attack, walk it across terrain at the correct cost, and then Attack, Heal or Wait.
+One test map, the *Proving Ground*, with seven player units and five enemies. You can select a unit, see where it can move and attack, walk it across terrain at the correct cost, and then Attack, Heal or Wait. When every unit has acted, or you choose *End Turn*, the enemy phase plays: each enemy advances, attacks or heals as its AI profile decides (DESIGN §10). Objectives, and so victory and defeat, arrive later in M3.
 
 - **Attack** offers each weapon that reaches someone, then the targets one at a time, with the forecast: damage, hit and crit chance, doubling, and expected HP for both sides. `Info` shows the working (attack speed, accuracy, evasion, cover).
 - Fights play out as map animation, then the EXP bar, any level-up and weapon grades earned. Weapons wear out and break. Healers restore HP with a remedy.
@@ -70,7 +70,7 @@ Confirm on an enemy unit shows its move and attack range. The touch pad appears 
 |---|---|---|
 | M1 | Renderer, tilemap, cursor, movement, attack, sprite tool, one test map | done |
 | M2 | Combat forecast and resolution, levelling, weapon triangle, terrain | done |
-| M3 | Enemy AI, phases, danger zone, fog, objectives | next |
+| M3 | Enemy AI, phases, danger zone, fog, objectives | in progress: AI and enemy phase done |
 | M4 | Classes, promotion, inventory, convoy, shops | planned |
 | M5 | Supports, Camp, dialogue and portraits | planned |
 | M6 | Save/load, Codex, title, settings, Classic/Casual | planned |

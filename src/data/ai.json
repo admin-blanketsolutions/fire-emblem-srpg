@@ -1,0 +1,11 @@
+{
+  "kill": 100,
+  "damage": 1.0,
+  "tag": 15,
+  "counter": 0.5,
+  "counterCautious": 0.7,
+  "cover": 2,
+  "avoid": 0.1,
+  "exposure": 5,
+  "heal": 1.0
+}

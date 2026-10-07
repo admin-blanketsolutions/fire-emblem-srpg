@@ -1,4 +1,5 @@
-import type { BattleState, HealReport } from '../core/battle';
+import type { AiPlan } from '../core/ai';
+import type { BattleState, FightReport, HealReport } from '../core/battle';
 import { cameraToInclude, clampCamera, type CameraPos } from '../core/camera';
 import { tileKey } from '../core/grid';
 import type { Action } from '../core/input';
@@ -60,7 +61,8 @@ type Mode =
   | { kind: 'banner'; text: string; sub: string; left: number; next: () => void }
   | { kind: 'free' }
   | { kind: 'selected'; unit: UnitInstance; reach: ReachResult; threat: Point[] }
-  | { kind: 'moving'; unit: UnitInstance; path: Point[]; elapsed: number; origin: Point }
+  /** A unit walks its path; a computer-controlled unit then carries out its `plan`. */
+  | { kind: 'moving'; unit: UnitInstance; path: readonly Point[]; elapsed: number; origin: Point; plan?: AiPlan }
   | { kind: 'action'; unit: UnitInstance; origin: Point; items: ActionItem[]; index: number }
   | { kind: 'weapon'; unit: UnitInstance; origin: Point; purpose: Purpose; choices: Choice[]; index: number }
   | {
@@ -272,7 +274,9 @@ export class BattleScene implements Scene {
     const total = (mode.path.length - 1) * STEP_MS;
     this.cursor = this.walkTile(mode);
     this.followCursor();
-    if (mode.elapsed >= total) this.openActionMenu(mode.unit, mode.origin);
+    if (mode.elapsed < total) return;
+    if (mode.plan) this.carryOut(mode.plan);
+    else this.openActionMenu(mode.unit, mode.origin);
   }
 
   // ---------------------------------------------------------------- the action menu
@@ -380,10 +384,13 @@ export class BattleScene implements Scene {
   // ---------------------------------------------------------------- fights, healing and their results
 
   private startFight(attacker: UnitInstance, defender: UnitInstance): void {
-    const report = this.battle.fight(attacker, defender);
+    this.playFight(this.battle.fight(attacker, defender));
+  }
+
+  private playFight(report: FightReport): void {
     this.dangerCache = null;
-    this.actor = attacker;
-    this.setCursor(attacker.x, attacker.y);
+    this.actor = report.attacker;
+    this.setCursor(report.attacker.x, report.attacker.y);
     this.mode = { kind: 'fight', player: new FightPlayer(report) };
   }
 
@@ -405,9 +412,12 @@ export class BattleScene implements Scene {
 
   private startHeal(healer: UnitInstance, target: UnitInstance, slot: number): void {
     const hpBefore = target.hp;
-    const report = this.battle.heal(healer, target, slot);
-    this.actor = healer;
-    this.popup(target, `+${report.restored}`, COLORS.good);
+    this.playHeal(this.battle.heal(healer, target, slot), hpBefore);
+  }
+
+  private playHeal(report: HealReport, hpBefore: number): void {
+    this.actor = report.healer;
+    this.popup(report.target, `+${report.restored}`, COLORS.good);
     this.mode = { kind: 'healing', report, hpBefore, elapsed: 0 };
   }
 
@@ -441,6 +451,10 @@ export class BattleScene implements Scene {
 
   private afterAction(): void {
     this.actor = null;
+    if (this.battle.phase === 'enemy') {
+      this.nextEnemy();
+      return;
+    }
     this.mode = { kind: 'free' };
     if (this.battle.isSideSpent('player')) this.beginEnemyPhase();
   }
@@ -474,15 +488,61 @@ export class BattleScene implements Scene {
     this.inspected = null;
     this.infoOpen = false;
     this.battle.endPlayerPhase();
-    this.startBanner('Enemy Phase', '', () => {
-      // The enemy has no behaviour until milestone M3, so its phase passes at once.
-      this.battle.endEnemyPhase();
+    this.startBanner('Enemy Phase', '', () => this.nextEnemy());
+  }
+
+  /** Play the next enemy's turn: plan it, walk it, then act (see `carryOut`). Ends the phase when all have acted. */
+  private nextEnemy(): void {
+    for (let unit = this.battle.nextAiUnit('enemy'); unit; unit = this.battle.nextAiUnit('enemy')) {
+      const origin = { x: unit.x, y: unit.y };
+      const plan = this.battle.planAi(unit);
+      const path = this.battle.moveForPlan(plan);
       this.dangerCache = null;
-      const first = this.battle.livingUnits('player')[0];
-      if (first) this.setCursor(first.x, first.y);
-      this.startBanner('Player Phase', `Turn ${this.battle.turn}`, () => {
-        this.mode = { kind: 'free' };
-      });
+      if (path.length <= 1 && plan.action.kind === 'wait') {
+        this.battle.actForPlan(plan); // holds its ground: nothing to show
+        continue;
+      }
+      this.setCursor(origin.x, origin.y);
+      this.mode = { kind: 'moving', unit, path, elapsed: 0, origin, plan };
+      return;
+    }
+    this.endEnemyPhase();
+  }
+
+  /** A computer-controlled unit has arrived: carry out its action and show it. */
+  private carryOut(plan: AiPlan): void {
+    const hpBefore = plan.action.kind === 'heal' ? plan.action.target.hp : 0;
+    const outcome = this.battle.actForPlan(plan);
+    this.dangerCache = null;
+    switch (outcome.kind) {
+      case 'fight':
+        this.playFight(outcome.report);
+        return;
+      case 'heal':
+        this.playHeal(outcome.report, hpBefore);
+        return;
+      case 'escape':
+        this.popup(plan.unit, 'Escapes', COLORS.textDim, 10);
+        this.nextEnemy();
+        return;
+      case 'wait':
+        this.nextEnemy();
+        return;
+    }
+  }
+
+  private endEnemyPhase(): void {
+    this.battle.endEnemyPhase();
+    this.dangerCache = null;
+    const first = this.battle.livingUnits('player')[0];
+    if (!first) {
+      // Objectives (and the defeat screen) are wired in later in M3; until then, a routed army ends play here.
+      this.startBanner('Defeat', 'Your army has retreated', () => undefined);
+      return;
+    }
+    this.setCursor(first.x, first.y);
+    this.startBanner('Player Phase', `Turn ${this.battle.turn}`, () => {
+      this.mode = { kind: 'free' };
     });
   }
 

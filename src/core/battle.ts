@@ -1,3 +1,4 @@
+import { aiOrder, planUnit, type AiPlan, type AiWeights } from './ai';
 import type { Balance } from './balance';
 import type { ClassDef, ClassTable } from './classes';
 import { forecast, NO_BONUS, resolveStrikes, type Combatant, type Forecast, type HitMode, type StrikeEvent } from './combat';
@@ -26,6 +27,7 @@ export interface BattleTables {
   readonly weapons: WeaponTable;
   readonly classes: ClassTable;
   readonly balance: Balance;
+  readonly ai: AiWeights;
 }
 
 /** A weapon the unit could attack with from a tile, and whom it would reach. */
@@ -55,6 +57,19 @@ export interface FightReport {
   readonly defeated: readonly UnitInstance[];
 }
 
+/** What a computer-controlled unit did with its turn. */
+export type AiOutcome =
+  | { readonly kind: 'fight'; readonly report: FightReport }
+  | { readonly kind: 'heal'; readonly report: HealReport }
+  | { readonly kind: 'wait' }
+  | { readonly kind: 'escape' };
+
+export interface AiTurn {
+  readonly plan: AiPlan;
+  readonly path: readonly Point[];
+  readonly outcome: AiOutcome;
+}
+
 export interface HealReport {
   readonly healer: UnitInstance;
   readonly target: UnitInstance;
@@ -74,6 +89,10 @@ export class BattleState {
   readonly rules: BattleRules;
   turn = 1;
   phase: Phase = 'player';
+  /** Story flags set by events; AI profiles can wait on them. */
+  readonly flags = new Set<string>();
+  /** Tiles where fleeing units leave the map. */
+  exits: readonly Point[] = [];
 
   constructor(map: GameMap, units: UnitInstance[], tables: BattleTables, rng: Rng, rules: BattleRules = DEFAULT_RULES) {
     this.map = map;
@@ -104,13 +123,13 @@ export class BattleState {
     return classDef;
   }
 
-  /** Where a unit can move this turn, given everyone else on the board. */
-  reachFor(unit: UnitInstance): ReachResult {
+  /** Where a unit can move this turn, given everyone else on the board. `mov` widens it (the AI plans beyond one turn). */
+  reachFor(unit: UnitInstance, mov: number = unit.stats.mov): ReachResult {
     return computeReach({
       map: this.map,
       start: { x: unit.x, y: unit.y },
       moveType: unit.moveType,
-      mov: unit.stats.mov,
+      mov,
       side: unit.side,
       occupantAt: (x, y) => {
         const other = this.unitAt(x, y);
@@ -323,6 +342,69 @@ export class BattleState {
     return { healer, target, restored, expAward };
   }
 
+  // ------------------------------------------------------------------ computer-controlled units
+
+  /** The side's units the computer plays, in the order they act (DESIGN §10.2). */
+  aiUnits(side: Side): UnitInstance[] {
+    return aiOrder(this.livingUnits(side).filter((u) => u.ai !== null));
+  }
+
+  /** The next unit of the side still to act this phase, or null. */
+  nextAiUnit(side: Side): UnitInstance | null {
+    return this.aiUnits(side).find((u) => !u.acted) ?? null;
+  }
+
+  /** Decide a unit's turn. A defensive unit that wakes stays awake from here on. */
+  planAi(unit: UnitInstance): AiPlan {
+    const plan = planUnit(this, unit);
+    if (plan.wakes) unit.triggered = true;
+    return plan;
+  }
+
+  /** Walk the unit to the plan's tile. Returns the path walked (just its tile if it stays). */
+  moveForPlan(plan: AiPlan): Point[] {
+    const { unit } = plan;
+    const path = this.moveUnit(unit, plan.to, this.reachFor(unit));
+    if (!path) throw new Error(`${unit.name} cannot reach (${plan.to.x}, ${plan.to.y})`);
+    return path;
+  }
+
+  /** Carry out the plan's action from where the unit now stands. The unit is spent afterwards. */
+  actForPlan(plan: AiPlan): AiOutcome {
+    const { unit, action } = plan;
+    switch (action.kind) {
+      case 'attack':
+        if (!action.target.retreated && this.equip(unit, action.slot)) return { kind: 'fight', report: this.fight(unit, action.target) };
+        break;
+      case 'heal':
+        if (!action.target.retreated) return { kind: 'heal', report: this.heal(unit, action.target, action.slot) };
+        break;
+      case 'escape':
+        unit.escaped = true;
+        unit.retreated = true;
+        this.wait(unit);
+        return { kind: 'escape' };
+      case 'wait':
+        break;
+    }
+    this.wait(unit);
+    return { kind: 'wait' };
+  }
+
+  /** Plan, move and act for one unit, all at once (tests and fast-forward). */
+  actAi(unit: UnitInstance): AiTurn {
+    const plan = this.planAi(unit);
+    const path = this.moveForPlan(plan);
+    return { plan, path, outcome: this.actForPlan(plan) };
+  }
+
+  /** Play every computer-controlled unit of the side that has not acted yet. */
+  runAiPhase(side: Side): AiTurn[] {
+    const turns: AiTurn[] = [];
+    for (let unit = this.nextAiUnit(side); unit; unit = this.nextAiUnit(side)) turns.push(this.actAi(unit));
+    return turns;
+  }
+
   // ------------------------------------------------------------------ phases
 
   /** True when no unit of the side can still act. */
@@ -330,7 +412,7 @@ export class BattleState {
     return this.livingUnits(side).every((u) => u.acted);
   }
 
-  /** Close the player phase. Enemy behaviour arrives in M3, so the enemy phase is a no-op here. */
+  /** Close the player phase; the enemy phase follows. */
   endPlayerPhase(): void {
     this.phase = 'enemy';
   }
