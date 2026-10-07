@@ -22,7 +22,11 @@ export interface Pen {
 }
 
 /** What the unit pages need to know: the data tables, a unit's class and its weapon. A battle has them; so does the camp. */
-export type UnitSource = Pick<BattleState, 'classOf' | 'tables' | 'weaponOf'>
+export type UnitSource = Pick<BattleState, 'classOf' | 'tables' | 'weaponOf'> & {
+  /** The army's supports and the units it can name, if there are any to show. */
+  readonly supports?: BattleState['supports'];
+  readonly units?: BattleState['units'];
+};
 
 const GOLD: TextStyle = { color: COLORS.gold };
 const PLAIN: TextStyle = { color: COLORS.text };
@@ -99,7 +103,7 @@ export function drawInfoPage(pen: Pen, battle: UnitSource, unit: UnitInstance, o
   }
   const { ctx, text } = pen;
   const w = 228;
-  const h = 132;
+  const h = 142;
   const x = onRight ? LOGICAL_WIDTH - w - 4 : 4;
   const y = Math.round((LOGICAL_HEIGHT - h) / 2);
   drawPanel(ctx, x, y, w, h);
@@ -146,7 +150,26 @@ export function drawInfoPage(pen: Pen, battle: UnitSource, unit: UnitInstance, o
     text.draw(ctx, 'Status', left, y + 107, GOLD);
     text.draw(ctx, statuses, left + 40, y + 107, { color: COLORS.bad });
   }
+  const bonds = bondsLine(battle, unit);
+  if (bonds) {
+    text.draw(ctx, 'Bonds', left, y + 117, GOLD);
+    text.draw(ctx, bonds, left + 40, y + 117, PLAIN);
+  }
   text.drawCentered(ctx, hint ? `${unit.moveType} · ${hint}` : unit.moveType, x + w / 2, y + h - 12, DIM);
+}
+
+/** The supports a unit has reached, as "Pikeman C, Healer B": only ranks whose scene has been seen count. */
+export function bondsLine(source: UnitSource, unit: UnitInstance): string {
+  const supports = source.supports;
+  if (!supports) return '';
+  const out: string[] = [];
+  for (const def of supports.defs.values()) {
+    const partner = supports.partnerIn(def, unit.defId);
+    const rank = partner ? supports.rankOf(def.id) : null;
+    if (!partner || !rank) continue;
+    out.push(`${source.units?.find((u) => u.defId === partner)?.name ?? partner} ${rank}`);
+  }
+  return out.join(', ');
 }
 
 // ---------------------------------------------------------------- weapons

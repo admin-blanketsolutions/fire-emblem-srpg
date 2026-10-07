@@ -1,0 +1,12 @@
+[
+  {
+    "id": "demo-lord-pikeman",
+    "a": "lord",
+    "b": "pikeman",
+    "pace": "fast",
+    "scenes": {
+      "C": { "scene": "demo.support-c", "ledger": "SUP-DEMO-C" },
+      "B": { "scene": "demo.support-b", "ledger": "SUP-DEMO-B" }
+    }
+  }
+]

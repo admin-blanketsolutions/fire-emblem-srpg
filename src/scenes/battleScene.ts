@@ -7,10 +7,13 @@ import { manhattan, tileKey } from '../core/grid';
 import type { Action } from '../core/input';
 import { describeObjective, progressText } from '../core/objectives';
 import { pathTo, type ReachResult } from '../core/pathfinding';
+import type { Effect } from '../core/dialogue';
+import { DEFAULT_SETTINGS, type Settings } from '../core/settings';
 import { areFriendly, type Point } from '../core/types';
 import type { UnitInstance } from '../core/unit';
 import type { WeaponDef } from '../core/weapons';
 import { LOGICAL_HEIGHT, LOGICAL_WIDTH } from '../core/viewport';
+import type { Story } from '../data/story';
 import type { Assets } from '../engine/assets';
 import type { Scene } from '../engine/game';
 import type { TextRenderer } from '../engine/text';
@@ -38,6 +41,7 @@ import {
   type Pen,
   type TradeView,
 } from './battleWindows';
+import { DialoguePlayer } from './dialoguePlayer';
 import { FightPlayer, type FightCue } from './fightPlayer';
 import { expSteps, fightSteps, promotionSteps, type ResultStep } from './results';
 
@@ -104,6 +108,7 @@ type Mode =
   | { kind: 'healing'; report: HealReport; hpBefore: number; elapsed: number }
   | { kind: 'results'; steps: ResultStep[]; index: number; elapsed: number }
   | { kind: 'messages'; list: BattleMessage[]; index: number; next: () => void }
+  | { kind: 'dialogue'; player: DialoguePlayer; next: () => void }
   | { kind: 'menu'; index: number }
   | { kind: 'ai' }
   | { kind: 'outcome'; elapsed: number };
@@ -123,6 +128,11 @@ export interface BattleSceneOptions {
   readonly text: TextRenderer;
   /** Called when the player asks to play the chapter again after its end. */
   readonly onRestart?: () => void;
+  /** The people and scenes of the story, to play the scenes the chapter's events call for. */
+  readonly story?: Story;
+  readonly settings?: Settings;
+  /** A scene unlocked a Codex entry. */
+  readonly onUnlock?: (id: string) => void;
 }
 
 /**
@@ -136,6 +146,9 @@ export class BattleScene implements Scene {
   private readonly assets: Assets;
   private readonly text: TextRenderer;
   private readonly onRestart: (() => void) | undefined;
+  private readonly story: Story | undefined;
+  private readonly settings: Settings;
+  private readonly onUnlock: ((id: string) => void) | undefined;
   private mapLayer: HTMLCanvasElement;
   /** The `terrainVersion` the map layer was drawn from. */
   private mapVersion = 0;
@@ -156,8 +169,11 @@ export class BattleScene implements Scene {
   private actor: UnitInstance | null = null;
   private readonly popups: Popup[] = [];
 
-  constructor({ battle, assets, text, onRestart }: BattleSceneOptions) {
+  constructor({ battle, assets, text, onRestart, story, settings, onUnlock }: BattleSceneOptions) {
     this.battle = battle;
+    this.story = story;
+    this.settings = settings ?? DEFAULT_SETTINGS;
+    this.onUnlock = onUnlock;
     this.assets = assets;
     this.text = text;
     this.onRestart = onRestart;
@@ -240,6 +256,10 @@ export class BattleScene implements Scene {
         break;
       case 'messages':
         if (actions.has('confirm')) this.advanceMessages(mode);
+        break;
+      case 'dialogue':
+        mode.player.update(dtMs, actions, taps);
+        if (mode.player.done) mode.next();
         break;
       case 'menu':
         this.updateMenu(mode, actions);
@@ -823,12 +843,39 @@ export class BattleScene implements Scene {
   }
 
   private showMessages(list: BattleMessage[], next: () => void): void {
-    this.mode = { kind: 'messages', list, index: 0, next };
+    this.runMessages(list, 0, next);
+  }
+
+  /** Show the messages from `index` on: a scene is played if the story has it, plain text is read. */
+  private runMessages(list: BattleMessage[], index: number, next: () => void): void {
+    const message = list[index];
+    if (!message) {
+      next();
+      return;
+    }
+    const scene = message.kind === 'dialogue' ? this.story?.scenes.get(message.scene) : undefined;
+    if (scene && this.story) {
+      const player = new DialoguePlayer({
+        scene,
+        characters: this.story.characters,
+        assets: this.assets,
+        text: this.text,
+        settings: this.settings,
+        onEffect: (effect) => this.applyEffect(effect),
+      });
+      this.mode = { kind: 'dialogue', player, next: () => this.runMessages(list, index + 1, next) };
+    } else {
+      this.mode = { kind: 'messages', list, index, next };
+    }
+  }
+
+  private applyEffect(effect: Effect): void {
+    if ('flag' in effect) this.battle.flags.add(effect.flag);
+    else if ('unlock' in effect) this.onUnlock?.(effect.unlock);
   }
 
   private advanceMessages(mode: Extract<Mode, { kind: 'messages' }>): void {
-    mode.index += 1;
-    if (mode.index >= mode.list.length) mode.next();
+    this.runMessages(mode.list, mode.index + 1, mode.next);
   }
 
   // ---------------------------------------------------------------- phases
@@ -1075,6 +1122,10 @@ export class BattleScene implements Scene {
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
+    if (this.mode.kind === 'dialogue') {
+      this.mode.player.draw(ctx);
+      return;
+    }
     ctx.fillStyle = COLORS.ink;
     ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
     const camX = Math.round(this.cam.x);

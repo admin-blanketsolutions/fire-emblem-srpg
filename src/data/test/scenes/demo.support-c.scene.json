@@ -1,0 +1,12 @@
+{
+  "id": "demo.support-c",
+  "title": "Demo: a first conversation",
+  "ledger": [],
+  "cmds": [
+    { "show": { "who": "lord", "at": "left" } },
+    { "show": { "who": "pikeman", "at": "right" } },
+    { "say": { "who": "lord", "text": "You held the line again today.", "kind": "dramatized" } },
+    { "say": { "who": "pikeman", "text": "It is what the line is for, my lord.", "kind": "dramatized" } },
+    { "say": { "who": "lord", "text": "Then stand beside me tomorrow, and we shall see what it is for.", "kind": "dramatized" } }
+  ]
+}

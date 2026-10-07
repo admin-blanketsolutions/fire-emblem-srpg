@@ -16,6 +16,7 @@ import { applyItem, canUseItem, equipWeapon, swapItems, type ItemUseReport } fro
 import { checkPromotion, promote } from './promotion';
 import { adjustedCost, movementOf, rangeBonus, skillBonus, type CombatContext, type SkillTable } from './skills';
 import { checkObjective, newProgress, type Checkpoint, type ObjectiveProgress, type Outcome } from './objectives';
+import { pairKey, type SupportGain, type SupportTracker } from './supports';
 import { computeReach, pathTo, type ReachResult } from './pathfinding';
 import type { Rng } from './rng';
 import { applyStatus, hasExpired, type StatusId } from './status';
@@ -98,6 +99,8 @@ export interface PhaseReport {
   /** Units hurt by flames as the previous phase ended. */
   readonly burned: ReadonlyArray<{ readonly unit: UnitInstance; readonly damage: number }>;
   readonly arrived: readonly UnitInstance[];
+  /** Support points the Player Phase that has just ended earned. */
+  readonly supportGains: readonly SupportGain[];
 }
 
 /** Something for the player to read: a scene to play, or plain text. */
@@ -157,6 +160,11 @@ export class BattleState {
   readonly flames = new Map<number, number>();
   /** Counts of things done this chapter, for the limits on actions (barricades, decrees). */
   private readonly counts = new Map<string, number>();
+  /** The army's supports, if the chapter is played with them: points gather at the end of each Player Phase. */
+  supports: SupportTracker | null = null;
+  /** Where each unit definition last fought this Player Phase, and who aided whom: what earns support points. */
+  private readonly fought = new Map<string, Point>();
+  private readonly aided = new Set<string>();
   /** Burns from phases that were skipped, to be reported with the next phase. */
   private readonly skippedBurns: Array<{ unit: UnitInstance; damage: number }> = [];
 
@@ -528,6 +536,7 @@ export class BattleState {
       if (mine.length > 0 && kind) wexpGains.push({ unit, ...grantWexp(unit, kind, outcome.killed ? 2 : 1) });
     }
 
+    this.noteFought(attacker, defender);
     this.applyFightEffects(attacker, defender, events);
     this.finishAction(attacker);
     return { attacker, defender, forecast: fc, events, hpBefore, expAwards, wexpGains, brokenWeapons, defeated, ignited, splash };
@@ -574,6 +583,17 @@ export class BattleState {
       }
     }
     return { ignited, splash };
+  }
+
+  /** Two player units that fight this phase, each where it stood, may earn support points if they were near each other. */
+  private noteFought(attacker: UnitInstance, defender: UnitInstance): void {
+    if (this.phase !== 'player') return;
+    for (const u of [attacker, defender]) if (u.side === 'player' && u.kind === 'unit') this.fought.set(u.defId, { x: u.x, y: u.y });
+  }
+
+  /** One unit healed, mended or sent on another: it counts toward their support this phase. */
+  noteAid(actor: UnitInstance, target: UnitInstance): void {
+    if (actor.side === 'player' && target.side === 'player') this.aided.add(pairKey(actor.defId, target.defId));
   }
 
   /** What skills do once a fight is over: statuses on those hit, ransom, and movement owed after an attack. */
@@ -678,6 +698,7 @@ export class BattleState {
       expAward = { unit: healer, amount, ...awardExp(healer, amount, this.classOf(healer), this.tables.balance, this.rng, this.rules.guaranteedProgress) };
       grantWexp(healer, 'remedy', 1);
     }
+    this.noteAid(healer, target);
     this.finishAction(healer);
     return { healer, target, restored, cured, expAward };
   }
@@ -1004,8 +1025,9 @@ export class BattleState {
 
   /** Begin the battle: the first phase starts, with its reinforcements, terrain effects and events. A second call does nothing. */
   begin(): PhaseReport {
-    if (this.begun) return { turn: this.turn, phase: this.phase, healed: [], burned: [], arrived: [] };
+    if (this.begun) return { turn: this.turn, phase: this.phase, healed: [], burned: [], arrived: [], supportGains: [] };
     this.begun = true;
+    this.supports?.startChapter();
     return this.startPhase();
   }
 
@@ -1016,12 +1038,27 @@ export class BattleState {
    */
   endPhase(): PhaseReport {
     const burned = this.burnUnits(this.phase);
+    const supportGains = this.phase === 'player' ? this.tickSupports() : [];
     this.expireStatuses();
     this.check('phaseEnd');
     if (!this.outcome) this.advancePhase();
     burned.push(...this.skippedBurns.splice(0));
-    if (this.outcome) return { turn: this.turn, phase: this.phase, healed: [], burned, arrived: [] };
-    return { ...this.startPhase(), burned };
+    if (this.outcome) return { turn: this.turn, phase: this.phase, healed: [], burned, arrived: [], supportGains };
+    return { ...this.startPhase(), burned, supportGains };
+  }
+
+  /** At the end of a Player Phase: the points every supported pair on the field has earned (DESIGN §7.1). */
+  private tickSupports(): SupportGain[] {
+    const gains = this.supports
+      ? this.supports.tickPhase({
+          units: this.livingUnits('player').filter((u) => u.kind === 'unit'),
+          fought: this.fought,
+          aided: this.aided,
+        })
+      : [];
+    this.fought.clear();
+    this.aided.clear();
+    return gains;
   }
 
   /** Remove the statuses whose time has run out with this phase. */
@@ -1118,6 +1155,6 @@ export class BattleState {
     this.fire({ type: 'turnStart', turn, phase });
     const arrived = this.arrivals.splice(before);
     this.afterChange();
-    return { turn, phase, healed, burned: [], arrived };
+    return { turn, phase, healed, burned: [], arrived, supportGains: [] };
   }
 }

@@ -171,6 +171,7 @@ export function performAction(battle: BattleState, unit: UnitInstance, id: Class
         stack.uses += amount;
       }
       target.turnFlags.push('mended');
+      battle.noteAid(unit, target);
       break;
     }
     case 'counsel': {
@@ -186,6 +187,7 @@ export function performAction(battle: BattleState, unit: UnitInstance, id: Class
       target.travelled = 0;
       target.bonusMove = 0;
       target.turnFlags.push('dispatched');
+      battle.noteAid(unit, target);
       amount = 1;
       break;
     }

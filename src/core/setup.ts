@@ -2,12 +2,15 @@ import { BattleState, DEFAULT_RULES, type BattleRules, type BattleTables } from 
 import type { GameMap } from './map';
 import { createRng, hashSeed } from './rng';
 import { createStructure } from './structures';
+import type { SupportTracker } from './supports';
 import { createUnit, type UnitInstance, type UnitTable } from './unit';
 
 export interface BattleOptions {
   /** Seeds every random draw in the battle; defaults to a hash of the map id. */
   readonly seed?: number;
   readonly rules?: Partial<BattleRules>;
+  /** The army's supports: given before the battle begins, so the chapter's points start from nothing. */
+  readonly supports?: SupportTracker;
 }
 
 /**
@@ -38,6 +41,7 @@ export function buildBattle(map: GameMap, defs: UnitTable, tables: BattleTables,
   });
   const rng = createRng(options.seed ?? hashSeed('battle', map.id));
   const battle = new BattleState(map, units, tables, rng, { ...DEFAULT_RULES, ...options.rules });
+  if (options.supports) battle.supports = options.supports;
   battle.begin();
   return battle;
 }

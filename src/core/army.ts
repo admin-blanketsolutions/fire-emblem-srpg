@@ -1,6 +1,7 @@
 import type { BattleState } from './battle';
 import { addToPack, freshUses, priceOf, putInPack, removeFromPack, sellValue, type InventoryEnv } from './inventory';
 import type { ShopDef } from './shop';
+import type { SupportTracker } from './supports';
 import { INVENTORY_SLOTS, maxHp, type ItemStack, type UnitInstance } from './unit';
 
 /**
@@ -11,6 +12,12 @@ import { INVENTORY_SLOTS, maxHp, type ItemStack, type UnitInstance } from './uni
 /** The convoy (the baggage train, *athqal*) holds this many stacks (DESIGN §5.4). */
 export const CONVOY_SLOTS = 100;
 
+/** What a camp allows: a few conversations, and one drill for each unit. */
+export interface CampAllowance {
+  talks: number;
+  drilled: Set<string>;
+}
+
 export interface Army {
   /** Everyone who fights for the player, in the order they joined. */
   units: UnitInstance[];
@@ -18,9 +25,33 @@ export interface Army {
   dinars: number;
   /** Units lost to the Classic rules, for the Casualty roll. */
   fallen: UnitInstance[];
+  /** The chapter each fallen unit was lost in, by unit id. */
+  fallenIn: Map<string, string>;
+  /** The army's supports; they grow in battle and are shown in camp. */
+  supports: SupportTracker | null;
+  camp: CampAllowance;
+  /** Units chosen to take the field, by id; the Lord always goes. */
+  deployed: Set<string>;
+  /** How many the next chapter's map has room for. */
+  deployLimit: number;
 }
 
-export const newArmy = (units: UnitInstance[] = [], dinars = 0): Army => ({ units, convoy: [], dinars, fallen: [] });
+export interface ArmyOptions {
+  readonly supports?: SupportTracker;
+  readonly deployLimit?: number;
+}
+
+export const newArmy = (units: UnitInstance[] = [], dinars = 0, options: ArmyOptions = {}): Army => ({
+  units,
+  convoy: [],
+  dinars,
+  fallen: [],
+  fallenIn: new Map(),
+  supports: options.supports ?? null,
+  camp: { talks: 0, drilled: new Set() },
+  deployed: new Set(units.map((u) => u.id)),
+  deployLimit: options.deployLimit ?? 99,
+});
 
 export type Result = { readonly ok: true } | { readonly ok: false; readonly reason: string };
 const ok: Result = { ok: true };
@@ -91,7 +122,7 @@ export interface ChapterSettlement {
  * Casual mode every unit returns. Everyone is healed, their conditions cleared, and units won over
  * in the chapter join. Ransom becomes dinars.
  */
-export function settleChapter(army: Army, battle: BattleState, mode: CampaignMode): ChapterSettlement {
+export function settleChapter(army: Army, battle: BattleState, mode: CampaignMode, chapter?: string): ChapterSettlement {
   const lost: UnitInstance[] = [];
   const joined: UnitInstance[] = [];
   const keep: UnitInstance[] = [];
@@ -119,6 +150,9 @@ export function settleChapter(army: Army, battle: BattleState, mode: CampaignMod
   }
   army.units = keep;
   army.fallen.push(...lost);
+  if (chapter) for (const unit of lost) army.fallenIn.set(unit.id, chapter);
+  for (const unit of lost) army.deployed.delete(unit.id);
+  for (const unit of joined) army.deployed.add(unit.id);
   army.dinars += battle.ransom;
   return { lost, joined, ransom: battle.ransom };
 }

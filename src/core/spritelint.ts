@@ -1,3 +1,4 @@
+import { deniedWordIn } from './sensitive';
 import { KIND_SIZES, usedIndices, type SpriteDef, type SpriteKind } from './sprite';
 
 /**
@@ -22,12 +23,6 @@ export const ID_PREFIX: Readonly<Record<SpriteKind, string>> = {
   icon: 'icon',
 };
 
-/**
- * Words that must not appear in a sprite id: the project never depicts the Prophet or the
- * Companions (DECISIONS D-005). This catches an accidental asset name, not a deliberate one.
- */
-const DENIED_ID_WORDS: readonly string[] = ['prophet', 'rasul', 'nabi', 'sahaba', 'sahabi', 'companion'];
-
 const ID_PATTERN = /^[a-z0-9]+(\.[a-z0-9]+(-[a-z0-9]+)*)+$/;
 
 export function lintSprite(def: SpriteDef): LintIssue[] {
@@ -38,10 +33,8 @@ export function lintSprite(def: SpriteDef): LintIssue[] {
   if (!ID_PATTERN.test(def.id)) error(`id "${def.id}" must be lower-case dotted words, e.g. "unit.pikeman"`);
   const prefix = ID_PREFIX[def.kind];
   if (!def.id.startsWith(`${prefix}.`)) error(`a ${def.kind} sprite's id must start with "${prefix}."`);
-  const tokens = def.id.split(/[.\-_]/);
-  for (const word of DENIED_ID_WORDS) {
-    if (tokens.includes(word)) error(`id contains "${word}", which the project never depicts`);
-  }
+  const denied = deniedWordIn(def.id);
+  if (denied) error(`id contains "${denied}", which the project never depicts`);
 
   const allowed = KIND_SIZES[def.kind];
   if (!allowed.some(([w, h]) => w === def.size[0] && h === def.size[1])) {

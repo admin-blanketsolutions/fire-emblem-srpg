@@ -58,6 +58,7 @@ const SHEETS: SheetSpec[] = [
   { name: 'units', columns: 3, scale: 6, select: (d) => d.kind === 'map-unit' },
   { name: 'tiles', columns: 7, scale: 6, select: (d) => d.kind === 'tile' },
   { name: 'ui', columns: 4, scale: 6, select: (d) => d.kind === 'ui' },
+  { name: 'portraits', columns: 4, scale: 5, select: (d) => d.kind === 'portrait' },
 ];
 const GAP = 3;
 
@@ -78,7 +79,7 @@ function writeSheet({ name, columns, scale, select }: SheetSpec): void {
     sheet[i + 3] = 255;
   }
   chosen.forEach((def, n) => {
-    const isUnit = def.kind === 'map-unit';
+    const isUnit = def.kind === 'map-unit' || def.kind === 'portrait';
     // vary faction and skin along the sheet so the remapping is visible too
     const strip = render(def, isUnit && n % 2 === 1 ? 'frankish' : 'ayyubid', isUnit ? `s${(n % 5) + 1}` : 's2');
     const ox = GAP + (n % columns) * cellW;
