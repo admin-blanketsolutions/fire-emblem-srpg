@@ -171,6 +171,42 @@ describe('versions', () => {
   });
 });
 
+describe('the format of a campaign in the story (format 2)', () => {
+  const story = (): Campaign => {
+    const supports = loadEnv.supportsFor('campaign')!;
+    const c = newCampaign({ mode: 'casual', seed: 11, story: 'campaign', army: newArmy([], 250, { supports }), chapter: 'CH-02', step: 6, recruitName: 'Hasan' });
+    c.army.away = new Set(['shirkuh', 'ayyub']);
+    return c;
+  };
+
+  it('keeps where the campaign stands, what the Recruit is called and who is away', () => {
+    const file = encodeSave({ kind: 'slot', campaign: story(), label: 'x', savedAt: '2026-10-08T12:00:00Z' });
+    expect(file.schemaVersion).toBe(2);
+    const back = decodeSave(JSON.parse(JSON.stringify(file)), loadEnv).campaign;
+    expect(back).toMatchObject({ chapter: 'CH-02', step: 6, recruitName: 'Hasan', mode: 'casual' });
+    expect([...back.army.away].sort()).toEqual(['ayyub', 'shirkuh']);
+    expect(back.army.required.size).toBe(0);
+  });
+
+  it('reads a save of the first release (format 1) as a campaign at its first step, with the default name and no one away', () => {
+    const file = JSON.parse(JSON.stringify(encodeSave({ kind: 'slot', campaign: story(), label: 'x', savedAt: '2026-10-08T12:00:00Z' }))) as Record<string, unknown>;
+    const campaign = file.campaign as Record<string, unknown>;
+    delete campaign.step;
+    delete campaign.recruitName;
+    delete (campaign.army as Record<string, unknown>).away;
+    file.schemaVersion = 1;
+    const back = decodeSave(file, loadEnv).campaign;
+    expect(back).toMatchObject({ chapter: 'CH-02', step: 0, recruitName: 'Recruit' });
+    expect(back.army.away.size).toBe(0);
+  });
+
+  it('refuses a save whose name for the Recruit is empty or absurd', () => {
+    const file = JSON.parse(JSON.stringify(encodeSave({ kind: 'slot', campaign: story(), label: 'x', savedAt: '2026-10-08T12:00:00Z' }))) as { campaign: Record<string, unknown> };
+    file.campaign.recruitName = '   ';
+    expect(() => decodeSave(file, loadEnv)).toThrow(/recruitName/);
+  });
+});
+
 describe('save slots', () => {
   const file = (mode: Campaign['mode'] = 'classic', kind: SaveFile['kind'] = 'slot'): SaveFile => {
     const battle = battleFrom({ kind: 'proving', objective: 'rout', fog: false }, {}, 1);
