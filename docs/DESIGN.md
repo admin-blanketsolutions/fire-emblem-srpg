@@ -1301,6 +1301,7 @@ As built (M6, `scenes/menus.ts`): the settings screen shows only what the game h
 | `localStorage` unavailable or full | Adapter with in-memory fallback and a visible notice |
 | Scope creep in systems | Features marked *stretch* are cut first (reclassing, pair-up, Babain/Damietta maps) |
 | Three tiers of reset levels make EXP pacing hard | Tier EXP rates in `balance.json`; a balance script checks the slice's level targets. *(M7: the campaign has its own faster rates, and the story gives Salah ad-Din his levels; §5.7.)* |
+| The bundle grows with the campaign | The slice builds to one 542 kB script (137 kB gzipped) with all its data and placeholder art, and Vite says so; split the chapters' data and maps into lazily loaded chunks (`import()` in `data/story.ts` and `data/campaign.ts`) when the later chapters arrive, and not before |
 | A person plays better than the balance tool, and worse in other ways | The tool's numbers are floors and ceilings, not forecasts; the Casual mode is there for the player who does not want a battle to cost units; the first human play-tests should read the *lost* column first |
 
 **Decisions confirmed (2026-10-06)**
