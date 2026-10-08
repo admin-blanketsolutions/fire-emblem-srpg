@@ -1,4 +1,5 @@
-import { newArmy, type Army } from '../core/army';
+import { newArmy, type Army, type CampaignMode } from '../core/army';
+import { newCampaign, type Campaign } from '../core/campaign';
 import type { BattleState, BattleTables } from '../core/battle';
 import { freshUses } from '../core/inventory';
 import { parseMap, type MapJson } from '../core/map';
@@ -50,4 +51,22 @@ export function createCampDemo(): { army: Army; tables: BattleTables } {
     army.convoy.push({ id, uses: freshUses(id, tables) ?? 1 });
   }
   return { army, tables };
+}
+
+/**
+ * A campaign for the demo story: the camp army above with its own supports, every Codex entry
+ * there is to read, and the siege as its battle. New Game plays this until the chapters exist (M7).
+ */
+export function newDemoCampaign(mode: CampaignMode, seed: number): Campaign {
+  const supports = new SupportTracker(demoStory.supports);
+  const defs = Object.values(siegeUnits).filter((d) => d.side === 'player');
+  const army = newArmy(
+    defs.map((d) => createUnit(d, d.id, 0, 0, tables)),
+    1500,
+    { supports },
+  );
+  for (const id of ['steel-head-spear', 'bandage', 'naphtha-pot', 'water-skin']) army.convoy.push({ id, uses: freshUses(id, tables) ?? 1 });
+  const campaign = newCampaign({ mode, seed, story: 'demo', army, chapter: 'CH-00' });
+  for (const id of demoStory.codex.keys()) campaign.codex.add(id);
+  return campaign;
 }

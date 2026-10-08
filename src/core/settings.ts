@@ -40,7 +40,7 @@ export const DEFAULT_SETTINGS: Settings = {
   sfxVolume: 0.8,
   hitMode: 'honest',
   guaranteedProgress: true,
-  autoEndTurn: false,
+  autoEndTurn: true,
   dangerZoneDefault: false,
   sourceMarkers: true,
   portraits: 'illustrated',

@@ -183,11 +183,12 @@ describe('events during play', () => {
     expect(report.arrived.map((u) => u.id)).toEqual(['soldier#1']);
   });
 
-  it('records actions that need later systems without failing', () => {
+  it('records actions it cannot carry out without failing, and keeps Codex unlocks for the campaign', () => {
     const map = openMap(5, 1, { events: [{ id: 'gate', when: { type: 'turnStart', turn: 1 }, then: [{ type: 'openGate', at: [2, 0] }, { type: 'unlockCodex', id: 'CDX-1' }] }] });
     const battle = battleOf([unit({ id: 'p' })], map);
     battle.begin();
-    expect(battle.unhandled.map((a) => a.type)).toEqual(['openGate', 'unlockCodex']);
+    expect(battle.unhandled.map((a) => a.type)).toEqual(['openGate']);
+    expect(battle.codexUnlocks).toEqual(['CDX-1']);
   });
 
   it('lets an enemy event unit be recruited by an event alone', () => {

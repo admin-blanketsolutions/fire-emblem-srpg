@@ -136,6 +136,7 @@ export interface BattleSnapshot {
   readonly messages: readonly BattleMessage[];
   readonly arrivals: readonly number[];
   readonly unhandled: readonly EventAction[];
+  readonly codex: readonly string[];
   readonly explored: readonly number[];
   readonly visible: readonly number[];
   /** Changed tiles: tile key and terrain id. */
@@ -181,6 +182,8 @@ export class BattleState {
   readonly arrivals: UnitInstance[] = [];
   /** Event actions that need systems from later milestones (gates, flames, the Codex). */
   readonly unhandled: EventAction[] = [];
+  /** Codex entries unlocked by events during the battle, for the campaign to keep. */
+  readonly codexUnlocks: string[] = [];
 
   /** Tiles the player's side has seen, and tiles it sees now (fog of war). */
   explored = new Set<number>();
@@ -1024,7 +1027,7 @@ export class BattleState {
         if (!this.ignite(action.tile[0], action.tile[1])) this.unhandled.push(action);
         break;
       case 'unlockCodex':
-        this.unhandled.push(action);
+        if (!this.codexUnlocks.includes(action.id)) this.codexUnlocks.push(action.id);
         break;
     }
   }
@@ -1216,6 +1219,7 @@ export class BattleState {
       messages: this.messages.map((m) => ({ ...m })),
       arrivals: this.arrivals.map(ref),
       unhandled: structuredClone(this.unhandled),
+      codex: [...this.codexUnlocks],
       explored: [...this.explored],
       visible: [...this.visible],
       terrain: [...this.overrides].map(([key, def]) => [key, def.id] as const),
@@ -1258,6 +1262,7 @@ export class BattleState {
     this.messages.splice(0, this.messages.length, ...snap.messages.map((m) => ({ ...m })));
     this.arrivals.splice(0, this.arrivals.length, ...snap.arrivals.map(unit));
     this.unhandled.splice(0, this.unhandled.length, ...structuredClone(snap.unhandled));
+    this.codexUnlocks.splice(0, this.codexUnlocks.length, ...snap.codex);
     this.explored = new Set(snap.explored);
     this.visible = new Set(snap.visible);
     this.overrides.clear();

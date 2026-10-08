@@ -71,6 +71,8 @@ export interface CampSceneOptions {
   readonly flags?: Set<string>;
   /** A scene unlocked a Codex entry. */
   readonly onUnlock?: (id: string) => void;
+  /** More entries for the main menu, before the way on: saving, the Codex, settings. */
+  readonly extraItems?: () => ReadonlyArray<{ readonly label: string; readonly run: () => void }>;
 }
 
 /** Where a stack for sale comes from. */
@@ -102,12 +104,14 @@ export class CampScene implements Scene {
   private readonly chapterOrder: readonly string[];
   private readonly flags: Set<string>;
   private readonly onUnlock: ((id: string) => void) | undefined;
+  private readonly extraItems: CampSceneOptions['extraItems'];
   private mode: Mode = { kind: 'main', index: 0 };
   /** The list rows on screen, for taps: filled as the scene is drawn. */
   private hits: Hit[] = [];
 
-  constructor({ army, tables, shops, assets, text, title, onContinue, continueLabel, story, settings, chapter, chapterOrder, flags, onUnlock }: CampSceneOptions) {
+  constructor({ army, tables, shops, assets, text, title, onContinue, continueLabel, story, settings, chapter, chapterOrder, flags, onUnlock, extraItems }: CampSceneOptions) {
     this.army = army;
+    this.extraItems = extraItems;
     this.assets = assets;
     this.story = story;
     this.settings = settings ?? DEFAULT_SETTINGS;
@@ -209,6 +213,7 @@ export class CampScene implements Scene {
     items.push({ label: 'Maydan', run: list('maydan') });
     items.push({ label: `Class${ready > 0 ? `  (${ready})` : ''}`, run: list('class') });
     if (this.army.fallen.length > 0) items.push({ label: 'Casualty roll', run: list('roll') });
+    for (const extra of this.extraItems?.() ?? []) items.push({ label: extra.label, run: extra.run });
     const next = this.onContinue;
     if (next) items.push({ label: this.continueLabel, run: next });
     return items;

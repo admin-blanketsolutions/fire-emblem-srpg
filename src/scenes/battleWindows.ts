@@ -362,7 +362,7 @@ export function drawMessage(pen: Pen, lines: readonly string[]): void {
 
 
 /** The end of the chapter: a veil, the verdict, and why. */
-export function drawOutcome(pen: Pen, result: 'won' | 'lost', reason: string, canContinue: boolean): void {
+export function drawOutcome(pen: Pen, result: 'won' | 'lost', reason: string, prompt: string | null): void {
   const { ctx, text } = pen;
   ctx.fillStyle = 'rgba(13, 10, 20, 0.72)';
   ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
@@ -372,7 +372,7 @@ export function drawOutcome(pen: Pen, result: 'won' | 'lost', reason: string, ca
   ctx.fillRect(0, top + 66, LOGICAL_WIDTH, 1);
   text.drawCentered(ctx, result === 'won' ? 'Victory' : 'Defeat', LOGICAL_WIDTH / 2, top + 10, { color: result === 'won' ? COLORS.victory : COLORS.defeat, shadow: COLORS.ink, scale: 3 });
   text.wrap(reason, 200).forEach((line, i) => text.drawCentered(ctx, line, LOGICAL_WIDTH / 2, top + 38 + i * 10, PLAIN));
-  if (canContinue) text.drawCentered(ctx, 'OK to play again', LOGICAL_WIDTH / 2, top + 76, DIM);
+  if (prompt) text.drawCentered(ctx, prompt, LOGICAL_WIDTH / 2, top + 76, DIM);
 }
 
 /** Who is about to speak with whom. */

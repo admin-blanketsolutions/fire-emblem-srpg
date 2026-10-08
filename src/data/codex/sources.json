@@ -1,0 +1,24 @@
+[
+  {
+    "id": "CDX-S-EXPEDITION-DATES",
+    "category": "sources",
+    "title": "The first Egyptian expedition: 558 or 559 AH?",
+    "unlock": { "chapter": "CH-02", "at": "start" },
+    "confidence": "attested-differ",
+    "sources": ["SRC-IS", "SRC-IKH", "CH-02.E2"],
+    "body": [
+      "Nur ad-Din sent Shirkuh to Egypt, and Saladin rode with him, much against his will, in command of the vanguard. The sources agree on the expedition but not on its year.",
+      "Ibn Shaddad dates it to 558 AH. Ibn Khallikan prefers 559 AH, on the authority of the hadith scholar al-Silafi, who was in Egypt at the time; by his account the army set out in Jumada I 559 (March to April 1164) and reached Egypt in Rajab.",
+      "Ibn Shaddad served Saladin only from 1188, so for these early years he wrote down what others, often Saladin himself, told him. The game shows both years and does not choose between them."
+    ],
+    "differ": [
+      {
+        "claim": "The year the first expedition set out",
+        "positions": [
+          { "source": "SRC-IS", "says": "558 AH" },
+          { "source": "SRC-IKH", "says": "559 AH (Jumada I 559, March to April 1164), citing al-Silafi, who was in Egypt" }
+        ]
+      }
+    ]
+  }
+]

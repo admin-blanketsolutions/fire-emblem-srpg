@@ -8,6 +8,9 @@ import { Game } from './engine/game';
 import { Input } from './engine/input';
 import { TextRenderer } from './engine/text';
 import { installTouchControls } from './engine/touch';
+import { openBrowserStore } from './engine/storage';
+import { SaveSlots } from './core/save';
+import { GameFlow } from './scenes/flow';
 import { BattleScene } from './scenes/battleScene';
 import { CampScene } from './scenes/campScene';
 
@@ -29,9 +32,28 @@ async function boot(): Promise<void> {
   installTouchControls(input);
   const game = new Game({ display, input, assets, text });
 
-  // The proving ground can be played under each objective: ?objective=seize, ?fog=1, ?seed=42.
-  // ?demo=siege opens a walled courtyard with gates, mangonels and dry grass to burn.
   const params = new URLSearchParams(window.location.search);
+
+  // The game opens on the title screen. The address can instead go straight to a test battle:
+  // the proving ground under each objective (?objective=seize, ?fog=1, ?seed=42), the siege
+  // (?demo=siege) or the camp (?demo=camp).
+  const direct = ['objective', 'demo', 'fog', 'seed'].some((key) => params.has(key));
+  if (!direct) {
+    const { store, persistent } = openBrowserStore();
+    const flow = new GameFlow({
+      game,
+      assets,
+      text,
+      slots: new SaveSlots(store),
+      persistent,
+      now: () => new Date().toISOString(),
+      newSeed: () => Math.floor(Math.random() * 0x7fffffff),
+    });
+    game.run(flow.title());
+    if (import.meta.env.DEV) Object.assign(window, { sultan: { flow, assets } });
+    return;
+  }
+
   const objective = PROVING_OBJECTIVES.find((o) => o === params.get('objective')) ?? 'rout';
   const seed = Number(params.get('seed'));
   const makeSiege = (): BattleScene => {

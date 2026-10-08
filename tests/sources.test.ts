@@ -3,6 +3,8 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { lintRepository, lintScript, lintStory, loadStory, parseLedger, type StoryFiles } from '../tools/lint-sources';
+import { SOURCE_NAMES } from '../src/data/sourceNames';
+import { campaignStory } from '../src/data/story';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const real = parseLedger(readFileSync(join(root, 'docs', 'SOURCES.md'), 'utf8'));
@@ -14,6 +16,8 @@ const ledger = parseLedger(
     '| `CH-00` | Prologue |',
     '| `CH-00.E3` | Ayyub supplied boats |',
     '| `CHR-AYYUB` | Ayyub |',
+    '| `CDX-P-AYYUB` | Najm ad-Din Ayyub |',
+    '| `SRC-IKH` | Ibn Khallikan |',
     '| `CHR-GEN-*` | generic troops |',
     '| `SUP-A-B-C` **S** | a scene |',
     '| `SUP-A-B-B` | another |',
@@ -27,6 +31,7 @@ const story = (extra: Partial<StoryFiles> = {}): StoryFiles => ({
   characters: [{ file: 'characters.json', data: [{ id: 'ayyub', name: 'Ayyub', ledger: 'CHR-AYYUB', portrait: null }] }],
   scenes: [],
   supports: [],
+  codex: [],
   ...extra,
 });
 const scene = (id: string, cmds: unknown[], ledgerIds: string[] = ['CH-00.E3']) => ({ file: `${id}.scene.json`, data: { id, title: id, ledger: ledgerIds, cmds } });
@@ -110,6 +115,48 @@ describe('the story against the ledger', () => {
     expect(errors(lintStory(ledger, demo, { lenient: true }))).toEqual([]);
     const broken = story({ scenes: [{ file: 'd.scene.json', data: { id: 'demo.a', title: 'A', ledger: [], cmds: [{ say: { who: 'ayyub', text: 'x', kind: 'documented' } }] } }] });
     expect(errors(lintStory(ledger, broken, { lenient: true }))[0]).toMatch(/must cite the ledger/);
+  });
+});
+
+describe('the Codex against the ledger', () => {
+  const entry = (over: Record<string, unknown> = {}) => ({
+    id: 'CDX-P-AYYUB',
+    category: 'people',
+    title: 'Najm ad-Din Ayyub',
+    unlock: { chapter: 'CH-00', at: 'start' },
+    body: ['Keeper of the citadel of Tikrit.'],
+    confidence: 'attested',
+    sources: ['SRC-IKH', 'CH-00.E3'],
+    ...over,
+  });
+  const codex = (...entries: unknown[]) => story({ codex: [{ file: 'codex/people.json', data: entries }] });
+
+  it('passes an entry whose id and sources are rows', () => {
+    expect(errors(lintStory(ledger, codex(entry())))).toEqual([]);
+  });
+
+  it('finds an entry, or a source, that is not in the ledger', () => {
+    expect(errors(lintStory(ledger, codex(entry({ id: 'CDX-P-NOBODY' }))))).toEqual([expect.stringContaining('"CDX-P-NOBODY" is not in the ledger')]);
+    expect(errors(lintStory(ledger, codex(entry({ sources: ['SRC-NOWHERE'] }))))).toEqual([expect.stringContaining('"SRC-NOWHERE" is not in the ledger')]);
+    expect(errors(lintStory(ledger, codex(entry({ sources: ['UNV-01'] }))))).toEqual([expect.stringContaining('unverified or excluded')]);
+  });
+
+  it('is lenient about rows for demo entries', () => {
+    expect(errors(lintStory(ledger, codex(entry({ id: 'CDX-P-DEMO', sources: ['D-008'] })), { lenient: true }))).toEqual([]);
+  });
+
+  it('reports a malformed Codex file rather than failing', () => {
+    expect(errors(lintStory(ledger, story({ codex: [{ file: 'codex/x.json', data: { not: 'a list' } }] })))).toEqual(['must be a list of Codex entries']);
+  });
+});
+
+describe('the Codex’s source names', () => {
+  it('names only sources that are rows of the ledger, and every source the campaign’s entries cite', () => {
+    for (const id of Object.keys(SOURCE_NAMES)) expect(real.has(id), id).toBe(true);
+    for (const entry of campaignStory.codex.values()) {
+      for (const id of entry.sources) if (id.startsWith('SRC-') || id.startsWith('MOD-')) expect(SOURCE_NAMES[id], `${entry.id} cites ${id}`).toBeDefined();
+      for (const block of entry.differ ?? []) for (const p of block.positions) expect(SOURCE_NAMES[p.source], `${entry.id}: ${p.source}`).toBeDefined();
+    }
   });
 });
 
