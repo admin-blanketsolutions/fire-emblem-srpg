@@ -21,15 +21,16 @@ export type DemoName = (typeof DEMOS)[number];
 /** The demos' supports, kept while the page is open so that what the proving ground earns the camp can show. */
 export const demoSupports = new SupportTracker(demoStory.supports);
 
-const siegeUnits: UnitTable = { ...testUnits, ...(siegeUnitsJson as unknown as UnitTable) };
+export const siegeUnits: UnitTable = { ...testUnits, ...(siegeUnitsJson as unknown as UnitTable) };
+
+export const siegeMap = () => parseMap(siegeMapJson as unknown as MapJson, terrain);
 
 /**
  * A walled courtyard with a barred gate, wall segments that can be broken, mangonels, a barricade
  * and dry grass to burn: structures, flames, Sap, Entrench, Counsel, Open and a promotion item.
  */
 export function createSiegeDemo(options?: BattleOptions): BattleState {
-  const map = parseMap(siegeMapJson as unknown as MapJson, terrain);
-  return buildBattle(map, siegeUnits, { ...tables, units: siegeUnits }, { ...options, supports: demoSupports });
+  return buildBattle(siegeMap(), siegeUnits, { ...tables, units: siegeUnits }, { ...options, supports: demoSupports });
 }
 
 /**

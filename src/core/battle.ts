@@ -117,6 +117,40 @@ export interface PlanResult {
 }
 
 /**
+ * Everything about a battle in progress that is not fixed by its map, its tables and its rules,
+ * as plain JSON: the suspend-save (DESIGN §3.9). Units are written elsewhere and referred to here
+ * by number, so a unit shared with the army stays one unit when the save is read back.
+ */
+export interface BattleSnapshot {
+  readonly rng: number;
+  readonly turn: number;
+  readonly phase: Phase;
+  readonly phaseIndex: number;
+  readonly begun: boolean;
+  readonly units: readonly number[];
+  readonly fired: readonly string[];
+  readonly flags: readonly string[];
+  readonly progress: { readonly seized: boolean; readonly leaked: readonly string[]; readonly recruited: readonly string[]; readonly escaped: readonly string[] };
+  readonly outcome: Outcome | null;
+  readonly ransom: number;
+  readonly messages: readonly BattleMessage[];
+  readonly arrivals: readonly number[];
+  readonly unhandled: readonly EventAction[];
+  readonly explored: readonly number[];
+  readonly visible: readonly number[];
+  /** Changed tiles: tile key and terrain id. */
+  readonly terrain: ReadonlyArray<readonly [number, string]>;
+  readonly terrainVersion: number;
+  readonly flames: ReadonlyArray<readonly [number, number]>;
+  readonly counts: ReadonlyArray<readonly [string, number]>;
+  /** Whether the army's supports were with the battle. */
+  readonly supports: boolean;
+  readonly fought: ReadonlyArray<readonly [string, Point]>;
+  readonly aided: readonly string[];
+  readonly skippedBurns: ReadonlyArray<{ readonly unit: number; readonly damage: number }>;
+}
+
+/**
  * The battle rules: occupancy, movement, forecasts, fights with EXP and durability, healing,
  * phases with reinforcements and terrain effects, events, objectives, fog of war, and the
  * special actions (Seize, Depart, Talk, Visit). Every random draw comes from the battle's
@@ -1157,4 +1191,91 @@ export class BattleState {
     this.afterChange();
     return { turn, phase, healed, burned: [], arrived, supportGains: [] };
   }
+
+  // ------------------------------------------------------------------ suspend and resume
+
+  /** The battle's changing state as plain data; `ref` numbers each unit. */
+  snapshot(ref: (unit: UnitInstance) => number): BattleSnapshot {
+    return {
+      rng: this.rng.state(),
+      turn: this.turn,
+      phase: this.phase,
+      phaseIndex: this.phaseIndex,
+      begun: this.begun,
+      units: this.units.map(ref),
+      fired: [...this.events.fired],
+      flags: [...this.flags],
+      progress: {
+        seized: this.progress.seized,
+        leaked: [...this.progress.leaked],
+        recruited: [...this.progress.recruited],
+        escaped: [...this.progress.escaped],
+      },
+      outcome: this.outcome ? { ...this.outcome } : null,
+      ransom: this.ransom,
+      messages: this.messages.map((m) => ({ ...m })),
+      arrivals: this.arrivals.map(ref),
+      unhandled: structuredClone(this.unhandled),
+      explored: [...this.explored],
+      visible: [...this.visible],
+      terrain: [...this.overrides].map(([key, def]) => [key, def.id] as const),
+      terrainVersion: this.terrainVersion,
+      flames: [...this.flames],
+      counts: [...this.counts],
+      supports: this.supports !== null,
+      fought: [...this.fought].map(([id, p]) => [id, { x: p.x, y: p.y }] as const),
+      aided: [...this.aided],
+      skippedBurns: this.skippedBurns.map(({ unit, damage }) => ({ unit: ref(unit), damage })),
+    };
+  }
+
+  /**
+   * Put a battle built from the same map, tables and rules back into a saved state. `unit` turns a
+   * unit's number back into the unit; `supports` is the army's tracker, given back if the battle
+   * had it. Nothing is re-run: no phase starts and no event fires, so the next random draw is the
+   * one the suspended battle would have made.
+   */
+  restore(snap: BattleSnapshot, unit: (ref: number) => UnitInstance, supports: SupportTracker | null): void {
+    if (!this.phaseOrder.includes(snap.phase)) throw new Error(`Saved phase "${snap.phase}" is not played on map "${this.map.id}"`);
+    this.rng.restore(snap.rng);
+    this.turn = snap.turn;
+    this.phase = snap.phase;
+    this.phaseIndex = snap.phaseIndex;
+    this.begun = snap.begun;
+    this.units.splice(0, this.units.length, ...snap.units.map(unit));
+    const refill = <T>(set: Set<T>, values: readonly T[]): void => {
+      set.clear();
+      for (const v of values) set.add(v);
+    };
+    refill(this.events.fired, snap.fired);
+    refill(this.flags, snap.flags);
+    this.progress.seized = snap.progress.seized;
+    refill(this.progress.leaked, snap.progress.leaked);
+    refill(this.progress.recruited, snap.progress.recruited);
+    refill(this.progress.escaped, snap.progress.escaped);
+    this.outcome = snap.outcome ? { ...snap.outcome } : null;
+    this.ransom = snap.ransom;
+    this.messages.splice(0, this.messages.length, ...snap.messages.map((m) => ({ ...m })));
+    this.arrivals.splice(0, this.arrivals.length, ...snap.arrivals.map(unit));
+    this.unhandled.splice(0, this.unhandled.length, ...structuredClone(snap.unhandled));
+    this.explored = new Set(snap.explored);
+    this.visible = new Set(snap.visible);
+    this.overrides.clear();
+    for (const [key, id] of snap.terrain) {
+      const def = this.tables.terrain.get(id);
+      if (!def) throw new Error(`Saved terrain "${id}" is unknown`);
+      this.overrides.set(key, def);
+    }
+    this.terrainVersion = snap.terrainVersion;
+    this.flames.clear();
+    for (const [key, turns] of snap.flames) this.flames.set(key, turns);
+    this.counts.clear();
+    for (const [key, n] of snap.counts) this.counts.set(key, n);
+    this.supports = snap.supports ? supports : null;
+    this.fought.clear();
+    for (const [id, p] of snap.fought) this.fought.set(id, { x: p.x, y: p.y });
+    refill(this.aided, snap.aided);
+    this.skippedBurns.splice(0, this.skippedBurns.length, ...snap.skippedBurns.map((b) => ({ unit: unit(b.unit), damage: b.damage })));
+  }
 }
+
