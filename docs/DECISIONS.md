@@ -36,6 +36,9 @@ Companion documents: [DESIGN.md](DESIGN.md) · [SOURCES.md](SOURCES.md)
 | D-027 | No religious emblems on generic art | Policy |
 | D-028 | Combat and progression as built (M2) | Policy |
 | D-029 | Phases, AI, fog and objectives as built (M3) | Policy |
+| D-030 | Structures, fire, class actions and the camp as built (M4) | Policy |
+| D-031 | Supports, scenes and the Majlis as built (M5) | Policy |
+| D-032 | Saving, the Codex, the title, settings and sound as built (M6) | Policy |
 
 ---
 
@@ -271,6 +274,19 @@ They appear in the Codex and in carefully framed scenes, never as spectacle.
 - **Portraits are generic.** No source says what Salah ad-Din or his family looked like (ledger UNV-05); a placeholder portrait never claims to be a likeness. They are drawn from a few features (hair, beard, headgear, age), in the character's faction colours, and are replaced through the same override manifest as any other art.
 - **Settings are defined now,** with defaults and tolerant reading, so that dialogue can honour text speed, the source markers and the portraits setting; the settings screen and their storage arrive with M6.
 - **Drills and talks are small.** A drill is 4 weapon EXP and a talk 10 support points, once a camp; the numbers are first drafts for the balance pass in M7.
+
+## D-032 Saving, the Codex, the title, settings and sound as built (M6)
+
+- **A suspend-save rebuilds, then restores.** The battle is built again from its source (the chapter or demo it came from) and then put into the saved state; nothing is re-run on the way, so a resumed battle draws exactly the numbers the suspended one would have. A test plays a battle on from a save and from the original and compares them move for move.
+- **Units are saved once.** The army and the battle share unit objects in play (the army's units are the ones on the field), and the save keeps that: every unit is written once and referred to by number.
+- **Reading a save trusts nothing.** Every field is checked, and an unknown class, item, story or battle source is refused with the field named. A damaged save is listed as damaged rather than hidden, so the player knows it is there.
+- **Classic uses up the suspend-save when it is resumed;** Casual keeps it (DESIGN §3.9). Classic may become Casual in camp, never the reverse.
+- **A defeat goes back to the chapter-start autosave** instead of settling the army: under DESIGN §4.8 a lost chapter is retried, and settling a defeat in Classic would cost units for a battle that is about to be replayed.
+- **The demo stands in for the campaign.** Until the chapters exist, New Game plays the demo story: the camp army and the siege. Its army's units replace the map's units of the same definition where the map places them (`fieldArmy`), keeping the map's tags such as `lord`. The demo campaign has every Codex entry unlocked, so the Codex can be read.
+- **One real Codex entry, written only from the ledger.** *The first Egyptian expedition: 558 or 559 AH?* (`CDX-S-EXPEDITION-DATES`) says no more than ledger row CH-02.E2 and the source register say, and shows both years. Every other campaign entry is written in M7 with its chapter. The two demo entries are about the game itself (the test maps; the Three Postures as a game rule) and say they are demos.
+- **Settings show only what works.** Class-name style, screen shake (there is none yet), high contrast, larger text and remappable keys are defined but not on the screen until they do something. *End turn when all have acted* now defaults to on, which is what the game already did. Settings are kept apart from campaigns, under their own key.
+- **Sound is original and placeholder.** Seven short pieces in modes on D (the camp theme leans on Hijaz) and fourteen effects, all synthesised. Validation refuses any song or sound whose id names the call to prayer, takbir or recitation (D-004). Audio waits for the first key press or tap, as browsers require.
+- **A tap is reported when the finger lifts.** That is what lets a drag pan the map without also moving the cursor; a pointer that moves more than 4 logical pixels is a drag.
 
 ## Confirmed and open
 

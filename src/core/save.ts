@@ -439,16 +439,6 @@ export class SaveSlots {
     });
   }
 
-  /**
-   * Read the suspend-save for resuming. In Classic mode it is consumed: resuming removes it, so a
-   * battle cannot be replayed from the same moment (DESIGN §3.9). Casual keeps it.
-   */
-  takeSuspend(): ReadResult {
-    const read = this.read({ kind: 'suspend' });
-    if (read.ok && isObj(read.raw) && isObj(read.raw.campaign) && read.raw.campaign.mode !== 'casual') this.remove({ kind: 'suspend' });
-    return read;
-  }
-
   readSettings(): unknown {
     try {
       const text = this.store.get(SETTINGS_KEY);

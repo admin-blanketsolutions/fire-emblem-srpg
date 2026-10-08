@@ -289,6 +289,15 @@ describe('the Codex screen (M6 acceptance)', () => {
 });
 
 describe('damaged saves', () => {
+  it('keeps a Classic suspend-save that cannot be opened, rather than using it up', () => {
+    const store = new MemoryStore();
+    store.set('s2b:v1:suspend', JSON.stringify({ schemaVersion: 1, kind: 'suspend', summary: {}, units: [], campaign: { mode: 'classic' } }));
+    const h = harness(store);
+    h.flow.resume();
+    expect(h.scene()).toBeInstanceOf(TitleScene);
+    expect(store.get('s2b:v1:suspend')).not.toBeNull();
+  });
+
   it('reports a save that cannot be opened on the title, and carries on', () => {
     const store = new MemoryStore();
     store.set('s2b:v1:slot2', JSON.stringify({ schemaVersion: 1, kind: 'slot', summary: { label: 'x', chapter: null, mode: 'classic', units: 0, turn: null, savedAt: 'now' }, units: [], campaign: {} }));

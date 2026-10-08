@@ -183,13 +183,14 @@ export class GameFlow {
     this.title();
   }
 
-  /** Resume the suspended battle. In Classic the suspend-save is used up. */
+  /** Resume the suspended battle. In Classic the suspend-save is used up, once it has loaded. */
   resume(): void {
-    const read = this.s.slots.takeSuspend();
+    const read = this.s.slots.read({ kind: 'suspend' });
     if (!read.ok) return this.fail(read.reason);
     try {
       const loaded = decodeSave(read.raw, loadEnv);
       if (!loaded.battle) return this.fail('The suspended save holds no battle.');
+      if (loaded.campaign.mode === 'classic') this.s.slots.remove({ kind: 'suspend' });
       this.campaign = loaded.campaign;
       this.battleScene(loaded.battle, loaded.source as BattleSource);
     } catch (error) {

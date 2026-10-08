@@ -200,17 +200,6 @@ describe('save slots', () => {
     expect(listing[2]).toMatchObject({ state: 'damaged' });
   });
 
-  it('consumes the suspend-save on resume in Classic, keeps it in Casual', () => {
-    const slots = new SaveSlots(new MemoryStore());
-    slots.write({ kind: 'suspend' }, file('classic', 'suspend'));
-    expect(slots.takeSuspend().ok).toBe(true);
-    expect(slots.takeSuspend()).toMatchObject({ ok: false, empty: true });
-
-    slots.write({ kind: 'suspend' }, file('casual', 'suspend'));
-    expect(slots.takeSuspend().ok).toBe(true);
-    expect(slots.takeSuspend().ok).toBe(true);
-  });
-
   it('reports a storage failure instead of throwing', () => {
     const broken: KeyValueStore = {
       get: () => {

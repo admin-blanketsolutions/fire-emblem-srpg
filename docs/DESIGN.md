@@ -163,7 +163,7 @@ Screen layout (map view, 15×10 tiles of 16 px = 240×160):
 
 | Action | Keyboard | Touch |
 |---|---|---|
-| Move cursor | Arrow keys (hold to repeat) | Tap a tile; drag to pan (drag arrives with M6) |
+| Move cursor | Arrow keys (hold to repeat) | Tap a tile; drag to pan |
 | **Confirm** | `Z` | Tap the cursor tile again, or the on-screen **OK** |
 | **Cancel** | `X` | On-screen **Back**, or two-finger tap |
 | **Info** (unit/terrain details; previous unit in lists) | `A` | On-screen **Info** |
@@ -277,6 +277,8 @@ As built (`core/events.ts`): events live inline in the map's `events` array. A `
 - **Versioning:** every save has `schemaVersion`; migrations are pure functions with tests.
 - **Resilience:** all storage calls are wrapped; if storage is unavailable (private mode, quota), the game continues with an in-memory store and shows a notice.
 - Save contents are plain JSON and compressed with a tiny RLE for map layers only if size becomes a problem (not expected).
+
+As built (M6, `core/save.ts`, `core/campaign.ts`, `engine/storage.ts`): a save holds the campaign (mode, seed, story, chapter reached, flags, Codex unlocks and the army with its convoy, dinars, fallen, supports and deployment) and, for the suspend-save, the battle's *source* (what the data layer needs to build it again: a chapter, a demo) and its snapshot. Every unit is written once and referred to by number, so a unit in both the army and the battle is one unit when the save is read back. `BattleState.snapshot()` covers everything that is not fixed by the map, the tables and the rules (DECISIONS D-030 lists it), and `restore()` re-runs nothing, so the next random draw is the one the suspended battle would have made. Reading a save checks every field and refuses unknown classes, items, stories and battles with a message that names the field; the save list shows a damaged save as damaged. Keys are `s2b:v1:slot1` to `slot3`, `s2b:v1:auto`, `s2b:v1:suspend` and `s2b:v1:settings`. The autosave is written as a chapter's battle begins; a defeat returns to it.
 
 ---
 
@@ -937,6 +939,8 @@ interface CodexEntry {
 - **Game vs History** entries per chapter list exactly what the game invents (e.g., the Prologue's rear-guard skirmish).
 - Partisan or late sources are flagged in the entry that uses them (e.g., Ibn al-Athir's Zengid sympathies).
 
+As built (M6, `core/codex.ts`, `scenes/menus.ts`): an entry's id is its ledger row (`CDX-P-…`, `CDX-S-…`); the letter after `CDX-` must match the category. Entries carry `confidence` (`attested`, `attested-differ`, `inferred`, `fictional`; unverified claims never reach the Codex) except Game vs History entries, which carry none. An `attested-differ` entry must have at least one `differ` block, and every block at least two positions. Sources are ledger ids (`SRC-…`, `MOD-…`, `CH-02.E2`) and the screen shows them by name (`data/sourceNames.ts`). Campaign entries live in `src/data/codex/*.json` and are checked against the ledger by the source lint; demo entries in `src/data/test/codex.json` say that they are demos. Entries unlock at a chapter's start or end and by an event's `unlockCodex`; the reader has the six categories, each entry's badge, its paragraphs, each disputed claim with every source's position, and its sources.
+
 ### 9.5 The fictional viewpoint unit
 
 One fictional unit exists: **the Recruit**, a player-named levy (a Soldier) who joins in the Prologue. The Recruit is flagged *Fictional* in the unit window, the Codex and the ledger (`CHR-RECRUIT`). Generic troops (Tikrit Garrison, Caliphal Cavalry, etc.) are unnamed composites, also flagged. All named characters are historical.
@@ -1165,6 +1169,8 @@ Everything is a **placeholder** behind a manifest; real assets replace entries w
 - **Respect:** no adhan, takbir or recitation is synthesised or used as an effect.
 - Autoplay policy: audio starts on the first user gesture; mute and volume settings persist.
 
+As built (M6, `core/music.ts`, `engine/audio.ts`): songs are `assets/music/*.song.json` with patterns written as `NOTE:steps` tokens (`D4:2 -:2 x:4`, a step being a sixteenth), validated and timed in the core; the engine schedules notes 0.2 s ahead and loops from `loopFrom`. Sound effects are `assets/sfx/effects.json`. The override manifest is `public/assets/override/audio/manifest.json` with `music` and `sfx` maps. Ids naming the call to prayer, takbir or recitation are refused by validation. The interface sounds (move, choose, back) are played by the game loop for every scene.
+
 ---
 
 ## 14. Testing and quality gates
@@ -1215,6 +1221,8 @@ Each milestone ends with tests green, a production build, and a commit (the repo
 - **Mode:** Classic or Casual, chosen at New Game. Classic → Casual may be switched at any Camp; Casual → Classic is not allowed mid-campaign (it would retroactively condemn units).
 - Text speed; battle animations (Scene / Map / Off); music and SFX volume; hit-roll mode (Honest / Weighted); *Guaranteed progress*; auto-end-turn; danger-zone default; source markers on/off; **portraits: illustrated / name plates only**; **class names: Common / Historical / Both**; screen-shake off; high-contrast overlays; larger-text option (doubles to 2× font in dialogue only); colour-blind-safe range colours (blue/orange instead of blue/red); remappable keys.
 - Touch controls scale with screen size; all menus are reachable with one hand.
+
+As built (M6, `scenes/menus.ts`): the settings screen shows only what the game honours: text speed, battle animations (Map or Off; Scene waits for battle sprites, D-028), music and sound volume, hit rolls and guaranteed progress (from the next battle), ending the turn when all have acted, the danger zone at the start, source marks, portraits, and colour-blind-safe ranges (orange for attack). Class-name style, screen shake, high contrast, larger text and remappable keys are not shown yet (DECISIONS D-032). The mode is chosen at New Game and changed only in camp.
 
 ---
 

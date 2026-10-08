@@ -4,7 +4,7 @@ A browser-based tactical RPG in the feel of the Game Boy Advance era, telling th
 
 It takes inspiration from the *genre* and its mechanics only. All names, classes, items, art, music and text are original, and all art and audio are procedurally generated placeholders that can be replaced without code changes.
 
-**Status:** design approved; milestones M1 (engine), M2 (combat and levelling) and M3 (enemy AI, phases, fog, objectives) complete, M4 next. See [Progress](#progress).
+**Status:** design approved; milestones M1 to M6 complete (engine, combat, AI and objectives, classes and the camp, supports and dialogue, saving and the Codex); M7, the first four chapters, is next. See [Progress](#progress).
 
 ## What it is
 
@@ -38,38 +38,45 @@ Requires Node 22.12 or later.
 npm install
 npm run dev          # the game, at http://localhost:3000
 npm test             # unit tests (Vitest)
-npm run lint         # layering lint + sprite lint
+npm run lint         # layering lint + source lint + sprite lint
 npm run build        # typecheck + production build into dist/
 npm run sprites:preview   # the sprite preview page, with live reload
 ```
 
 Other sprite commands: `npm run sprites:gen` regenerates the placeholder sprites from the kits in `tools/sprites/kits/`, and `npm run sprites` exports PNG strips and contact sheets to `out/sprites/`.
 
-## Playing it (M3)
+## Playing it (M6)
 
-One test map, the *Proving Ground*, with seven player units and five enemies. You can select a unit, see where it can move and attack, walk it across terrain at the correct cost, and then Attack, Heal, Wait, or, where the objective allows, Seize, Depart, Talk or Visit. When you end the turn the enemy plays its phase.
+The game opens on the title screen. **New game** asks for **Classic** (a unit that retreats wounded leaves the army, unless the sources place it in later events) or **Casual** (everyone returns after the battle). Until the chapters are written (M7), a campaign is the demo: an army in camp, and a siege to ride to.
 
-- **Attack** offers each weapon that reaches someone, then the targets one at a time, with the forecast: damage, hit and crit chance, doubling, and expected HP for both sides. `Info` shows the working (attack speed, accuracy, evasion, cover).
-- Fights play out as map animation, then the EXP bar, any level-up and weapon grades earned. Weapons wear out and break. Healers restore HP with a remedy.
-- The enemy fights by mode (advance, hold a post until something comes near, shoot from a fixed spot, flee for an exit, guard a unit), picks the best attack by an exact expectation of the outcome, and goes for the Lord when it can kill him. Reinforcements can arrive, healing ground restores HP, and events can speak to you.
-- The map can be played under each of the seven objectives, with or without fog of war:
+- **Camp:** Preparations, the units and their packs, the convoy, two shops, Majlis talks (support scenes), the Maydan, promotion, and **Codex and saves**: three save slots, the Codex, settings, the switch from Classic to Casual (never back), and the way to the title.
+- **Battle:** select a unit, see where it can move and attack, and act: Attack (with the forecast and the working behind it), Heal, items, Trade, class actions (Sap, Entrench, Mend, Counsel, Dispatch, Decree, Open), Seize, Depart, Talk and Visit where the map allows. The enemy plays its phase by mode and by an exact expectation of each fight. **Suspend** on the turn menu saves the battle and returns to the title, where **Resume battle** picks it up exactly where it was. In Classic a suspend-save is used up when it is resumed.
+- **After a battle:** a victory brings the army home under the campaign's rules and back to camp. A defeat sends the campaign back to the autosave made as the battle began.
+- **The Codex** has People, Places, Events, Terms, Sources & Disputes and Game vs History. Each entry carries its confidence badge and its sources, and where the sources disagree it shows each one's position.
+- **Settings** (from the title or camp) are kept between visits: text speed, battle animations, music and sound volume, hit rolls (Honest or Weighted), guaranteed progress, ending the turn when everyone has acted, the danger zone at the start, the ◆/◇ source marks, portraits, and colour-blind-safe ranges.
+- **Sound** is placeholder chiptune from a small synthesiser, and starts with the first key press or tap. Real recordings can replace any song or sound (see [Replacing sound](#replacing-sound)).
+- If the browser will not keep saves (private mode, storage blocked), the game says so on the title and keeps them for as long as the page is open.
 
-  | Address | Objective |
-  |---|---|
-  | `/?objective=rout` | Defeat all enemies (default) |
-  | `/?objective=seize` | The Lord seizes the marked tile in the citadel |
-  | `/?objective=defend` | Defend until the end of turn 6 |
-  | `/?objective=hold-the-pass` | Keep the enemy from crossing the bridge until turn 6 |
-  | `/?objective=escort` | Take the healer to the marked exit and Depart |
-  | `/?objective=survive` | Survive until the end of turn 6 |
-  | `/?objective=persuade` | Talk the crossbowman round within 8 turns |
+Test battles can still be opened directly. The proving ground can be played under each of the seven objectives, with or without fog of war:
 
-  Add `&fog=1` for fog of war and `&seed=42` for a different set of dice.
-- The three-way weapon triangle (Spear beats Mace, Mace beats Sabre, Sabre beats Spear) shows as ▲ and ▼ on the forecast.
+| Address | Battle |
+|---|---|
+| `/?objective=rout` | Defeat all enemies |
+| `/?objective=seize` | The Lord seizes the marked tile in the citadel |
+| `/?objective=defend` | Defend until the end of turn 6 |
+| `/?objective=hold-the-pass` | Keep the enemy from crossing the bridge until turn 6 |
+| `/?objective=escort` | Take the healer to the marked exit and Depart |
+| `/?objective=survive` | Survive until the end of turn 6 |
+| `/?objective=persuade` | Talk the crossbowman round within 8 turns |
+| `/?demo=siege` | A walled courtyard with a gate, mangonels and dry grass |
+| `/?demo=camp` | The camp, then the siege |
+
+Add `&fog=1` for fog of war and `&seed=42` for a different set of dice.
 
 | Action | Keyboard | Touch |
 |---|---|---|
 | Move cursor | Arrow keys | On-screen pad, or tap a tile |
+| Pan the map | — | Drag |
 | Confirm | `Z` | OK, or tap the cursor tile again |
 | Cancel | `X` | Back |
 | Info (unit details; forecast working) | `A` | Info |
@@ -78,6 +85,16 @@ One test map, the *Proving Ground*, with seven player units and five enemies. Yo
 
 Confirm on an enemy unit shows its move and attack range. The touch pad appears on touch devices only.
 
+## Replacing sound
+
+Put recordings in `public/assets/override/audio/` with a `manifest.json` that maps song and sound ids to files:
+
+```json
+{ "music": { "title": "title.ogg", "camp": "camp.ogg" }, "sfx": { "hit": "hit.ogg" } }
+```
+
+A recording replaces the synthesised version of that id; anything not listed keeps the placeholder. The ids are the file names in `assets/music/` (`title`, `camp`, `player-phase`, `enemy-phase`, `story`, `victory`, `defeat`) and the entries of `assets/sfx/effects.json`. Nothing that imitates the call to prayer or recitation is used as music or as an effect (DECISIONS D-004).
+
 ## Progress
 
 | Milestone | Scope | State |
@@ -85,9 +102,9 @@ Confirm on an enemy unit shows its move and attack range. The touch pad appears 
 | M1 | Renderer, tilemap, cursor, movement, attack, sprite tool, one test map | done |
 | M2 | Combat forecast and resolution, levelling, weapon triangle, terrain | done |
 | M3 | Enemy AI, phases, danger zone, fog, objectives | done |
-| M4 | Classes, promotion, inventory, convoy, shops | next |
-| M5 | Supports, Camp, dialogue and portraits | planned |
-| M6 | Save/load, Codex, title, settings, Classic/Casual | planned |
-| M7 | Prologue and Chapters 1–3 with source-backed dialogue | planned |
+| M4 | Classes, promotion, inventory, convoy, shops | done |
+| M5 | Supports, Camp, dialogue and portraits | done |
+| M6 | Save/load, Codex, title, settings, Classic/Casual | done |
+| M7 | Prologue and Chapters 1–3 with source-backed dialogue | next |
 
 The full README (adding chapters, units and classes, swapping art and audio) lands with M7. Each milestone ends with tests green, a production build, and a commit.
