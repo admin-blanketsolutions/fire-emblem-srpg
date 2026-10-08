@@ -17,7 +17,7 @@ import { DIM, drawBackdrop, GOLD, ListScreen, PLAIN, type ListContent, type Row 
 
 const cycle = <T>(list: readonly T[], value: T, delta: -1 | 1): T => list[(list.indexOf(value) + delta + list.length) % list.length] as T;
 const MODE_ABOUT: Readonly<Record<CampaignMode, string>> = {
-  classic: 'Classic: a unit that retreats wounded leaves the army, unless the sources place it in later events.',
+  classic: 'Classic: a unit that retreats wounded is lost, unless the story needs it.',
   casual: 'Casual: every unit that retreats wounded returns after the battle.',
 };
 
@@ -172,7 +172,7 @@ export class SettingsScene extends ListScreen {
         label: 'Hit rolls',
         value: s.hitMode === 'honest' ? 'Honest' : 'Weighted',
         change: () => this.set({ hitMode: s.hitMode === 'honest' ? 'weighted' : 'honest' }),
-        about: 'Honest: one roll, so 70% hits seven times in ten. Weighted: two rolls averaged, so high chances hit more often. Applies from the next battle.',
+        about: 'Honest: one roll. Weighted: two averaged, so good odds hit more. From next battle.',
       },
       { label: 'Guaranteed progress', ...toggle('guaranteedProgress'), about: 'A level-up that would gain nothing tries again once. Applies from the next battle.' },
       { label: 'End turn when all have acted', ...toggle('autoEndTurn') },

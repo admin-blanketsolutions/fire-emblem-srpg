@@ -29,7 +29,7 @@ export interface Harness {
   press: (...actions: Action[]) => void;
 }
 
-export function harness(store = new MemoryStore(), persistent = true): Harness {
+export function harness(store = new MemoryStore(), persistent = true, renderer: TextRenderer = text): Harness {
   let current: Scene | null = null;
   let lastBattle: BattleSceneOptions | null = null;
   let lastBattleScene: Scene | null = null;
@@ -38,7 +38,7 @@ export function harness(store = new MemoryStore(), persistent = true): Harness {
   const flow = new GameFlow({
     game,
     assets: {} as Assets,
-    text,
+    text: renderer,
     slots,
     persistent,
     now: () => '2026-10-08T10:00:00Z',
