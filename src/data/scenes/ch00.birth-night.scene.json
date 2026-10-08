@@ -1,0 +1,16 @@
+{
+  "id": "ch00.birth-night",
+  "title": "The night of the birth",
+  "ledger": ["CH-00.E6", "CH-00.E7"],
+  "cmds": [
+    {"bg": "tikrit-night"},
+    {"show": {"who": "ayyub", "at": "left"}},
+    {"say": {"who": "narrator", "text": "That same year, 532 AH, in the fortress of Tikrit, Ayyub's son Yusuf was born: the child who would one day be called Salah ad-Din. The historians agree on the year and on the place.", "kind": "narration", "src": ["CH-00.E6"]}},
+    {"say": {"who": "narrator", "text": "A kinsman of the family told Ibn Khallikan the rest as a story the household told: that they left Tikrit on the very night of the birth.", "kind": "narration", "src": ["CH-00.E7"]}},
+    {"say": {"who": "ayyub", "text": "A son, and a journey the same night. People will say it is a sign.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Some of the household thought it a bad omen. One of them answered: 'Good may come of this, when you least expect it.'", "kind": "narration", "src": ["CH-00.E7"]}},
+    {"say": {"who": "narrator", "text": "Ibn Khallikan himself reckoned that they left at the end of 532 or in 533. Ibn Shaddad says only that circumstances obliged Ayyub to leave. The Codex shows where the accounts part.", "kind": "narration", "src": ["CH-00.E7"]}},
+    {"unlock": "CDX-S-BIRTHNIGHT"},
+    {"unlock": "CDX-E-EXILE"}
+  ]
+}

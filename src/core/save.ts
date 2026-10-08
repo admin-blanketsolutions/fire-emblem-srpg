@@ -14,7 +14,7 @@ import type { UnitInstance } from './unit';
  */
 
 /** The current save format. Bump it, and add a migration, whenever the format changes. */
-export const SAVE_SCHEMA = 1;
+export const SAVE_SCHEMA = 2;
 
 export type SaveKind = 'slot' | 'autosave' | 'suspend';
 
@@ -44,6 +44,7 @@ interface ArmyJson {
   readonly camp: { readonly talks: number; readonly drilled: readonly string[] };
   readonly deployed: readonly string[];
   readonly deployLimit: number;
+  readonly away: readonly string[];
 }
 
 interface CampaignJson {
@@ -51,8 +52,10 @@ interface CampaignJson {
   readonly seed: number;
   readonly story: string;
   readonly chapter: string | null;
+  readonly step: number;
   readonly flags: readonly string[];
   readonly codex: readonly string[];
+  readonly recruitName: string;
   readonly army: ArmyJson;
 }
 
@@ -125,6 +128,7 @@ export function encodeSave(req: SaveRequest): SaveFile {
     camp: { talks: army.camp.talks, drilled: [...army.camp.drilled] },
     deployed: [...army.deployed],
     deployLimit: army.deployLimit,
+    away: [...army.away],
   };
   return {
     schemaVersion: SAVE_SCHEMA,
@@ -143,8 +147,10 @@ export function encodeSave(req: SaveRequest): SaveFile {
       seed: campaign.seed,
       story: campaign.story,
       chapter: campaign.chapter,
+      step: campaign.step,
       flags: [...campaign.flags],
       codex: [...campaign.codex],
+      recruitName: campaign.recruitName,
       army: armyJson,
     },
     battle: battleJson,
@@ -156,8 +162,22 @@ export function encodeSave(req: SaveRequest): SaveFile {
 /** Turns a save of version n into version n + 1. Pure. */
 export type Migration = (file: Record<string, unknown>) => Record<string, unknown>;
 
-/** Keyed by the version each migration upgrades from. None yet: version 1 is the first. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = {};
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
+
+/**
+ * Version 1 (M6) knew the chapter a campaign had reached but not the step of it, the name of the
+ * Recruit, or who was away. A v1 campaign is taken to be at the first step; a save that is not
+ * shaped like a campaign is left for the reader to refuse with its reason.
+ */
+const toVersion2: Migration = (file) => {
+  const campaign = file.campaign;
+  if (!isRecord(campaign)) return { ...file, schemaVersion: 2 };
+  const army = isRecord(campaign.army) ? { ...campaign.army, away: campaign.army.away ?? [] } : campaign.army;
+  return { ...file, schemaVersion: 2, campaign: { ...campaign, step: campaign.step ?? 0, recruitName: campaign.recruitName ?? 'Recruit', army } };
+};
+
+/** Keyed by the version each migration upgrades from. */
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: toVersion2 };
 
 /** Bring parsed JSON up to `target`, one version at a time. Refuses saves from a newer game. */
 export function migrate(raw: unknown, migrations: Readonly<Record<number, Migration>> = MIGRATIONS, target = SAVE_SCHEMA): Record<string, unknown> {
@@ -193,6 +213,11 @@ const str = (v: unknown, where: string): string => need(typeof v === 'string', v
 const bool = (v: unknown, where: string): boolean => need(typeof v === 'boolean', v, where, 'true or false');
 const strs = (v: unknown, where: string): string[] => arr(v, where).map((s, i) => str(s, `${where}[${i}]`));
 const ints = (v: unknown, where: string): number[] => arr(v, where).map((n, i) => int(n, `${where}[${i}]`));
+const recruitName = (v: unknown, where: string): string => {
+  const name = str(v, where);
+  if (name.trim() === '' || name.length > 24) throw new SaveError(`${where} should be a name of 1 to 24 characters.`);
+  return name;
+};
 const MODES: readonly CampaignMode[] = ['classic', 'casual'];
 const mode = (v: unknown, where: string): CampaignMode => need(MODES.includes(v as CampaignMode), v, where, '"classic" or "casual"');
 
@@ -265,6 +290,8 @@ function readArmy(raw: unknown, unit: (i: number, where: string) => UnitInstance
     camp: { talks: int(camp.talks, 'campaign.army.camp.talks'), drilled: new Set(strs(camp.drilled, 'campaign.army.camp.drilled')) },
     deployed: new Set(strs(a.deployed, 'campaign.army.deployed')),
     deployLimit: int(a.deployLimit, 'campaign.army.deployLimit'),
+    away: new Set(strs(a.away, 'campaign.army.away')),
+    required: new Set(),
   };
 }
 
@@ -302,8 +329,10 @@ export function decodeSave(raw: unknown, env: LoadEnv): LoadedSave {
     seed: int(c.seed, 'campaign.seed'),
     story,
     chapter: c.chapter === null ? null : str(c.chapter, 'campaign.chapter'),
+    step: int(c.step, 'campaign.step'),
     flags: new Set(strs(c.flags, 'campaign.flags')),
     codex: new Set(strs(c.codex, 'campaign.codex')),
+    recruitName: recruitName(c.recruitName, 'campaign.recruitName'),
     army,
   };
 

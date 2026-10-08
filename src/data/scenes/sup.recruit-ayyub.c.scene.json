@@ -1,0 +1,20 @@
+{
+  "id": "sup.recruit-ayyub.c",
+  "title": "Provisions for the Retreat",
+  "ledger": ["SUP-RECRUIT-AYYUB-C", "CH-00.E3"],
+  "cmds": [
+    {"bg": "camp-night"},
+    {"show": {"who": "ayyub", "at": "left"}},
+    {"show": {"who": "recruit", "at": "right"}},
+    {"say": {"who": "narrator", "text": "The Recruit is a levy of the Tikrit garrison: an invented person, who stood on the landing the day the boats were lent.", "kind": "narration"}},
+    {"say": {"who": "recruit", "text": "My lord. Before the day of the boats I had never tasted bread from the citadel's granary.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "No one had. It was kept for a siege.", "kind": "dramatized"}},
+    {"say": {"who": "recruit", "text": "The men in the ranks said the governor would have our heads for opening it to Zengi's people.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Ayyub gave the fugitives boats, kindness and provisions; Bihruz sent him a letter of blame.", "kind": "narration", "src": ["CH-00.E3"]}},
+    {"say": {"who": "ayyub", "text": "The governor wrote me a letter. That was all it cost.", "kind": "dramatized"}},
+    {"say": {"who": "recruit", "text": "And if they had been the Caliph's men, who came to the river hungry?", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "The same. It was never about whose they were. A man with nothing in his hands is a guest.", "kind": "dramatized"}},
+    {"say": {"who": "recruit", "text": "Then I know what a garrison is for, my lord. I will remember where I learned it.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "Learn the other half as well: how to hold a landing. We shall want both.", "kind": "dramatized"}}
+  ]
+}

@@ -11,6 +11,7 @@ import type { BattleSceneOptions } from '../src/scenes/battleScene';
 import { CampScene } from '../src/scenes/campScene';
 import { GameFlow } from '../src/scenes/flow';
 import { ListScreen } from '../src/scenes/listScreen';
+import { NameScene } from '../src/scenes/nameScene';
 import { CodexScene, SettingsScene, SlotsScene, TitleScene } from '../src/scenes/menus';
 
 /** A text renderer good enough for layout: every glyph one pixel, no wrapping. */
@@ -72,10 +73,18 @@ function choose(h: Harness, label: string): void {
   h.press('confirm');
 }
 
+/** A campaign of the demo story: one camp, the siege, and a last camp. (The real campaign starts by naming the Recruit.) */
 function startCampaign(h: Harness, mode: 'Classic' | 'Casual' = 'Classic'): void {
   h.flow.title();
-  choose(h, 'New game');
-  choose(h, mode);
+  h.flow.newGame(mode === 'Classic' ? 'classic' : 'casual', 'demo');
+}
+
+/** From camp, take the way on: the last entry of the main menu. */
+function ride(h: Harness): void {
+  const camp = h.scene() as CampScene;
+  const items = (camp as unknown as { mainItems(): Array<{ label: string }> }).mainItems();
+  (camp as unknown as { mode: { kind: 'main'; index: number } }).mode = { kind: 'main', index: items.length - 1 };
+  h.press('confirm');
 }
 
 /** From camp, open the records menu. */
@@ -115,7 +124,16 @@ describe('the title', () => {
     expect((title as unknown as { content(): { note?: string } }).content().note).toMatch(/not available/);
   });
 
-  it('asks Classic or Casual for a new game, and starts in camp', () => {
+  it('asks Classic or Casual for a new game, and the campaign begins by naming the Recruit', () => {
+    const h = harness();
+    h.flow.title();
+    choose(h, 'New game');
+    choose(h, 'Casual');
+    expect(h.scene()).toBeInstanceOf(NameScene);
+    expect(h.flow.campaign).toMatchObject({ mode: 'casual', story: 'campaign', chapter: 'CH-00', step: 0 });
+  });
+
+  it('starts the demo story in camp', () => {
     const h = harness();
     startCampaign(h, 'Casual');
     expect(h.scene()).toBeInstanceOf(CampScene);
@@ -132,7 +150,7 @@ describe('saving and loading in camp', () => {
     choose(h, 'Save');
     expect(h.scene()).toBeInstanceOf(SlotsScene);
     choose(h, 'Slot 1');
-    expect(h.slots.list()[0]).toMatchObject({ state: 'ok', summary: { label: 'Camp · CH-00', mode: 'classic' } });
+    expect(h.slots.list()[0]).toMatchObject({ state: 'ok', summary: { label: 'Prologue · The Siege Demo', mode: 'classic' } });
     choose(h, 'Slot 1');
     expect((h.scene() as unknown as { content(): { title: string } }).content().title).toBe('Overwrite Slot 1?');
     choose(h, 'Yes');
@@ -173,8 +191,8 @@ describe('battles, suspend and the end of a chapter', () => {
   it('autosaves as the chapter begins, and fields the army’s own units', () => {
     const h = harness();
     startCampaign(h);
-    h.flow.beginBattle();
-    expect(h.slots.list().find((l) => l.place.kind === 'autosave')).toMatchObject({ state: 'ok', summary: { label: 'Chapter start' } });
+    ride(h);
+    expect(h.slots.list().find((l) => l.place.kind === 'autosave')).toMatchObject({ state: 'ok', summary: { label: 'Prologue · The Siege Demo' } });
     const battle = battleOf(h);
     const army = h.flow.campaign!.army;
     const fielded = battle.units.filter((u) => u.side === 'player' && u.kind === 'unit');
@@ -187,7 +205,7 @@ describe('battles, suspend and the end of a chapter', () => {
   it('suspends to the title and resumes the same battle, used up in Classic (M6 acceptance)', () => {
     const h = harness();
     startCampaign(h);
-    h.flow.beginBattle();
+    ride(h);
     const before = battleOf(h);
     before.endPhase();
     playPhase(before, before.phase);
@@ -207,7 +225,7 @@ describe('battles, suspend and the end of a chapter', () => {
   it('keeps the suspend-save in Casual', () => {
     const h = harness();
     startCampaign(h, 'Casual');
-    h.flow.beginBattle();
+    ride(h);
     h.battle().onSuspend!();
     choose(h, 'Resume battle');
     expect(h.slots.list().find((l) => l.place.kind === 'suspend')?.state).toBe('ok');
@@ -215,7 +233,7 @@ describe('battles, suspend and the end of a chapter', () => {
 
   /** Win the siege with one ordinary unit fallen along the way. */
   function winWithACasualty(h: Harness): string {
-    h.flow.beginBattle();
+    ride(h);
     const battle = battleOf(h);
     const army = h.flow.campaign!.army;
     const fallen = army.units.find((u) => !u.chronicled && !u.tags.includes('lord') && battle.units.includes(u))!;
@@ -254,7 +272,7 @@ describe('battles, suspend and the end of a chapter', () => {
     startCampaign(h);
     const army = h.flow.campaign!.army;
     const count = army.units.length;
-    h.flow.beginBattle();
+    ride(h);
     const battle = battleOf(h);
     playOut(battle);
     for (const u of battle.units) if (u.side === 'player') u.retreated = true;

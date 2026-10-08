@@ -1,0 +1,23 @@
+{
+  "id": "ch00.quarrel",
+  "title": "The quarrel at the gate",
+  "ledger": ["CH-00.E5", "CH-00.E2"],
+  "cmds": [
+    {"bg": "citadel"},
+    {"music": "story"},
+    {"say": {"who": "narrator", "text": "Six years later Tikrit is still Ayyub's to keep, and the household in the citadel is waiting for a child.", "kind": "narration", "src": ["CH-00.E6"]}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"show": {"who": "ayyub", "at": "left"}},
+    {"say": {"who": "narrator", "text": "Ibn Khallikan tells what came next. A woman, weeping, said that the officer of the guard had insulted her as she entered the castle gate.", "kind": "narration", "src": ["CH-00.E5"]}},
+    {"say": {"who": "shirkuh", "text": "Who did this to her?", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Shirkuh took the officer's own halberd and struck him with it, and the man died.", "kind": "narration", "src": ["CH-00.E5"]}},
+    {"say": {"who": "ayyub", "text": "It was not yours to judge, Shirkuh.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "No. I did not stop to ask whose it was.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Ayyub shut his brother in a tower, and wrote to Bihruz to tell him what had happened and to put Shirkuh at his disposal.", "kind": "narration", "src": ["CH-00.E5"]}},
+    {"say": {"who": "narrator", "text": "Another account, Ibn al-Athir's, says only that Shirkuh quarrelled with a man at Tikrit and killed him. The Codex shows both.", "kind": "narration", "src": ["CH-00.E5"]}},
+    {"hide": "shirkuh"},
+    {"show": {"who": "bihruz", "at": "center"}},
+    {"say": {"who": "bihruz", "text": "I owe a debt to your father, who was my friend. I cannot deal harshly with either of you. But leave my service, and leave Tikrit, and seek your living where you will.", "kind": "documented", "src": ["CH-00.E5"]}},
+    {"unlock": "CDX-S-QUARREL"}
+  ]
+}

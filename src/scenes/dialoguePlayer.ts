@@ -24,6 +24,11 @@ export interface DialogueOptions {
   readonly text: TextRenderer;
   readonly settings: Settings;
   readonly onEffect?: (effect: Effect) => void;
+  /**
+   * Names the player chose, by character id: the plate says them, and `{id}` in a line's text is
+   * replaced by them (the Recruit is called whatever the player called him).
+   */
+  readonly names?: Readonly<Record<string, string>>;
 }
 
 const BOX = { x: 8, y: 114, w: 224, h: 40 };
@@ -32,11 +37,29 @@ const SLOT_X: Readonly<Record<Slot, number>> = { left: 6, center: 88, right: 170
 const PORTRAIT_Y = 38;
 
 /** Backdrops are placeholders: two colours, top and bottom, by name. */
-const BACKDROPS: Readonly<Record<string, readonly [string, string]>> = {
+export const BACKDROPS: Readonly<Record<string, readonly [string, string]>> = {
   'demo-camp': ['#3a2f55', '#7a5a3a'],
   'tikrit-gate': ['#4a5f7a', '#8a7a5a'],
   night: ['#0d0a1e', '#2a2548'],
   desert: ['#c9a064', '#e8d2a0'],
+  'tigris-dawn': ['#6a7fa8', '#d8b48a'],
+  'tigris-evening': ['#3a3a6a', '#c98a5a'],
+  citadel: ['#4a4658', '#9a8f78'],
+  'tikrit-night': ['#14122a', '#4a3a3a'],
+  'camp-night': ['#16122e', '#5a4030'],
+  'road-dust': ['#9a7f5a', '#d8c08a'],
+  'ghouta-spring': ['#7fa86a', '#d8d09a'],
+  'damascus-wall': ['#8a7a68', '#d8c49a'],
+  'damascus-dusk': ['#5a4a6a', '#d8905a'],
+  'alexandria-sea': ['#4a7fa8', '#d8d0b0'],
+  'alexandria-wall': ['#7a8a98', '#c8b890'],
+  'cairo-camp': ['#5a6a8a', '#d0b078'],
+  'cairo-palace': ['#3a5a4a', '#c8b070'],
+  'cairo-night': ['#10122a', '#3a4a5a'],
+  'vizier-hall': ['#2f4a3a', '#a8946a'],
+  'sickroom': ['#2a2a3a', '#6a5a48'],
+  'council-tent': ['#4a3a4a', '#b09a70'],
+  dawn: ['#5a5a8a', '#e8c890'],
 };
 const DEFAULT_BACKDROP: readonly [string, string] = ['#2c2a45', '#4d4366'];
 
@@ -126,7 +149,7 @@ export class DialoguePlayer {
       this.state = { kind: 'waiting', left: beat.ms };
     } else {
       const { text } = this.options;
-      const pages = paginate(beat.line.text, (t) => text.wrap(t, BOX.w - 16), 3);
+      const pages = paginate(this.say(beat.line.text), (t) => text.wrap(t, BOX.w - 16), 3);
       this.state = { kind: 'reading', line: beat.line, stage: beat.stage, pages, page: 0, shown: 0 };
     }
   }
@@ -135,6 +158,20 @@ export class DialoguePlayer {
     this.runner.skip();
     this.deliver();
     this.state = { kind: 'done' };
+  }
+
+  /** A line's text with the player's names put in. */
+  private say(text: string): string {
+    const { names } = this.options;
+    return names ? text.replace(/\{([a-z][a-z0-9-]*)\}/g, (whole, id: string) => names[id] ?? whole) : text;
+  }
+
+  /** What a character's plate says: the name the player gave, or the character's own. */
+  private plate(id: string): string {
+    const given = this.options.names?.[id];
+    if (given) return given;
+    const character = this.options.characters.get(id);
+    return character ? plateName(character) : id;
   }
 
   private deliver(): void {
@@ -165,8 +202,7 @@ export class DialoguePlayer {
 
     // the speaker's plate, on the side of the box the speaker stands on
     const { line } = state;
-    const character = this.options.characters.get(line.who);
-    const name = line.who === NARRATOR ? '' : character ? plateName(character) : line.who;
+    const name = line.who === NARRATOR ? '' : this.plate(line.who);
     const side: Slot | null = (['left', 'center', 'right'] as const).find((s) => stage[s] === line.who) ?? null;
     drawPanel(ctx, BOX.x, BOX.y, BOX.w, BOX.h);
     if (name) {
@@ -210,27 +246,27 @@ export class DialoguePlayer {
     const size = 32 * PORTRAIT_SCALE;
     ctx.globalAlpha = lit ? 1 : 0.55;
     if (character.portrait && assets.has(character.portrait)) {
-      const frame = assets.frame(character.portrait, 'still', 0, { faction: character.faction ?? 'neutral', skin: 's2' });
+      const frame = assets.frame(character.portrait, 'still', 0, { faction: character.faction ?? 'neutral', skin: character.skin ?? 's2' });
       ctx.drawImage(frame, x, PORTRAIT_Y, size, size);
     } else {
       // no portrait: a plain plate with the initial, so a missing picture is never a missing person
       ctx.fillStyle = COLORS.panel;
       ctx.fillRect(x, PORTRAIT_Y, size, size);
-      this.options.text.drawCentered(ctx, plateName(character).charAt(0), x + size / 2, PORTRAIT_Y + size / 2 - 8, { color: COLORS.gold, scale: 2 });
+      this.options.text.drawCentered(ctx, this.plate(who).charAt(0), x + size / 2, PORTRAIT_Y + size / 2 - 8, { color: COLORS.gold, scale: 2 });
     }
     ctx.globalAlpha = 1;
   }
 
   private drawBacklog(ctx: CanvasRenderingContext2D, state: Extract<State, { kind: 'backlog' }>): void {
-    const { text, characters, settings } = this.options;
+    const { text, settings } = this.options;
     drawPanel(ctx, 6, 6, LOGICAL_WIDTH - 12, LOGICAL_HEIGHT - 12);
     text.draw(ctx, `Backlog: ${this.options.scene.title}`, 14, 11, GOLD);
     // the newest lines that fit, from `scroll` lines back
     const rows: Array<{ text: string; style: TextStyle }> = [];
     for (const line of this.runner.backlog.slice(0, this.runner.backlog.length - state.scroll)) {
-      const who = line.who === NARRATOR ? '' : `${plateName(characters.get(line.who) ?? { id: line.who, name: line.who, ledger: '', portrait: null })}: `;
+      const who = line.who === NARRATOR ? '' : `${this.plate(line.who)}: `;
       const mark = settings.sourceMarkers ? markFor(line.kind) : '';
-      const wrapped = text.wrap(`${mark ? `${mark} ` : ''}${who}${line.text}`, LOGICAL_WIDTH - 36);
+      const wrapped = text.wrap(`${mark ? `${mark} ` : ''}${who}${this.say(line.text)}`, LOGICAL_WIDTH - 36);
       wrapped.forEach((row, i) => rows.push({ text: i === 0 ? row : `  ${row}`, style: line.kind === 'narration' ? DIM : PLAIN }));
     }
     const visible = rows.slice(-12);

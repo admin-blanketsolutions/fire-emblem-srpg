@@ -1,0 +1,16 @@
+{
+  "id": "ch00.departure",
+  "title": "The road to Mosul",
+  "ledger": ["CH-00.E8", "CH-00.E9", "CH-00.E10"],
+  "cmds": [
+    {"bg": "road-dust"},
+    {"show": {"who": "ayyub", "at": "left"}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"say": {"who": "narrator", "text": "They take the road north to Mosul, where Zengi rules.", "kind": "narration", "src": ["CH-00.E8"]}},
+    {"say": {"who": "shirkuh", "text": "Do you hold it against me, Najm?", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "I hold a new son and a brother's hand. That is enough to travel with.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Zengi received them kindly. He gave them a large fief and took them into his army, in return for the service Ayyub had done him at Tikrit.", "kind": "narration", "src": ["CH-00.E8"]}},
+    {"say": {"who": "narrator", "text": "In time Ayyub would hold Baalbek for him, as its warden; and after Zengi's death he would become one of the great emirs of Damascus, and Shirkuh would serve Nur ad-Din.", "kind": "narration", "src": ["CH-00.E8", "CH-00.E9"]}},
+    {"say": {"who": "narrator", "text": "Ayyub was known as a pious and generous man who loved holy company.", "kind": "narration", "src": ["CH-00.E10"]}}
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "ch00.after",
+  "title": "The reproach",
+  "ledger": ["CH-00.E2", "CH-00.E3"],
+  "cmds": [
+    {"bg": "tikrit-night"},
+    {"music": "story"},
+    {"show": {"who": "ayyub", "at": "left"}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"say": {"who": "narrator", "text": "The last boats cross in the dark. On the landings, the Caliph's ally draws his riders off.", "kind": "narration", "src": ["CH-00.E4"]}},
+    {"say": {"who": "shirkuh", "text": "That was the last of them, and we are still standing. I count that a victory.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "Count it again when Baghdad has answered.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Bihruz, the governor, was told what Ayyub had done and sent him a letter of blame.", "kind": "narration", "src": ["CH-00.E3"]}},
+    {"hide": "shirkuh"},
+    {"show": {"who": "bihruz", "at": "center"}},
+    {"say": {"who": "bihruz", "text": "You had our enemy in your power. Why did you treat him so well, and let him go?", "kind": "documented", "src": ["CH-00.E3"]}},
+    {"say": {"who": "ayyub", "text": "He asks why. I have no better answer than the one I gave at the gate: the man had nothing left in his hands.", "kind": "dramatized"}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"say": {"who": "shirkuh", "text": "And if he asks again?", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "Then I will remind him what he owed our father.", "kind": "dramatized"}}
+  ]
+}

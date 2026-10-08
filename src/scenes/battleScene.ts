@@ -141,6 +141,8 @@ export interface BattleSceneOptions {
   readonly onSuspend?: () => void;
   /** Called when the player moves on from the end of the chapter; replaces *play again*. */
   readonly onFinish?: () => void;
+  /** What the player named people (the Recruit), for the scenes the chapter plays. */
+  readonly names?: Readonly<Record<string, string>>;
 }
 
 /**
@@ -159,6 +161,7 @@ export class BattleScene implements Scene {
   private readonly onUnlock: ((id: string) => void) | undefined;
   private readonly onSuspend: (() => void) | undefined;
   private readonly onFinish: (() => void) | undefined;
+  private readonly names: Readonly<Record<string, string>> | undefined;
   private mapLayer: HTMLCanvasElement;
   /** The `terrainVersion` the map layer was drawn from. */
   private mapVersion = 0;
@@ -179,8 +182,9 @@ export class BattleScene implements Scene {
   private actor: UnitInstance | null = null;
   private readonly popups: Popup[] = [];
 
-  constructor({ battle, assets, text, onRestart, story, settings, onUnlock, onSuspend, onFinish }: BattleSceneOptions) {
+  constructor({ battle, assets, text, onRestart, story, settings, onUnlock, onSuspend, onFinish, names }: BattleSceneOptions) {
     this.battle = battle;
+    this.names = names;
     this.story = story;
     this.settings = settings ?? DEFAULT_SETTINGS;
     this.onUnlock = onUnlock;
@@ -899,6 +903,7 @@ export class BattleScene implements Scene {
         assets: this.assets,
         text: this.text,
         settings: this.settings,
+        ...(this.names ? { names: this.names } : {}),
         onEffect: (effect) => this.applyEffect(effect),
       });
       this.mode = { kind: 'dialogue', player, next: () => this.runMessages(list, index + 1, next) };
@@ -910,6 +915,7 @@ export class BattleScene implements Scene {
   private applyEffect(effect: Effect): void {
     if ('flag' in effect) this.battle.flags.add(effect.flag);
     else if ('unlock' in effect) this.onUnlock?.(effect.unlock);
+    else if ('sfx' in effect) audio.playSfx(effect.sfx);
   }
 
   private advanceMessages(mode: Extract<Mode, { kind: 'messages' }>): void {

@@ -42,6 +42,8 @@ export interface UnitDef {
   readonly chronicled?: boolean;
   /** An invented character, flagged as such in the game and the ledger. */
   readonly fictional?: boolean;
+  /** The player chooses this unit's name (the Recruit); `name` is what it is called until then. */
+  readonly playerNamed?: boolean;
   /** Earns bonus EXP when defeated. */
   readonly boss?: boolean;
   readonly sprite?: string;
@@ -163,10 +165,15 @@ export function autoEquip(unit: UnitInstance, weapons: WeaponTable, classes: Cla
 export interface UnitOverrides {
   readonly ai?: AiProfile;
   readonly tags?: readonly string[];
+  /** A name other than the definition's: the one the player gave. */
+  readonly name?: string;
+  /** A side other than the definition's: a map may place a unit of the army as an ally, or the reverse. */
+  readonly side?: Side;
 }
 
 export function createUnit(def: UnitDef, id: string, x: number, y: number, catalog: UnitCatalog, overrides: UnitOverrides = {}): UnitInstance {
   const { classes, weapons, items } = catalog;
+  const side = overrides.side ?? def.side;
   const classDef = classes.get(def.class);
   if (!classDef) throw new Error(`Unit "${def.id}" has unknown class "${def.class}"`);
   const stats = addStats(classDef.base, def.offset ?? {});
@@ -192,8 +199,8 @@ export function createUnit(def: UnitDef, id: string, x: number, y: number, catal
   const unit: UnitInstance = {
     id,
     defId: def.id,
-    name: def.name,
-    side: def.side,
+    name: overrides.name ?? def.name,
+    side,
     spriteId: def.sprite ?? `unit.${classDef.id}`,
     faction: def.faction,
     skin: def.skin,
@@ -222,7 +229,7 @@ export function createUnit(def: UnitDef, id: string, x: number, y: number, catal
     retreated: false,
     escaped: false,
     // enemies and allies are played by the computer unless the data says otherwise
-    ai: overrides.ai ?? def.ai ?? (def.side === 'player' ? null : { mode: 'aggressive' }),
+    ai: overrides.ai ?? def.ai ?? (side === 'player' ? null : { mode: 'aggressive' }),
     tags: [...(overrides.tags ?? def.tags ?? [])],
     triggered: false,
     statuses: [],

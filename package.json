@@ -20,7 +20,8 @@
     "sprites:gen": "tsx tools/sprites/kits/generate.ts",
     "sprites": "tsx tools/sprites/build.ts",
     "sprites:preview": "vite --open /tools/sprites/preview.html",
-    "sprites:lint": "tsx tools/sprites/lint.ts"
+    "sprites:lint": "tsx tools/sprites/lint.ts",
+    "balance": "vitest run --config vitest.balance.config.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",

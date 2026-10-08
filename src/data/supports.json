@@ -1,0 +1,29 @@
+[
+  {
+    "id": "ayyub-shirkuh",
+    "a": "ayyub",
+    "b": "shirkuh",
+    "pace": "fast",
+    "scenes": {
+      "C": { "scene": "sup.ayyub-shirkuh.c", "ledger": "SUP-AYYUB-SHIRKUH-C", "availableFrom": "CH-00" }
+    }
+  },
+  {
+    "id": "recruit-ayyub",
+    "a": "recruit",
+    "b": "ayyub",
+    "pace": "fast",
+    "scenes": {
+      "C": { "scene": "sup.recruit-ayyub.c", "ledger": "SUP-RECRUIT-AYYUB-C", "availableFrom": "CH-00" }
+    }
+  },
+  {
+    "id": "ayyub-salah",
+    "a": "ayyub",
+    "b": "salah-ad-din",
+    "pace": "normal",
+    "scenes": {
+      "C": { "scene": "sup.ayyub-salah.c", "ledger": "SUP-AYYUB-SALAH-C", "availableFrom": "CH-01" }
+    }
+  }
+]

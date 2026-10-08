@@ -1,0 +1,20 @@
+[
+  {
+    "id": "CH-00",
+    "title": "The Boats of Tikrit",
+    "date": "Rabi' II 526 AH · March 1132",
+    "steps": [
+      {"kind": "name"},
+      {"kind": "card"},
+      {"kind": "scenes", "scenes": ["ch00.pursuit", "ch00.boats"]},
+      {"kind": "apply", "do": [{"join": "ayyub"}, {"join": "shirkuh"}, {"join": "garrison-soldier", "count": 4}, {"join": "garrison-pikeman", "count": 2}, {"join": "recruit"}, {"give": "bandage", "count": 2}, {"give": "salve"}, {"dinars": 300}]},
+      {"kind": "camp", "label": "Hold the landings"},
+      {"kind": "battle", "battle": "CH-00"},
+      {"kind": "scenes", "scenes": ["ch00.after"]},
+      {"kind": "card", "title": "The Exile", "date": "532 AH · 1137"},
+      {"kind": "scenes", "scenes": ["ch00.quarrel", "ch00.birth-night", "ch00.departure"]},
+      {"kind": "apply", "do": [{"grant": "ayyub-shirkuh", "atLeast": "C"}, {"grant": "recruit-ayyub", "atLeast": "C"}]},
+      {"kind": "camp", "label": "On to Damascus"}
+    ]
+  }
+]

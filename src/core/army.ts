@@ -34,6 +34,10 @@ export interface Army {
   deployed: Set<string>;
   /** How many the next chapter's map has room for. */
   deployLimit: number;
+  /** Unit definitions away from the army for now (the story has sent them elsewhere): they stay in the roster but cannot talk, drill or deploy. */
+  away: Set<string>;
+  /** Units the next map cannot do without, by id: they deploy, and cannot be released. Worked out when a camp opens; never saved. */
+  required: Set<string>;
 }
 
 export interface ArmyOptions {
@@ -51,6 +55,8 @@ export const newArmy = (units: UnitInstance[] = [], dinars = 0, options: ArmyOpt
   camp: { talks: 0, drilled: new Set() },
   deployed: new Set(units.map((u) => u.id)),
   deployLimit: options.deployLimit ?? 99,
+  away: new Set(),
+  required: new Set(),
 });
 
 export type Result = { readonly ok: true } | { readonly ok: false; readonly reason: string };
@@ -126,18 +132,22 @@ export function settleChapter(army: Army, battle: BattleState, mode: CampaignMod
   const lost: UnitInstance[] = [];
   const joined: UnitInstance[] = [];
   const keep: UnitInstance[] = [];
+  const falls = (unit: UnitInstance): boolean => unit.retreated && !unit.escaped && mode === 'classic' && !unit.chronicled;
   for (const unit of army.units) {
-    const fallen = unit.retreated && !unit.escaped;
-    if (fallen && mode === 'classic' && !unit.chronicled) lost.push(unit);
+    if (falls(unit)) lost.push(unit);
     else keep.push(unit);
   }
+  // those won over in the chapter join the army, unless they fell in the very chapter that won them
   for (const unit of battle.units) {
-    if (unit.side === 'player' && unit.kind === 'unit' && !army.units.includes(unit) && !keep.includes(unit)) {
+    if (unit.side === 'player' && unit.kind === 'unit' && !army.units.includes(unit) && !keep.includes(unit) && !falls(unit)) {
       keep.push(unit);
       joined.push(unit);
     }
   }
   for (const unit of keep) {
+    // a unit the map placed as an ally (a father inside the city walls) is the army's again
+    unit.side = 'player';
+    unit.ai = null;
     unit.retreated = false;
     unit.escaped = false;
     unit.hp = maxHp(unit);
