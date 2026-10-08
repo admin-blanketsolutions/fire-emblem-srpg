@@ -1,0 +1,42 @@
+{
+  "id": "defeat",
+  "tempo": 60,
+  "instruments": {
+    "lead": {
+      "voice": "pulse",
+      "duty": 0.5,
+      "attack": 0.01,
+      "decay": 0.1,
+      "sustain": 0.5,
+      "release": 0.3,
+      "volume": 0.25
+    },
+    "harmony": {
+      "voice": "pulse",
+      "duty": 0.125,
+      "attack": 0.01,
+      "decay": 0.1,
+      "sustain": 0.6,
+      "release": 0.3,
+      "volume": 0.15
+    },
+    "bass": {
+      "voice": "triangle",
+      "attack": 0.01,
+      "decay": 0.1,
+      "sustain": 0.6,
+      "release": 0.3,
+      "volume": 0.4
+    }
+  },
+  "patterns": {
+    "a": {
+      "lead": "A4:4 G4:4 F4:4 E4:4 | D4:16",
+      "harmony": "F4:8 E4:8 | D4:16",
+      "bass": "D3:8 C3:8 | Bb2:8 A2:8"
+    }
+  },
+  "order": [
+    "a"
+  ]
+}

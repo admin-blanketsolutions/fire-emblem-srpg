@@ -1,0 +1,51 @@
+{
+  "id": "victory",
+  "tempo": 132,
+  "instruments": {
+    "lead": {
+      "voice": "pulse",
+      "duty": 0.25,
+      "attack": 0.01,
+      "decay": 0.1,
+      "sustain": 0.6,
+      "release": 0.08,
+      "volume": 0.32
+    },
+    "harmony": {
+      "voice": "pulse",
+      "duty": 0.125,
+      "attack": 0.01,
+      "decay": 0.1,
+      "sustain": 0.5,
+      "release": 0.08,
+      "volume": 0.2
+    },
+    "bass": {
+      "voice": "triangle",
+      "attack": 0.01,
+      "decay": 0.1,
+      "sustain": 0.8,
+      "release": 0.05,
+      "volume": 0.45
+    },
+    "drums": {
+      "voice": "noise",
+      "attack": 0.001,
+      "decay": 0.06,
+      "sustain": 0,
+      "release": 0.02,
+      "volume": 0.18
+    }
+  },
+  "patterns": {
+    "a": {
+      "lead": "D5:2 D5:2 D5:2 A4:2 D5:4 F#5:4 | A5:12 -:4",
+      "harmony": "F#4:2 F#4:2 F#4:2 E4:2 F#4:4 A4:4 | D5:12 -:4",
+      "bass": "D2:4 D2:4 D2:4 D2:4 | D2:12 -:4",
+      "drums": "x:2 x:2 x:2 x:2 x:4 x:4 | x:4 -:12"
+    }
+  },
+  "order": [
+    "a"
+  ]
+}

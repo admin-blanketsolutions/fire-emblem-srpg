@@ -1,0 +1,38 @@
+{
+  "id": "story",
+  "tempo": 66,
+  "instruments": {
+    "lead": {
+      "voice": "pulse",
+      "duty": 0.5,
+      "attack": 0.04,
+      "decay": 0.1,
+      "sustain": 0.5,
+      "release": 0.2,
+      "volume": 0.22
+    },
+    "bass": {
+      "voice": "triangle",
+      "attack": 0.05,
+      "decay": 0.1,
+      "sustain": 0.7,
+      "release": 0.2,
+      "volume": 0.35
+    }
+  },
+  "patterns": {
+    "a": {
+      "lead": "A4:6 G4:2 F4:4 E4:4 | D4:8 -:8",
+      "bass": "D3:16 | Bb2:16"
+    },
+    "b": {
+      "lead": "F4:4 G4:4 A4:4 Bb4:4 | A4:12 -:4",
+      "bass": "F2:16 | A2:16"
+    }
+  },
+  "order": [
+    "a",
+    "b"
+  ],
+  "loopFrom": 0
+}

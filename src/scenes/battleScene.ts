@@ -14,6 +14,7 @@ import type { UnitInstance } from '../core/unit';
 import type { WeaponDef } from '../core/weapons';
 import { LOGICAL_HEIGHT, LOGICAL_WIDTH } from '../core/viewport';
 import type { Story } from '../data/story';
+import { audio } from '../engine/audio';
 import type { Assets } from '../engine/assets';
 import type { Scene } from '../engine/game';
 import type { TextRenderer } from '../engine/text';
@@ -122,6 +123,9 @@ interface Popup {
   age: number;
 }
 
+/** The player's phase has its own music; the computer's sides share the other. */
+const phaseSong = (phase: string): string => (phase === 'player' ? 'player-phase' : 'enemy-phase');
+
 export interface BattleSceneOptions {
   readonly battle: BattleState;
   readonly assets: Assets;
@@ -202,7 +206,14 @@ export class BattleScene implements Scene {
       LOGICAL_HEIGHT,
     );
     this.camTarget = this.cam;
+    audio.playMusic(phaseSong(battle.phase));
     this.startBanner(PHASE_TITLES[battle.phase], this.phaseSub(battle.turn, battle.phase), () => this.proceed());
+  }
+
+  /** Drag the map: the camera follows the finger, within the map's edges, until the cursor next moves. */
+  private panCamera(pan: Point): void {
+    this.cam = clampCamera(this.cam.x - pan.x, this.cam.y - pan.y, this.mapWidthPx, this.mapHeightPx, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    this.camTarget = this.cam;
   }
 
   /** Attack ranges in red, or orange with the colour-blind-safe setting (DESIGN §16). */
@@ -216,7 +227,8 @@ export class BattleScene implements Scene {
 
   // ---------------------------------------------------------------- update
 
-  update(dtMs: number, actions: ReadonlySet<Action>, taps: readonly Point[]): void {
+  update(dtMs: number, actions: ReadonlySet<Action>, taps: readonly Point[], pan: Point = { x: 0, y: 0 }): void {
+    if (pan.x !== 0 || pan.y !== 0) this.panCamera(pan);
     this.clock += dtMs;
     this.updatePopups(dtMs);
     this.updateCamera(dtMs);
@@ -784,9 +796,11 @@ export class BattleScene implements Scene {
   private applyCue(cue: FightCue): void {
     if (cue.kind === 'defeat') {
       this.popup(cue.unit, cue.unit.kind === 'structure' ? 'Destroyed' : 'Retreats', COLORS.bad, 10);
+      audio.playSfx(cue.unit.kind === 'structure' ? 'structure-break' : 'defeat');
       return;
     }
     const { event, target } = cue;
+    audio.playSfx(!event.hit ? 'miss' : event.crit ? 'critical' : 'hit');
     if (!event.hit) this.popup(target, 'Miss', COLORS.textDim);
     else if (event.damage === 0) this.popup(target, 'No damage', COLORS.textDim);
     else this.popup(target, event.crit ? `${event.damage}!` : String(event.damage), event.crit ? COLORS.gold : COLORS.white);
@@ -795,6 +809,7 @@ export class BattleScene implements Scene {
   private playHeal(report: HealReport, actor: UnitInstance): void {
     this.actor = actor;
     this.popup(report.target, `+${report.restored}`, COLORS.good);
+    audio.playSfx('heal');
     this.mode = { kind: 'healing', report, hpBefore: report.target.hp - report.restored, elapsed: 0 };
   }
 
@@ -816,6 +831,7 @@ export class BattleScene implements Scene {
       this.proceed();
       return;
     }
+    if (mode.elapsed === 0 && (step.kind === 'levelup' || step.kind === 'promotion')) audio.playSfx(step.kind === 'levelup' ? 'level-up' : 'promotion');
     mode.elapsed += dtMs;
     const confirm = actions.has('confirm');
     const finished =
@@ -847,6 +863,7 @@ export class BattleScene implements Scene {
     }
     if (this.battle.outcome) {
       this.mode = { kind: 'outcome', elapsed: 0 };
+      audio.playMusic(this.battle.outcome.result === 'won' ? 'victory' : 'defeat');
       return;
     }
     if (this.battle.phase !== 'player') {
@@ -915,6 +932,7 @@ export class BattleScene implements Scene {
       this.proceed();
       return;
     }
+    audio.playMusic(phaseSong(report.phase));
     this.startBanner(PHASE_TITLES[report.phase], this.phaseSub(report.turn, report.phase), () => {
       this.applyReport(report);
       this.proceed();

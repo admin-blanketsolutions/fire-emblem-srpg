@@ -5,6 +5,7 @@ import { createProvingBattle, PROVING_OBJECTIVES } from './data/proving';
 import { Assets } from './engine/assets';
 import { Display } from './engine/display';
 import { Game } from './engine/game';
+import { audio } from './engine/audio';
 import { Input } from './engine/input';
 import { TextRenderer } from './engine/text';
 import { installTouchControls } from './engine/touch';
@@ -31,6 +32,8 @@ async function boot(): Promise<void> {
   const input = new Input(display);
   installTouchControls(input);
   const game = new Game({ display, input, assets, text });
+  // browsers allow sound only after the player has pressed something
+  for (const event of ['keydown', 'pointerdown'] as const) window.addEventListener(event, () => audio.unlock(), { capture: true });
 
   const params = new URLSearchParams(window.location.search);
 
@@ -50,7 +53,7 @@ async function boot(): Promise<void> {
       newSeed: () => Math.floor(Math.random() * 0x7fffffff),
     });
     game.run(flow.title());
-    if (import.meta.env.DEV) Object.assign(window, { sultan: { flow, assets } });
+    if (import.meta.env.DEV) Object.assign(window, { sultan: { flow, assets, audio } });
     return;
   }
 

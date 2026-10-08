@@ -6,6 +6,7 @@ import { hashSeed } from '../core/rng';
 import { decodeSave, encodeSave, SaveError, SaveSlots, type SavePlace } from '../core/save';
 import { parseSettings, type Settings } from '../core/settings';
 import type { Assets } from '../engine/assets';
+import { audio } from '../engine/audio';
 import type { Game, Scene } from '../engine/game';
 import type { TextRenderer } from '../engine/text';
 import { shops } from '../data';
@@ -51,6 +52,7 @@ export class GameFlow {
 
   constructor(private readonly s: FlowServices) {
     this.settings = parseSettings(s.slots.readSettings());
+    audio.setVolumes(this.settings.musicVolume, this.settings.sfxVolume);
   }
 
   private show(scene: Scene): void {
@@ -72,6 +74,7 @@ export class GameFlow {
       onSettings: () => this.show(this.settingsScene(() => this.show(this.title()))),
     });
     this.notice = null;
+    audio.playMusic('title');
     this.show(scene);
     return scene;
   }
@@ -102,6 +105,7 @@ export class GameFlow {
       onContinue: () => this.beginBattle(),
       extraItems: () => [{ label: 'Codex and saves', run: () => this.show(this.campOptions(scene)) }],
     });
+    audio.playMusic('camp');
     this.show(scene);
     return scene;
   }
@@ -241,6 +245,7 @@ export class GameFlow {
       onChange: (next) => {
         this.settings = next;
         this.s.slots.writeSettings(next);
+        audio.setVolumes(next.musicVolume, next.sfxVolume);
       },
       onBack: back,
     });

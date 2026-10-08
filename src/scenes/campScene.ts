@@ -12,6 +12,7 @@ import type { ShopDef, ShopTable } from '../core/shop';
 import { INVENTORY_SLOTS, equippedWeapon, type ItemStack, type UnitInstance } from '../core/unit';
 import type { Point } from '../core/types';
 import { LOGICAL_HEIGHT, LOGICAL_WIDTH } from '../core/viewport';
+import { audio } from '../engine/audio';
 import type { Assets } from '../engine/assets';
 import type { Scene } from '../engine/game';
 import type { TextRenderer, TextStyle } from '../engine/text';
@@ -400,10 +401,13 @@ export class CampScene implements Scene {
       settings: this.settings,
       onEffect: (effect) => this.apply(effect),
     });
+    audio.playMusic('story');
     this.mode = {
       kind: 'scene',
       player,
       then: () => {
+        audio.playMusic('camp');
+        audio.playSfx('support');
         completeTalk(this.army, talk, this.gate());
         back.index = 0;
         back.note = `${talk.a.name} and ${talk.b.name}: rank ${talk.rank}`;

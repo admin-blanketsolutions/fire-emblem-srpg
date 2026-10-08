@@ -1,0 +1,61 @@
+{
+  "id": "player-phase",
+  "tempo": 120,
+  "instruments": {
+    "lead": {
+      "voice": "pulse",
+      "duty": 0.25,
+      "attack": 0.01,
+      "decay": 0.1,
+      "sustain": 0.6,
+      "release": 0.08,
+      "volume": 0.32
+    },
+    "harmony": {
+      "voice": "pulse",
+      "duty": 0.125,
+      "attack": 0.01,
+      "decay": 0.1,
+      "sustain": 0.5,
+      "release": 0.08,
+      "volume": 0.2
+    },
+    "bass": {
+      "voice": "triangle",
+      "attack": 0.01,
+      "decay": 0.1,
+      "sustain": 0.8,
+      "release": 0.05,
+      "volume": 0.45
+    },
+    "drums": {
+      "voice": "noise",
+      "attack": 0.001,
+      "decay": 0.06,
+      "sustain": 0,
+      "release": 0.02,
+      "volume": 0.18
+    }
+  },
+  "patterns": {
+    "a": {
+      "lead": "D5:2 -:2 A4:2 D5:2 E5:4 F#5:4 | G5:2 F#5:2 E5:2 D5:2 E5:8",
+      "harmony": "F#4:4 F#4:4 A4:8 | B4:8 A4:8",
+      "bass": "D2:2 D3:2 D2:2 D3:2 D2:2 D3:2 D2:2 D3:2 | G2:2 G3:2 G2:2 G3:2 A2:2 A3:2 A2:2 A3:2",
+      "drums": "x:2 -:2 x:2 -:2 x:2 -:2 x:1 x:1 x:2 | x:2 -:2 x:2 -:2 x:2 -:2 x:1 x:1 x:2"
+    },
+    "b": {
+      "lead": "C5:2 -:2 C5:2 D5:2 E5:4 C5:4 | D5:4 A4:4 D5:8",
+      "harmony": "E4:8 G4:8 | F#4:8 F#4:8",
+      "bass": "C2:2 C3:2 C2:2 C3:2 C2:2 C3:2 C2:2 C3:2 | D2:2 D3:2 D2:2 D3:2 D2:2 D3:2 D2:2 D3:2",
+      "drums": "x:2 -:2 x:2 -:2 x:2 -:2 x:1 x:1 x:2 | x:2 -:2 x:2 -:2 x:2 -:2 x:1 x:1 x:2"
+    }
+  },
+  "order": [
+    "a",
+    "a",
+    "b",
+    "a"
+  ],
+  "loopFrom": 0
+}

@@ -1,0 +1,228 @@
+[
+  {
+    "id": "cursor",
+    "voice": "pulse",
+    "duty": 0.5,
+    "volume": 0.12,
+    "notes": [
+      {
+        "note": "A5",
+        "dur": 0.03
+      }
+    ]
+  },
+  {
+    "id": "confirm",
+    "voice": "pulse",
+    "duty": 0.25,
+    "volume": 0.18,
+    "notes": [
+      {
+        "note": "E5",
+        "dur": 0.05
+      },
+      {
+        "note": "A5",
+        "dur": 0.07
+      }
+    ]
+  },
+  {
+    "id": "cancel",
+    "voice": "pulse",
+    "duty": 0.25,
+    "volume": 0.18,
+    "notes": [
+      {
+        "note": "A4",
+        "dur": 0.05
+      },
+      {
+        "note": "E4",
+        "dur": 0.07
+      }
+    ]
+  },
+  {
+    "id": "hit",
+    "voice": "noise",
+    "volume": 0.4,
+    "notes": [
+      {
+        "note": "C3",
+        "dur": 0.12
+      }
+    ]
+  },
+  {
+    "id": "critical",
+    "voice": "noise",
+    "volume": 0.55,
+    "notes": [
+      {
+        "note": "C3",
+        "dur": 0.08
+      },
+      {
+        "note": "C3",
+        "dur": 0.18
+      }
+    ]
+  },
+  {
+    "id": "miss",
+    "voice": "triangle",
+    "volume": 0.3,
+    "slide": true,
+    "notes": [
+      {
+        "note": "E5",
+        "dur": 0.08
+      },
+      {
+        "note": "A4",
+        "dur": 0.08
+      }
+    ]
+  },
+  {
+    "id": "heal",
+    "voice": "triangle",
+    "volume": 0.35,
+    "notes": [
+      {
+        "note": "C5",
+        "dur": 0.08
+      },
+      {
+        "note": "E5",
+        "dur": 0.08
+      },
+      {
+        "note": "G5",
+        "dur": 0.12
+      }
+    ]
+  },
+  {
+    "id": "level-up",
+    "voice": "pulse",
+    "duty": 0.5,
+    "volume": 0.22,
+    "notes": [
+      {
+        "note": "C5",
+        "dur": 0.07
+      },
+      {
+        "note": "E5",
+        "dur": 0.07
+      },
+      {
+        "note": "G5",
+        "dur": 0.07
+      },
+      {
+        "note": "C6",
+        "dur": 0.2
+      }
+    ]
+  },
+  {
+    "id": "promotion",
+    "voice": "pulse",
+    "duty": 0.25,
+    "volume": 0.22,
+    "notes": [
+      {
+        "note": "D5",
+        "dur": 0.1
+      },
+      {
+        "note": "F#5",
+        "dur": 0.1
+      },
+      {
+        "note": "A5",
+        "dur": 0.1
+      },
+      {
+        "note": "D6",
+        "dur": 0.3
+      }
+    ]
+  },
+  {
+    "id": "support",
+    "voice": "triangle",
+    "volume": 0.35,
+    "notes": [
+      {
+        "note": "A4",
+        "dur": 0.1
+      },
+      {
+        "note": "D5",
+        "dur": 0.1
+      },
+      {
+        "note": "F#5",
+        "dur": 0.2
+      }
+    ]
+  },
+  {
+    "id": "fire",
+    "voice": "noise",
+    "volume": 0.35,
+    "notes": [
+      {
+        "note": "C3",
+        "dur": 0.4
+      }
+    ]
+  },
+  {
+    "id": "structure-break",
+    "voice": "noise",
+    "volume": 0.5,
+    "notes": [
+      {
+        "note": "C3",
+        "dur": 0.3
+      }
+    ]
+  },
+  {
+    "id": "gate",
+    "voice": "triangle",
+    "volume": 0.4,
+    "slide": true,
+    "notes": [
+      {
+        "note": "D3",
+        "dur": 0.18
+      },
+      {
+        "note": "A2",
+        "dur": 0.18
+      }
+    ]
+  },
+  {
+    "id": "defeat",
+    "voice": "triangle",
+    "volume": 0.3,
+    "slide": true,
+    "notes": [
+      {
+        "note": "A3",
+        "dur": 0.15
+      },
+      {
+        "note": "D3",
+        "dur": 0.25
+      }
+    ]
+  }
+]
