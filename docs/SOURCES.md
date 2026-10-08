@@ -365,9 +365,9 @@ All major named characters are historical. Fictional characters are flagged. "Cl
 | `CHR-QUTBKHUSRAW` | Qutb ad-Din Khusraw ibn Talil, Kurdish emir (founder of the Qutbiyya college at Cairo) | recruit by Talk (CH-03) | IKh-dS IV p. 494 | Attested | PD |
 | `CHR-YARUQI` | Ain ad-Dawla al-Yaruqi, a leading Nurid emir; refused to serve Saladin and returned to Nur ad-Din | NPC (CH-03) | IKh-dS IV p. 495 | Attested | PD |
 | `CHR-JURDIK` | Izz ad-Din Jurdik, freedman of Nur ad-Din; helped seize Shawar | ally (CH-03) | IKh-dS IV pp. 490–491; IS-PPTS p. 13 note | Attested | PD |
-| `CHR-SILAFI` | al-Hafiz Abu Tahir al-Silafi, hadith scholar of Alexandria | NPC (CH-02) | IS-PPTS p. 10; IKh-dS IV p. 486 | Attested | PD |
+| `CHR-SILAFI` | al-Hafiz Abu Tahir al-Silafi, hadith scholar of Alexandria | NPC (CH-02) | IS-PPTS p. 10 (calls him "Hafiz el-Isfahani"; the 1897 editor writes that he "does not appear to be otherwise known"); IKh-dS IV p. 486 (Silafi, in Egypt, a careful dater) | Attested (the identification of the two is the game's, and the Codex says so) | PD |
 | `CHR-USAMA` | Usama ibn Munqidh | cameo/witness (CH-00) | IKh-dS IV p. 482 | Attested | PD (indirect) |
-| `CHR-AMALRIC` | Amalric I, king of Jerusalem (r. 1163–74) | enemy commander (CH-02–03) | `SRC-WT`; IS-PPTS mentions "the Franks" | Attested | — |
+| `CHR-AMALRIC` | Amalric I, king of Jerusalem (r. 1163–74) | enemy commander (CH-02–03) | IS-PPTS pp. 49–51 and the 1897 editors' notes ("Amalric (Amaury)", his treaty with Shawar, his leaving when al-Munaytira fell); PD-MOD Lane-Poole 1898; `SRC-WT` (not read) | Attested | PD-MOD (the translators' notes) |
 | `CHR-MUTAMIN` | The *Mu'taman al-Khilafa* (a title, "the trusted of the caliphate"), the eunuch who ruled the Fatimid palace; killed in August 1169 (given as "Nejah" by Lane-Poole) | disputed NPC (CH-03) | IA-RHC I pp. 566–568; AS-RHC IV pp. 145–148 | **Attested, sources differ** | PD |
 | `CHR-ABULHAYJA` | The emir Abu'l-Hayja, who led Saladin's troops against the Black regiments in 1169 | ally NPC (CH-03) | AS-RHC IV p. 147 (Imad ad-Din); no other detail read | Attested (single source) | PD |
 | `CHR-RECRUIT` | **The Recruit**, a player-named levy | viewpoint unit (CH-00 on) | n/a | **Fictional (game-only)** | n/a |
@@ -485,7 +485,7 @@ Entries unlock by chapter. All entries carry their confidence badge and sources.
 | `CDX-P-ABAQ` | Mujir ad-Din Abaq | CH-01 | Attested | IKh | |
 | `CDX-P-SILAFI` | al-Hafiz al-Silafi | CH-02 | Attested | IS, IKh | |
 | `CDX-P-SHAWAR` | Shawar | CH-02 | Attested | IS, IKh | |
-| `CDX-P-AMALRIC` | Amalric I | CH-02 | Attested | WT (Frankish) | labelled Frankish side |
+| `CDX-P-AMALRIC` | Amalric I | CH-02 | Attested | IS (the 1897 translators' notes); WT (Frankish; **not read**) | named from the Arabic side and the translators' notes; the entry says that William of Tyre has not been read |
 | `CDX-P-EMIRS` | The emirs of Shirkuh's army: al-Yaruqi, Qutb ad-Din, al-Mashtub, al-Harimi | CH-03 | Attested | IKh-dS IV pp. 494–495 (IAT); IA-RHC *Atabegs* (RHC Or. II.2 pp. 255–257) | PD |
 | `CDX-P-ISA` | Isa al-Hakkari | CH-03 | Attested | IKh | |
 | `CDX-P-TURANSHAH` | Turan-Shah | CH-03 | Attested | IKh, IS | |
@@ -617,6 +617,8 @@ Legends and later inventions that the game does not present as history. Some may
 5. **2026-10-06 update:** searched the Ibn Shaddad text for weapon and armour terms to anchor the added weapon types (§6.2) and read the passages on the Acre brigands, Arsuf, Jaffa and the murder of Conrad.
 6. **2026-10-08 update:** read in French translation (RHC, public domain) Ibn al-Athir's *Kamil* for 549 and 564–565 and his *Atabegs* for Damascus in 549, and Abu Shama's extracts for 1169 (quoting Imad ad-Din); read Lane-Poole (1898, 1901) as a cross-check of the outline. The OCR text of each scan was searched for the passages and the passages read in full; the weekdays the sources give were checked against the tabular calendar (§8). Nothing in a modern translation (Richards, Gibb) was used.
 
+7. **2026-10-08 (M7) update:** every scene, support and Codex entry of the slice was written against these rows, and `tools/lint-sources.ts` joins them (a scene names its rows; a documented line cites; nothing cites an `UNV-` or `EXC-` row). Four readings were re-checked in the cached texts when the chapters were built: the day of Shirkuh's investiture and who pressed Salah ad-Din to accept (discrepancies 18 and 19), the place of al-Babain in the 1897 editors' note (7) and Ibn Shaddad's "Hafiz el-Isfahani" (20). Nothing in a modern copyrighted translation was used for a line of text: documented lines are paraphrases of the public-domain texts, never copies.
+
 ### 11.2 Discrepancies found
 
 | # | Finding | Where |
@@ -627,7 +629,7 @@ Legends and later inventions that the game does not present as history. Some may
 | 4 | Shirkuh's day of death: 22nd, 23rd or 28th Jumada II 564 | CH-03.E4 |
 | 5 | Shawar's seizure: Saladin alone (IS) versus Saladin with Jurdik while Shirkuh was elsewhere (IKh notes) | CH-03.E3 |
 | 6 | Ibn Shaddad places the Damietta siege and Nur ad-Din's Kerak diversion in 1170 (565 AH); modern scholarship dates the siege Oct–Dec 1169. The 1897 editors repeat 1170 | CH-03.E10 |
-| 7 | Babain's location: near Ushmunayn (IKh) versus Giza (some summaries) | CH-02.E6 |
+| 7 | Babain's location: near Ushmunayn in Middle Egypt (IKh, notes) versus Giza (some summaries) versus Tira, "about six miles south of Cairo" (the 1897 editors' note to Ibn Shaddad). The game does not locate it on a map | CH-02.E6 |
 | 8 | The council in Egypt: Ayyub rebukes Taqi ad-Din (IAT) versus Saladin says he alone opposed revolt (IS) | CH-04.E5 |
 | 9 | Ibn Shaddad's text, as translated, gives the **same date** (7 Safar 570) for al-Kanz's defeat and for the Frankish naval attack on Alexandria; modern accounts (the Sicilian expedition) date the attack to late July–early August 1174 (WEB) | CH-05 (to resolve) |
 | 10 | Saladin's death date: Wednesday 27 Safar 589 does not match Thursday 4 March 1193 (Julian); it matches 3 March | CH-FIN.E9, §8 |
@@ -638,6 +640,9 @@ Legends and later inventions that the game does not present as history. Some may
 | 15 | Damascus 1154: Sunday 9 Safar after six days (Ibn Khallikan) or the 10th after a ten-day blockade (Ibn al-Athir's *Atabegs*) | CH-01.E1 |
 | 16 | Turan-Shah and the fighting of 1169: present from 8 Dhu'l-Qa'da (Imad ad-Din); afterwards pursuing the fugitives (Ibn al-Athir); campaigns in Upper Egypt and Nubia in 1171–73 (Lane-Poole) | CH-03.E13 |
 | 17 | Turan-Shah's arrival: 30 July (the translator's conversion of 8 Dhu'l-Qa'da) or 3 August (the tabular calendar) | §8 |
+| 18 | Who pressed Salah ad-Din to accept the vizierate: "his father" (de Slane's rendering of Ibn al-Athir, in Ibn Khallikan IV p. 494) versus "the prince" (the French of the *Atabegs*, RHC Or. II.2, whose "prince" is not named). The game says only that he was pressed and accepted, much against his will | CH-03.E5 |
+| 19 | The day Shirkuh was invested as vizier: the 17th of the *former* Rabi' 564 (19 Dec 1168) in Ibn Khallikan's quotation of Ibn Shaddad (IKh IV p. 490); the 17th of Rabi' II (18 Jan 1169) in the 1897 translation of Ibn Shaddad and in Ibn Khallikan's Shirkuh entry (a Wednesday). Ibn Khallikan's notes put Shirkuh's entry into Cairo on 7 Rabi' II (8 Jan 1169), so Rabi' II is the reading the game follows, and it prints no day | CH-03.E3 |
+| 20 | Ibn Shaddad's scholar of tradition at Alexandria is "Hafiz el-Isfahani" (the 1897 editor could not identify him); Ibn Khallikan names al-Silafi as the scholar in Egypt. The game identifies them and says it does | CH-02.E9 |
 
 ### 11.3 Not yet done (to complete before each chapter is built)
 

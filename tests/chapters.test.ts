@@ -79,9 +79,9 @@ describe('walking the chapters', () => {
 
 describe('what a step does to the army', () => {
   const env = { units, tables };
-  const fresh = () => {
+  const fresh = (seed = 1) => {
     const supports = new SupportTracker(buildSupportTable([{ id: 'pair', a: 'lord', b: 'soldier', pace: 'normal', scenes: { C: { scene: 's', ledger: 'SUP-X-C' } } }]));
-    return newCampaign({ mode: 'classic', seed: 1, story: 'campaign', army: newArmy([], 0, { supports }), chapter: 'CH-00', recruitName: 'Hasan' });
+    return newCampaign({ mode: 'classic', seed, story: 'campaign', army: newArmy([], 0, { supports }), chapter: 'CH-00', recruitName: 'Hasan' });
   };
 
   it('joins units, numbering a troop of one kind and naming the Recruit what the player said', () => {
@@ -109,6 +109,27 @@ describe('what a step does to the army', () => {
     applyEffects(c, [{ away: [] }], env);
     expect(c.army.away.size).toBe(0);
     expect(c.army.deployed.has('soldier')).toBe(true);
+  });
+
+  it('trains a unit: the story gives it levels, the same ones every time for the same campaign', () => {
+    const trained = (seed: number, levels: number) => {
+      const c = fresh(seed);
+      applyEffects(c, [{ join: 'lord' }, { join: 'soldier' }, { train: 'lord', levels }], env);
+      const [lord, soldier] = c.army.units;
+      return { lord: { level: lord!.level, stats: { ...lord!.stats } }, soldier: soldier!.level };
+    };
+    const a = trained(7, 3);
+    expect(a.lord.level).toBe(4);
+    expect(a.soldier, 'only the unit named is trained').toBe(1);
+    expect(trained(7, 3)).toEqual(a);
+    expect(trained(8, 3).lord.stats, 'another campaign may grow another way').not.toEqual(a.lord.stats);
+    expect(trained(7, 1).lord.level).toBe(2);
+  });
+
+  it('trains no further than the level cap', () => {
+    const c = fresh();
+    applyEffects(c, [{ join: 'lord' }, { train: 'lord', levels: 10 }, { train: 'lord', levels: 10 }], env);
+    expect(c.army.units[0]?.level).toBe(tables.balance.levelCap);
   });
 
   it('raises a support to a rank, never lowers it', () => {
