@@ -68,7 +68,7 @@ The outline below was checked against the sources (SOURCES.md §3). Two adjustme
 | CH-00 | Prologue: The Boats of Tikrit | 1132 / 526 (+ epilogue 532–534) | 1 map + scenes | Hold the Pass (ferry piers) | movement, terrain, triangle, danger zone, forecast, first Camp | ✔ |
 | CH-01 | Damascus: The East Gate | 1154 / 549 | 1 map | Seize | orchards and light units, Talk, healer, Maydan training | ✔ |
 | CH-02 | The Road to Egypt | 1163–1167 / 558–562 | 1 map (Alexandria); *stretch:* al-Babain | Defend 12 turns | structures (mangonels), Fire Thrower, Sapper, crossbows, fire, sapping, reinforcement waves | ✔ (+ stretch) |
-| CH-03 | The Vizier | 1168–1169 / 564–565 | Council stage (Talk), 1 map (Bayn al-Qasrayn); *stretch:* Damietta | Persuade; then Survive → Seize | recruit via Talk, rank-event promotion, ally phase, night fog | ✔ (+ stretch) |
+| CH-03 | The Vizier | 1168–1169 / 564–565 | Council stage (Talk), 1 map (Bayn al-Qasrayn); *stretch:* Damietta | Persuade; then Survive 8, or burn the pavilion | recruit via Talk, rank-event promotion, ally phase, night fog | ✔ (+ stretch) |
 | CH-04 – CH-FIN | see §11.2 | 1170–1193 | planned | | | later |
 
 Slice content target: **4 battle maps + 1 council stage**, 9 support scenes, about 45 Codex entries, about 20 named historical characters (about 8 of them playable or on-map units, the rest NPCs) plus generic troops, and one fictional viewpoint unit (the Recruit, §9.5). Stretch maps are added if M7 has room.

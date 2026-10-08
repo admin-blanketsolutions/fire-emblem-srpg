@@ -130,8 +130,8 @@ Companion documents: [DESIGN.md](DESIGN.md) · [SOURCES.md](SOURCES.md)
 - The Fatimid regiments, including the *Sudani* infantry and Armenian archers, are portrayed as **professional soldiers of a court faction** defending the dynasty they served, not as caricatures.
 - **Every faction is drawn with the same care and the full range of skin tones.** No racialized dialogue or descriptions.
 - The Codex states that **modern scholarship questions whether the plot that triggered the fighting happened as reported**, that the traditional account leans on a letter by al-Qadi al-Fadil, that the figures are unreliable, and that civilians suffered.
-- The chapter's objective is **"Survive, then Seize"**, not annihilation. The burning of the Mansura quarter and the aftermath are told, not shown. Saladin's own troops include Kurdish and Turkish regiments, and the tension among them is part of the story.
-- **Before M7** I will read the primary accounts (Ibn al-Athir, Ibn Abi Tayy via Abu Shama, Maqrizi); my current ledger entry rests on a modern summary (SOURCES CH-03.E8).
+- The chapter's objective is **"Survive eight turns, or burn the caliph's pavilion"** (as built, M7: DESIGN §11.1; planned as "Survive, then Seize"), not annihilation. The burning of the Mansura quarter and the aftermath are told, not shown. Saladin's own troops include Kurdish and Turkish regiments, and the tension among them is part of the story.
+- **Before M7** I will read the primary accounts (Ibn al-Athir, Ibn Abi Tayy via Abu Shama, Maqrizi); my current ledger entry rests on a modern summary (SOURCES CH-03.E8). *Done 2026-10-08:* Ibn al-Athir and Imad ad-Din (through Abu Shama) were read in the *Recueil des historiens des croisades* and the ledger rows CH-03.E8, E13 and E14 now rest on them; Maqrizi and Ibn Abi Tayy were not read.
 
 ## D-013 Fatimids, sects and language
 
