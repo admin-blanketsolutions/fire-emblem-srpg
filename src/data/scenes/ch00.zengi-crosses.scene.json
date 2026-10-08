@@ -1,0 +1,16 @@
+{
+  "id": "ch00.zengi-crosses",
+  "title": "Zengi crosses",
+  "ledger": ["CH-00.E3", "CH-00.E4"],
+  "cmds": [
+    {"bg": "tigris-evening"},
+    {"show": {"who": "zengi", "at": "center"}},
+    {"show": {"who": "ayyub", "at": "left"}},
+    {"say": {"who": "narrator", "text": "Zengi himself comes down to the landing.", "kind": "narration", "src": ["CH-00.E3"]}},
+    {"say": {"who": "zengi", "text": "Warden of Tikrit. You know whose banner followed me to your gate, and you open your boats to me all the same.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "I know only that you are at my river, lord, and that the river is wide.", "kind": "dramatized"}},
+    {"say": {"who": "zengi", "text": "Then I will remember a boat on the Tigris.", "kind": "dramatized"}},
+    {"hide": "zengi"},
+    {"say": {"who": "narrator", "text": "Zengi crosses the Tigris. The landings are still to be held.", "kind": "narration", "src": ["CH-00.E3"]}}
+  ]
+}

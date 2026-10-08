@@ -297,6 +297,26 @@ export function terrainSprites(): SpriteDef[] {
   );
 
   tiles.push(
+    // A watchtower seen from above: a stone roof inside a ring of merlons, with a plain pennant. No emblem of any faith.
+    tile('tower', ['#9a9486', '#6f6a60', '#c4beae', '#857f72', '#5a564c', '#b0553a'], (p, r) => {
+      p.fill(1);
+      p.rect(2, 2, 12, 12, 4);
+      p.hline(2, 2, 12, 2);
+      p.hline(2, 13, 12, 5);
+      p.vline(2, 2, 12, 2);
+      p.vline(13, 2, 12, 5);
+      for (const [x, y] of [[2, 2], [6, 2], [10, 2], [2, 6], [2, 10], [11, 6], [11, 10], [6, 11], [10, 11], [2, 11]] as const) p.rect(x, y, 3, 3, 3);
+      p.rect(5, 5, 6, 6, 3);
+      p.hline(5, 10, 6, 2);
+      p.vline(10, 5, 6, 2);
+      p.vline(8, 3, 5, 5);
+      p.hline(9, 3, 3, 6);
+      p.hline(9, 4, 2, 6);
+      p.scatter(r, 2, 6, [4]);
+    }),
+  );
+
+  tiles.push(
     tile('wall', ['#7a7466', '#4a463e', '#9a9486', '#5e5a50'], (p, r) => {
       for (let y = 3; y < 16; y += 4) p.hline(0, y, 16, 2);
       for (let row = 0; row < 4; row++) {

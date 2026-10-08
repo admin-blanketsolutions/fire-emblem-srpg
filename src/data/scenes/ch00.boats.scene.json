@@ -1,0 +1,19 @@
+{
+  "id": "ch00.boats",
+  "title": "The boats",
+  "ledger": ["CH-00.E3", "CH-00.E4", "CH-00.E10"],
+  "cmds": [
+    {"bg": "tigris-evening"},
+    {"show": {"who": "ayyub", "at": "left"}},
+    {"show": {"who": "usama", "at": "center"}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"say": {"who": "narrator", "text": "By evening the first of Zengi's men have reached the landings below the citadel.", "kind": "narration", "src": ["CH-00.E3"]}},
+    {"say": {"who": "usama", "text": "I am Usama, of Shaizar. I fought beside the lord of Mosul today. He is behind us on this road, and the Caliph's horsemen are behind him.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "Then the river must be ready before he is. Shirkuh: every boat we have, to the three landings. And open the granary.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "All of it? There will be questions from Baghdad.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "There will. I shall answer them.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Ayyub gave Zengi the boats to cross the Tigris, and showed his followers great kindness and gave them provisions.", "kind": "narration", "src": ["CH-00.E3"]}},
+    {"say": {"who": "narrator", "text": "Usama ibn Munqidh, the knight of Shaizar who became one of the great writers of his age, later wrote that he was at that battle with Zengi.", "kind": "narration", "src": ["CH-00.E3"]}},
+    {"say": {"who": "narrator", "text": "Whether Qaraja's riders ever came as far as the river, the histories do not say. Tonight, they do.", "kind": "narration", "src": ["CH-00.E4"]}}
+  ]
+}

@@ -18,6 +18,9 @@ export const COLORS = {
   reach: 'rgba(40, 90, 235, 0.58)',
   attack: 'rgba(235, 55, 45, 0.55)',
   danger: 'rgba(235, 55, 45, 0.32)',
+  /** The colour-blind-safe pair: orange against the blue of movement. */
+  attackSafe: 'rgba(245, 150, 30, 0.6)',
+  dangerSafe: 'rgba(245, 150, 30, 0.34)',
   path: '#f0c24a',
   latent: 'rgba(240, 200, 60, 0.34)',
   talk: 'rgba(240, 194, 74, 0.5)',

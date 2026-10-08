@@ -1,3 +1,4 @@
+import { PointerGesture } from '../core/gesture';
 import { RepeatTracker, type Action } from '../core/input';
 import type { Point } from '../core/types';
 import type { Display } from './display';
@@ -26,6 +27,7 @@ export class Input {
   private readonly deferredRelease = new Set<Action>();
   private readonly tracker = new RepeatTracker();
   private taps: Point[] = [];
+  private readonly gesture = new PointerGesture();
 
   constructor(display: Display) {
     window.addEventListener('keydown', (e) => {
@@ -39,10 +41,23 @@ export class Input {
       if (action) this.release(action);
     });
     window.addEventListener('blur', () => this.releaseAll());
-    display.canvas.addEventListener('pointerdown', (e) => {
+    // a tap is reported when the pointer lifts without having moved; a drag pans instead
+    const canvas = display.canvas;
+    canvas.addEventListener('pointerdown', (e) => {
       const p = display.toLogical(e.clientX, e.clientY);
-      if (p) this.taps.push(p);
+      if (!p) return;
+      canvas.setPointerCapture?.(e.pointerId);
+      this.gesture.down(e.pointerId, p);
     });
+    canvas.addEventListener('pointermove', (e) => {
+      const p = display.toLogical(e.clientX, e.clientY);
+      if (p) this.gesture.move(e.pointerId, p);
+    });
+    canvas.addEventListener('pointerup', (e) => {
+      const tap = this.gesture.up(e.pointerId);
+      if (tap) this.taps.push(tap);
+    });
+    canvas.addEventListener('pointercancel', (e) => this.gesture.cancel(e.pointerId));
   }
 
   press(action: Action): void {
@@ -68,6 +83,11 @@ export class Input {
     for (const action of this.deferredRelease) this.held.delete(action);
     this.deferredRelease.clear();
     return fired;
+  }
+
+  /** How far the player has dragged since the last call, in logical pixels. */
+  takePan(): Point {
+    return this.gesture.takePan();
   }
 
   /** Pointer taps since the last call, in logical pixels. */

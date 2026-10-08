@@ -1,0 +1,17 @@
+{
+  "id": "ch01.gate-captain",
+  "title": "The captain of the guard",
+  "ledger": ["CH-01.E2"],
+  "cmds": [
+    {"bg": "damascus-wall"},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"show": {"who": "gate-captain", "at": "right"}},
+    {"say": {"who": "gate-captain", "text": "You are Shirkuh's nephew? I was told to look for a young man in his company.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "I am Yusuf, the son of Ayyub. Nur ad-Din's letter reached you?", "kind": "dramatized"}},
+    {"say": {"who": "gate-captain", "text": "It reached the whole guard. We gave our word, and we are keeping it. The East Gate will not be shut when your banner is at the wall.", "kind": "dramatized"}},
+    {"say": {"who": "gate-captain", "text": "We ask one thing of your lord: that the people of the city be safe, whoever wins.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "Nur ad-Din does not make war on the people. I will carry your word to him.", "kind": "dramatized"}},
+    {"say": {"who": "gate-captain", "text": "Then go quickly, and good fortune go with you.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Nur ad-Din blockaded the city, and the young men of the guard to whom he had written rose and opened the East Gate to him.", "kind": "narration", "src": ["CH-01.E2"]}}
+  ]
+}

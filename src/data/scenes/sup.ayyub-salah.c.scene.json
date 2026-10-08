@@ -1,0 +1,19 @@
+{
+  "id": "sup.ayyub-salah.c",
+  "title": "Under His Father's Roof",
+  "ledger": ["SUP-AYYUB-SALAH-C", "CH-01.E3", "CH-01.E4", "CH-01.E2"],
+  "cmds": [
+    {"bg": "damascus-dusk"},
+    {"show": {"who": "ayyub", "at": "left"}},
+    {"show": {"who": "salah-ad-din", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Damascus, a few days after the gate was opened. Ayyub's house is quiet again.", "kind": "narration"}},
+    {"say": {"who": "salah-ad-din", "text": "Father, I did not hesitate at the gate.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "I saw you reach it. Courage is the easy half, Yusuf. When the gate was open, what did you see Nur ad-Din do?", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Nur ad-Din entered the city and pledged the lives and the property of its people.", "kind": "narration", "src": ["CH-01.E2"]}},
+    {"say": {"who": "salah-ad-din", "text": "He gave his word that no one in the city would be harmed.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "A prince's word is worth what he does with it the next morning. Watch that. It is the part of this day that is worth learning.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Salah ad-Din was raised under his father's care, and now entered the service of Nur ad-Din, who advanced him and made him one of his friends.", "kind": "narration", "src": ["CH-01.E4"]}},
+    {"say": {"who": "salah-ad-din", "text": "Will you come with me to his court?", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "I have served in more courts than I can count, and found that the best of them are schools. Go to learn, not to be seen.", "kind": "dramatized"}}
+  ]
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "CDX-G-DEMO-PROVING",
+    "category": "game",
+    "title": "Demo: the proving ground",
+    "unlock": { "chapter": "CH-00", "at": "start" },
+    "confidence": null,
+    "sources": ["D-008"],
+    "demo": true,
+    "body": [
+      "This is a demo entry. The proving ground and the walled courtyard are test maps: nothing on them happened, and the units on them are nobody in particular.",
+      "In the campaign, each chapter has an entry like this one listing exactly what the game invents."
+    ]
+  },
+  {
+    "id": "CDX-T-DEMO-POSTURES",
+    "category": "terms",
+    "title": "Demo: the Three Postures",
+    "unlock": { "chapter": "CH-00", "at": "start" },
+    "confidence": "fictional",
+    "sources": ["D-006"],
+    "demo": true,
+    "body": [
+      "This is a demo entry. Spear beats mace, mace beats sabre, and sabre beats spear.",
+      "The triangle is a rule of this game. No source describes fighting this way."
+    ]
+  }
+]

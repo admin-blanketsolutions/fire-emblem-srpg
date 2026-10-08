@@ -3,15 +3,17 @@ import { validateEvents, type EventDef, type PhaseSide, type SpawnSpec } from '.
 import { MAX_MAP_SIZE } from './grid';
 import { validateObjective, type ObjectiveDef } from './objectives';
 import type { TerrainDef, TerrainTable } from './terrain';
-import type { MoveType, Tile } from './types';
+import type { MoveType, Side, Tile } from './types';
 
 export interface SpawnJson {
   readonly unit: string;
   readonly at: Tile;
   /** Overrides the unit definition's behaviour for this placement. */
   readonly ai?: AiProfile;
-  /** Extra tags for this placement (`lord`, `boss`, `guards`, …). */
+  /** Extra tags for this placement (`lord`, `boss`, `guards`, `slot`, …). */
   readonly tags?: readonly string[];
+  /** Places the unit on another side than its definition's: a father of the army standing inside a city as an ally, an emir still to be won over. */
+  readonly side?: Side;
   /** For a structure: whose colours its flag wears (a faction palette); default neutral. */
   readonly faction?: string;
 }
@@ -157,6 +159,7 @@ export function parseMap(json: MapJson, table: TerrainTable): GameMap {
         throw new Error(`${where}: ${side} spawn "${spawn.unit}" at (${sx}, ${sy}) is outside the map`);
       }
       if (spawn.ai) validateAiProfile(spawn.ai, `${where}: ${side} spawn "${spawn.unit}"`);
+      if (spawn.side !== undefined && !['player', 'ally', 'enemy', 'neutral'].includes(spawn.side)) throw new Error(`${where}: ${side} spawn "${spawn.unit}" has an unknown side "${String(spawn.side)}"`);
     }
   }
 

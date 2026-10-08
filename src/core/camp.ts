@@ -30,14 +30,14 @@ export interface Talk {
   readonly b: UnitInstance;
 }
 
-/** The conversations the camp could hold now: both friends are in the army, a scene is due, and the camp has talks left. */
+/** The conversations the camp could hold now: both friends are in the camp, a scene is due, and the camp has talks left. */
 export function availableTalks(army: Army, gate: SupportGate): Talk[] {
   if (!army.supports || army.camp.talks >= TALKS_PER_CAMP) return [];
   const out: Talk[] = [];
   for (const { support, rank, scene } of army.supports.availableAll(gate)) {
     const a = army.units.find((u) => u.defId === support.a);
     const b = army.units.find((u) => u.defId === support.b);
-    if (a && b) out.push({ support, rank, scene, a, b });
+    if (a && b && !army.away.has(a.defId) && !army.away.has(b.defId)) out.push({ support, rank, scene, a, b });
   }
   return out;
 }
@@ -58,6 +58,7 @@ export type DrillResult = { readonly ok: true; readonly gain: WexpGain } | { rea
 
 /** Drill a unit once a camp: a little weapon EXP in the kind of weapon it has in hand. */
 export function drill(army: Army, unit: UnitInstance, env: Pick<InventoryEnv, 'weapons'>): DrillResult {
+  if (army.away.has(unit.defId)) return { ok: false, reason: `${unit.name} is away.` };
   if (army.camp.drilled.has(unit.id)) return { ok: false, reason: `${unit.name} has drilled today.` };
   const weapon = equippedWeapon(unit, env.weapons);
   if (!weapon) return { ok: false, reason: `${unit.name} has no weapon in hand to drill with.` };
@@ -115,14 +116,18 @@ export function promoteWithItem(army: Army, unit: UnitInstance, env: InventoryEn
 
 const isLord = (u: UnitInstance): boolean => u.tags.includes('lord');
 
+/** Whether the unit is away from the army, sent elsewhere by the story. */
+export const isAway = (army: Army, unit: UnitInstance): boolean => army.away.has(unit.defId);
+
 /** Whether the unit is chosen to deploy. */
 export const isDeployed = (army: Army, unit: UnitInstance): boolean => army.deployed.has(unit.id);
 
-/** Choose or release a unit. The Lord always goes; no more than the map has room for. */
+/** Choose or release a unit. The Lord and any unit the map requires always go; no more than the map has room for. */
 export function toggleDeploy(army: Army, unit: UnitInstance): Result {
   if (!army.units.includes(unit)) return no(`${unit.name} is not in the army.`);
+  if (isAway(army, unit)) return no(`${unit.name} is away.`);
   if (army.deployed.has(unit.id)) {
-    if (isLord(unit)) return no(`${unit.name} must go.`);
+    if (isLord(unit) || army.required.has(unit.id)) return no(`${unit.name} must go.`);
     army.deployed.delete(unit.id);
     return ok;
   }
@@ -132,15 +137,18 @@ export function toggleDeploy(army: Army, unit: UnitInstance): Result {
 }
 
 /**
- * Make the choice fit the map: keep the Lord first, then those already chosen, in the order they
- * joined, up to the limit. Call it when a new chapter's room is known.
+ * Make the choice fit the map: the Lord and the units the map requires first, then those already
+ * chosen, in the order they joined, up to the limit; nobody who is away. Call it when a new
+ * chapter's room is known.
  */
-export function fitDeployment(army: Army, limit: number): void {
+export function fitDeployment(army: Army, limit: number, required: Iterable<UnitInstance> = []): void {
   army.deployLimit = limit;
-  const order = [...army.units.filter(isLord), ...army.units.filter((u) => !isLord(u) && army.deployed.has(u.id)), ...army.units.filter((u) => !isLord(u) && !army.deployed.has(u.id))];
+  army.required = new Set([...required].map((u) => u.id));
+  const here = army.units.filter((u) => !isAway(army, u));
+  const must = (u: UnitInstance): boolean => isLord(u) || army.required.has(u.id);
+  const order = [...here.filter(must), ...here.filter((u) => !must(u) && army.deployed.has(u.id)), ...here.filter((u) => !must(u) && !army.deployed.has(u.id))];
   army.deployed = new Set(order.slice(0, limit).map((u) => u.id));
 }
 
 /** The units that take the field, in the order they joined. */
-export const deployedUnits = (army: Army): UnitInstance[] => army.units.filter((u) => army.deployed.has(u.id));
-
+export const deployedUnits = (army: Army): UnitInstance[] => army.units.filter((u) => army.deployed.has(u.id) && !isAway(army, u));

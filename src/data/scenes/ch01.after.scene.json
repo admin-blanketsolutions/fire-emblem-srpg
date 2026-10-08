@@ -1,0 +1,23 @@
+{
+  "id": "ch01.after",
+  "title": "The city changes hands",
+  "ledger": ["CH-01.E1", "CH-01.E2", "CH-01.E4", "CH-01.E5", "CH-01.E6"],
+  "cmds": [
+    {"bg": "damascus-dusk"},
+    {"music": "story"},
+    {"say": {"who": "narrator", "text": "Safar, 549 AH: April, 1154. Nur ad-Din entered Damascus, having pledged to respect the lives and the property of its people.", "kind": "narration", "src": ["CH-01.E1", "CH-01.E2"]}},
+    {"say": {"who": "narrator", "text": "He besieged Mujir ad-Din in the citadel and wrote to him, offering a great fief, with the city of Homs in it. Mujir ad-Din accepted, left the citadel and went to Homs.", "kind": "narration", "src": ["CH-01.E2"]}},
+    {"say": {"who": "narrator", "text": "The Franks, who had been gathering to relieve the city, heard that it had fallen to Nur ad-Din, and went home.", "kind": "narration", "src": ["CH-01.E2"]}},
+    {"show": {"who": "nur-ad-din", "at": "center"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"say": {"who": "nur-ad-din", "text": "Let no one be harmed who is not armed against us. That is the word I gave at the gate, and the word is the city's now.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Ibn al-Athir, who wrote the Zengid house's history and admired Nur ad-Din, says that he treated the people of Damascus with the greatest consideration and ruled them with perfect justice.", "kind": "narration", "src": ["CH-01.E2"]}},
+    {"say": {"who": "narrator", "text": "Nur ad-Din was just and pious, and built colleges across Syria, and in Damascus a hospital and a school for the study of Tradition.", "kind": "narration", "src": ["CH-01.E6"]}},
+    {"say": {"who": "narrator", "text": "Salah ad-Din, who had grown up in his father's care, stayed in Nur ad-Din's service. Nur ad-Din advanced him, and admitted him among his friends.", "kind": "narration", "src": ["CH-01.E4"]}},
+    {"say": {"who": "narrator", "text": "Ibn Khallikan judged that it was from Nur ad-Din that he learned righteousness, and zeal in the war against the Franks.", "kind": "narration", "src": ["CH-01.E5"]}},
+    {"say": {"who": "shirkuh", "text": "You kept your head. That is more than I did at your age.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "I kept my head because you stood where I could see you, uncle.", "kind": "dramatized"}},
+    {"unlock": "CDX-S-DAMASCUS-DAY"}
+  ]
+}

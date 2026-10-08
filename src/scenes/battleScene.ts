@@ -14,6 +14,7 @@ import type { UnitInstance } from '../core/unit';
 import type { WeaponDef } from '../core/weapons';
 import { LOGICAL_HEIGHT, LOGICAL_WIDTH } from '../core/viewport';
 import type { Story } from '../data/story';
+import { audio } from '../engine/audio';
 import type { Assets } from '../engine/assets';
 import type { Scene } from '../engine/game';
 import type { TextRenderer } from '../engine/text';
@@ -122,6 +123,9 @@ interface Popup {
   age: number;
 }
 
+/** The player's phase has its own music; the computer's sides share the other. */
+const phaseSong = (phase: string): string => (phase === 'player' ? 'player-phase' : 'enemy-phase');
+
 export interface BattleSceneOptions {
   readonly battle: BattleState;
   readonly assets: Assets;
@@ -133,6 +137,12 @@ export interface BattleSceneOptions {
   readonly settings?: Settings;
   /** A scene unlocked a Codex entry. */
   readonly onUnlock?: (id: string) => void;
+  /** Offers *Suspend* on the turn menu: save the battle and leave (DESIGN §3.9). */
+  readonly onSuspend?: () => void;
+  /** Called when the player moves on from the end of the chapter; replaces *play again*. */
+  readonly onFinish?: () => void;
+  /** What the player named people (the Recruit), for the scenes the chapter plays. */
+  readonly names?: Readonly<Record<string, string>>;
 }
 
 /**
@@ -149,6 +159,9 @@ export class BattleScene implements Scene {
   private readonly story: Story | undefined;
   private readonly settings: Settings;
   private readonly onUnlock: ((id: string) => void) | undefined;
+  private readonly onSuspend: (() => void) | undefined;
+  private readonly onFinish: (() => void) | undefined;
+  private readonly names: Readonly<Record<string, string>> | undefined;
   private mapLayer: HTMLCanvasElement;
   /** The `terrainVersion` the map layer was drawn from. */
   private mapVersion = 0;
@@ -169,11 +182,15 @@ export class BattleScene implements Scene {
   private actor: UnitInstance | null = null;
   private readonly popups: Popup[] = [];
 
-  constructor({ battle, assets, text, onRestart, story, settings, onUnlock }: BattleSceneOptions) {
+  constructor({ battle, assets, text, onRestart, story, settings, onUnlock, onSuspend, onFinish, names }: BattleSceneOptions) {
     this.battle = battle;
+    this.names = names;
     this.story = story;
     this.settings = settings ?? DEFAULT_SETTINGS;
     this.onUnlock = onUnlock;
+    this.onSuspend = onSuspend;
+    this.onFinish = onFinish;
+    this.dangerOn = this.settings.dangerZoneDefault;
     this.assets = assets;
     this.text = text;
     this.onRestart = onRestart;
@@ -193,12 +210,29 @@ export class BattleScene implements Scene {
       LOGICAL_HEIGHT,
     );
     this.camTarget = this.cam;
+    audio.playMusic(phaseSong(battle.phase));
     this.startBanner(PHASE_TITLES[battle.phase], this.phaseSub(battle.turn, battle.phase), () => this.proceed());
+  }
+
+  /** Drag the map: the camera follows the finger, within the map's edges, until the cursor next moves. */
+  private panCamera(pan: Point): void {
+    this.cam = clampCamera(this.cam.x - pan.x, this.cam.y - pan.y, this.mapWidthPx, this.mapHeightPx, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    this.camTarget = this.cam;
+  }
+
+  /** Attack ranges in red, or orange with the colour-blind-safe setting (DESIGN §16). */
+  private get attackColor(): string {
+    return this.settings.colourBlindSafe ? COLORS.attackSafe : COLORS.attack;
+  }
+
+  private get dangerColor(): string {
+    return this.settings.colourBlindSafe ? COLORS.dangerSafe : COLORS.danger;
   }
 
   // ---------------------------------------------------------------- update
 
-  update(dtMs: number, actions: ReadonlySet<Action>, taps: readonly Point[]): void {
+  update(dtMs: number, actions: ReadonlySet<Action>, taps: readonly Point[], pan: Point = { x: 0, y: 0 }): void {
+    if (pan.x !== 0 || pan.y !== 0) this.panCamera(pan);
     this.clock += dtMs;
     this.updatePopups(dtMs);
     this.updateCamera(dtMs);
@@ -269,7 +303,7 @@ export class BattleScene implements Scene {
         break;
       case 'outcome':
         mode.elapsed += dtMs;
-        if (mode.elapsed > OUTCOME_LOCK_MS && actions.has('confirm')) this.onRestart?.();
+        if (mode.elapsed > OUTCOME_LOCK_MS && actions.has('confirm')) (this.onFinish ?? this.onRestart)?.();
         break;
     }
   }
@@ -746,7 +780,10 @@ export class BattleScene implements Scene {
     this.dangerCache = null;
     this.actor = actor;
     this.setCursor(report.attacker.x, report.attacker.y);
-    this.mode = { kind: 'fight', player: new FightPlayer(report) };
+    const player = new FightPlayer(report);
+    this.mode = { kind: 'fight', player };
+    // with battle animations off, the fight is over at once and only its results are shown
+    if (this.settings.battleAnimations === 'off') for (const cue of player.update(player.duration)) this.applyCue(cue);
   }
 
   private updateFight(mode: Extract<Mode, { kind: 'fight' }>, dtMs: number): void {
@@ -763,9 +800,11 @@ export class BattleScene implements Scene {
   private applyCue(cue: FightCue): void {
     if (cue.kind === 'defeat') {
       this.popup(cue.unit, cue.unit.kind === 'structure' ? 'Destroyed' : 'Retreats', COLORS.bad, 10);
+      audio.playSfx(cue.unit.kind === 'structure' ? 'structure-break' : 'defeat');
       return;
     }
     const { event, target } = cue;
+    audio.playSfx(!event.hit ? 'miss' : event.crit ? 'critical' : 'hit');
     if (!event.hit) this.popup(target, 'Miss', COLORS.textDim);
     else if (event.damage === 0) this.popup(target, 'No damage', COLORS.textDim);
     else this.popup(target, event.crit ? `${event.damage}!` : String(event.damage), event.crit ? COLORS.gold : COLORS.white);
@@ -774,6 +813,7 @@ export class BattleScene implements Scene {
   private playHeal(report: HealReport, actor: UnitInstance): void {
     this.actor = actor;
     this.popup(report.target, `+${report.restored}`, COLORS.good);
+    audio.playSfx('heal');
     this.mode = { kind: 'healing', report, hpBefore: report.target.hp - report.restored, elapsed: 0 };
   }
 
@@ -795,6 +835,7 @@ export class BattleScene implements Scene {
       this.proceed();
       return;
     }
+    if (mode.elapsed === 0 && (step.kind === 'levelup' || step.kind === 'promotion')) audio.playSfx(step.kind === 'levelup' ? 'level-up' : 'promotion');
     mode.elapsed += dtMs;
     const confirm = actions.has('confirm');
     const finished =
@@ -826,6 +867,7 @@ export class BattleScene implements Scene {
     }
     if (this.battle.outcome) {
       this.mode = { kind: 'outcome', elapsed: 0 };
+      audio.playMusic(this.battle.outcome.result === 'won' ? 'victory' : 'defeat');
       return;
     }
     if (this.battle.phase !== 'player') {
@@ -839,7 +881,7 @@ export class BattleScene implements Scene {
       return;
     }
     this.mode = { kind: 'free' };
-    if (this.battle.isSideSpent('player')) this.changePhase();
+    if (this.settings.autoEndTurn && this.battle.isSideSpent('player')) this.changePhase();
   }
 
   private showMessages(list: BattleMessage[], next: () => void): void {
@@ -861,6 +903,7 @@ export class BattleScene implements Scene {
         assets: this.assets,
         text: this.text,
         settings: this.settings,
+        ...(this.names ? { names: this.names } : {}),
         onEffect: (effect) => this.applyEffect(effect),
       });
       this.mode = { kind: 'dialogue', player, next: () => this.runMessages(list, index + 1, next) };
@@ -872,6 +915,7 @@ export class BattleScene implements Scene {
   private applyEffect(effect: Effect): void {
     if ('flag' in effect) this.battle.flags.add(effect.flag);
     else if ('unlock' in effect) this.onUnlock?.(effect.unlock);
+    else if ('sfx' in effect) audio.playSfx(effect.sfx);
   }
 
   private advanceMessages(mode: Extract<Mode, { kind: 'messages' }>): void {
@@ -894,6 +938,7 @@ export class BattleScene implements Scene {
       this.proceed();
       return;
     }
+    audio.playMusic(phaseSong(report.phase));
     this.startBanner(PHASE_TITLES[report.phase], this.phaseSub(report.turn, report.phase), () => {
       this.applyReport(report);
       this.proceed();
@@ -969,6 +1014,9 @@ export class BattleScene implements Scene {
         this.mode = { kind: 'free' };
         this.changePhase();
         break;
+      case 'Suspend':
+        this.onSuspend?.();
+        break;
       case 'Danger Zone':
         this.toggleDanger();
         break;
@@ -985,7 +1033,9 @@ export class BattleScene implements Scene {
   private menuItems(): MenuItem[] {
     const items: MenuItem[] = [{ label: 'End Turn' }];
     if (this.battle.map.rules.objective) items.push({ label: 'Objective' });
-    items.push({ label: `Danger Zone: ${this.dangerOn ? 'On' : 'Off'}` }, { label: 'Resume' });
+    items.push({ label: `Danger Zone: ${this.dangerOn ? 'On' : 'Off'}` });
+    if (this.onSuspend) items.push({ label: 'Suspend' });
+    items.push({ label: 'Resume' });
     return items;
   }
 
@@ -1179,10 +1229,10 @@ export class BattleScene implements Scene {
   /** The tiles the current mode is asking the player to choose among, and the colour they wear. */
   private chosenTiles(): { tiles: readonly Point[]; color: string } | null {
     const mode = this.mode;
-    if (mode.kind === 'target') return { tiles: mode.choice.targets, color: mode.purpose === 'attack' ? COLORS.attack : HEAL_TINT };
-    if (mode.kind === 'weapon') return { tiles: mode.choices[mode.index]?.targets ?? [], color: mode.purpose === 'attack' ? COLORS.attack : HEAL_TINT };
+    if (mode.kind === 'target') return { tiles: mode.choice.targets, color: mode.purpose === 'attack' ? this.attackColor : HEAL_TINT };
+    if (mode.kind === 'weapon') return { tiles: mode.choices[mode.index]?.targets ?? [], color: mode.purpose === 'attack' ? this.attackColor : HEAL_TINT };
     if (mode.kind === 'talk') return { tiles: mode.targets, color: COLORS.talk };
-    if (mode.kind === 'aim') return { tiles: mode.option.targets, color: mode.option.id === 'sap' ? COLORS.attack : mode.option.id === 'entrench' ? COLORS.talk : HEAL_TINT };
+    if (mode.kind === 'aim') return { tiles: mode.option.targets, color: mode.option.id === 'sap' ? this.attackColor : mode.option.id === 'entrench' ? COLORS.talk : HEAL_TINT };
     return null;
   }
 
@@ -1197,16 +1247,16 @@ export class BattleScene implements Scene {
     if (this.dangerOn) {
       const zone = this.danger();
       this.hatchKeys(ctx, zone.latent, camX, camY);
-      this.fillKeys(ctx, zone.active, camX, camY, COLORS.danger);
+      this.fillKeys(ctx, zone.active, camX, camY, this.dangerColor);
     }
     if (this.inspected) {
       this.hatchKeys(ctx, this.inspected.latent, camX, camY);
-      this.fillKeys(ctx, this.inspected.active, camX, camY, COLORS.attack);
+      this.fillKeys(ctx, this.inspected.active, camX, camY, this.attackColor);
     }
     const mode = this.mode;
     if (mode.kind === 'selected') {
       const stops = new Set(mode.reach.stops.map((p) => tileKey(p.x, p.y)));
-      for (const p of mode.threat) if (!stops.has(tileKey(p.x, p.y))) this.fillTile(ctx, p.x, p.y, camX, camY, COLORS.attack);
+      for (const p of mode.threat) if (!stops.has(tileKey(p.x, p.y))) this.fillTile(ctx, p.x, p.y, camX, camY, this.attackColor);
       this.fillKeys(ctx, stops, camX, camY, COLORS.reach);
       const path = pathTo(mode.reach, this.cursor);
       if (path && path.length > 1) {
@@ -1214,16 +1264,16 @@ export class BattleScene implements Scene {
         for (const p of path.slice(1)) ctx.fillRect(p.x * TILE - camX + 6, p.y * TILE - camY + 6, 4, 4);
       }
     } else if (mode.kind === 'target') {
-      const color = mode.purpose === 'attack' ? COLORS.attack : HEAL_TINT;
+      const color = mode.purpose === 'attack' ? this.attackColor : HEAL_TINT;
       for (const t of mode.choice.targets) this.fillTile(ctx, t.x, t.y, camX, camY, color);
     } else if (mode.kind === 'weapon') {
       const choice = mode.choices[mode.index];
-      const color = mode.purpose === 'attack' ? COLORS.attack : HEAL_TINT;
+      const color = mode.purpose === 'attack' ? this.attackColor : HEAL_TINT;
       for (const t of choice?.targets ?? []) this.fillTile(ctx, t.x, t.y, camX, camY, color);
     } else if (mode.kind === 'talk') {
       for (const t of mode.targets) this.fillTile(ctx, t.x, t.y, camX, camY, COLORS.talk);
     } else if (mode.kind === 'aim') {
-      for (const t of mode.option.targets) this.fillTile(ctx, t.x, t.y, camX, camY, mode.option.id === 'sap' ? COLORS.attack : mode.option.id === 'entrench' ? COLORS.talk : HEAL_TINT);
+      for (const t of mode.option.targets) this.fillTile(ctx, t.x, t.y, camX, camY, mode.option.id === 'sap' ? this.attackColor : mode.option.id === 'entrench' ? COLORS.talk : HEAL_TINT);
     } else if (mode.kind === 'bonus') {
       this.fillKeys(ctx, mode.reach.stops.map((p) => tileKey(p.x, p.y)), camX, camY, COLORS.reach);
       const path = pathTo(mode.reach, this.cursor);
@@ -1398,7 +1448,10 @@ export class BattleScene implements Scene {
         return;
       }
       case 'outcome':
-        if (this.battle.outcome) drawOutcome(pen, this.battle.outcome.result, this.battle.outcome.reason, mode.elapsed > OUTCOME_LOCK_MS && this.onRestart !== undefined);
+        if (this.battle.outcome) {
+          const prompt = this.onFinish ? 'OK to continue' : this.onRestart ? 'OK to play again' : null;
+          drawOutcome(pen, this.battle.outcome.result, this.battle.outcome.reason, mode.elapsed > OUTCOME_LOCK_MS ? prompt : null);
+        }
         return;
       case 'moving':
       case 'healing':

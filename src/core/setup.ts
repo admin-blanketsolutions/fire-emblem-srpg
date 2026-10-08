@@ -11,6 +11,11 @@ export interface BattleOptions {
   readonly rules?: Partial<BattleRules>;
   /** The army's supports: given before the battle begins, so the chapter's points start from nothing. */
   readonly supports?: SupportTracker;
+  /**
+   * Start the first phase (default). A campaign puts its own army on the field first and begins the
+   * battle itself, so the first turn's events act on the units that are really there.
+   */
+  readonly begin?: boolean;
 }
 
 /**
@@ -36,12 +41,15 @@ export function buildBattle(map: GameMap, defs: UnitTable, tables: BattleTables,
       if (built.ai) built.ai = side === 'player' ? null : (spawn.ai ?? built.ai);
       return built;
     }
-    const overrides = { ...(spawn.ai ? { ai: spawn.ai } : {}), ...(spawn.tags ? { tags: spawn.tags } : {}) };
-    return createUnit(def, id, spawn.at[0], spawn.at[1], tables, overrides);
+    const overrides = { ...(spawn.ai ? { ai: spawn.ai } : {}), ...(spawn.tags ? { tags: spawn.tags } : {}), ...(spawn.side ? { side: spawn.side } : {}) };
+    const unit = createUnit(def, id, spawn.at[0], spawn.at[1], tables, overrides);
+    // a reserve stands off the map until an event brings it on
+    if (unit.tags.includes('reserve')) Object.assign(unit, { retreated: true, escaped: true });
+    return unit;
   });
   const rng = createRng(options.seed ?? hashSeed('battle', map.id));
   const battle = new BattleState(map, units, tables, rng, { ...DEFAULT_RULES, ...options.rules });
   if (options.supports) battle.supports = options.supports;
-  battle.begin();
+  if (options.begin !== false) battle.begin();
   return battle;
 }

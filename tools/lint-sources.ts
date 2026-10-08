@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { buildCharacterTable, type CharacterTable } from '../src/core/characters';
+import { buildCodexTable } from '../src/core/codex';
 import { buildSceneTable, type SceneTable } from '../src/core/dialogue';
 import { hasArabicScript, stringsIn } from '../src/core/sensitive';
 import { buildSupportTable } from '../src/core/supports';
@@ -57,6 +58,7 @@ export interface StoryFiles {
   readonly characters: readonly JsonFile[];
   readonly scenes: readonly JsonFile[];
   readonly supports: readonly JsonFile[];
+  readonly codex: readonly JsonFile[];
 }
 
 export interface LintOptions {
@@ -117,6 +119,17 @@ export function lintStory(ledger: Ledger, story: StoryFiles, options: LintOption
   }
   const supports = attempt('supports', issues, () => buildSupportTable(supportEntries, { scenes, ...(known ? { knownLedgerId: known } : {}) }));
 
+  // the Codex: every entry is a ledger row, and so is every source it names
+  const codexEntries: unknown[] = [];
+  for (const { file, data } of story.codex) {
+    if (!Array.isArray(data)) {
+      issues.push({ severity: 'error', where: file, message: 'must be a list of Codex entries' });
+      continue;
+    }
+    codexEntries.push(...data);
+  }
+  attempt('codex', issues, () => buildCodexTable(codexEntries, { scenes: new Set(scenes.keys()), ...(known ? { knownLedgerId: known } : {}) }));
+
   // the ledger's slice supports with no scene yet are work still to do, not a fault
   if (!options.lenient && supports) {
     const written = new Set([...supports.values()].flatMap((s) => Object.values(s.scenes).map((sc) => sc?.ledger)));
@@ -164,11 +177,13 @@ export function loadStory(root: string): { campaign: StoryFiles; demo: StoryFile
     characters: one(join(data, 'characters.json'), root),
     scenes: jsonIn(join(data, 'scenes'), root, '.scene.json'),
     supports: one(join(data, 'supports.json'), root),
+    codex: jsonIn(join(data, 'codex'), root),
   };
   const demo: StoryFiles = {
     characters: one(join(data, 'test', 'characters.json'), root),
     scenes: jsonIn(join(data, 'test', 'scenes'), root, '.scene.json'),
     supports: one(join(data, 'test', 'supports.json'), root),
+    codex: one(join(data, 'test', 'codex.json'), root),
   };
   return { campaign, demo, all: jsonIn(data, root) };
 }

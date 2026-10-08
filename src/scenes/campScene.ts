@@ -1,6 +1,6 @@
 import { buy, CONVOY_SLOTS, sell, store, withdraw, type Army, type Result } from '../core/army';
 import type { BattleTables } from '../core/battle';
-import { availableTalks, completeTalk, deployedUnits, drill, isDeployed, promotable, promoteWithItem, toggleDeploy, type Talk } from '../core/camp';
+import { availableTalks, completeTalk, deployedUnits, drill, isAway, isDeployed, promotable, promoteWithItem, toggleDeploy, type Talk } from '../core/camp';
 import type { Effect } from '../core/dialogue';
 import type { Action } from '../core/input';
 import { applyItem, canUseItem, equipWeapon, priceOf, sellValue, stackName, type InventoryEnv } from '../core/inventory';
@@ -12,6 +12,7 @@ import type { ShopDef, ShopTable } from '../core/shop';
 import { INVENTORY_SLOTS, equippedWeapon, type ItemStack, type UnitInstance } from '../core/unit';
 import type { Point } from '../core/types';
 import { LOGICAL_HEIGHT, LOGICAL_WIDTH } from '../core/viewport';
+import { audio } from '../engine/audio';
 import type { Assets } from '../engine/assets';
 import type { Scene } from '../engine/game';
 import type { TextRenderer, TextStyle } from '../engine/text';
@@ -71,6 +72,10 @@ export interface CampSceneOptions {
   readonly flags?: Set<string>;
   /** A scene unlocked a Codex entry. */
   readonly onUnlock?: (id: string) => void;
+  /** More entries for the main menu, before the way on: saving, the Codex, settings. */
+  readonly extraItems?: () => ReadonlyArray<{ readonly label: string; readonly run: () => void }>;
+  /** What the player named people (the Recruit), for the scenes the camp plays. */
+  readonly names?: Readonly<Record<string, string>>;
 }
 
 /** Where a stack for sale comes from. */
@@ -102,12 +107,16 @@ export class CampScene implements Scene {
   private readonly chapterOrder: readonly string[];
   private readonly flags: Set<string>;
   private readonly onUnlock: ((id: string) => void) | undefined;
+  private readonly extraItems: CampSceneOptions['extraItems'];
+  private readonly names: Readonly<Record<string, string>> | undefined;
   private mode: Mode = { kind: 'main', index: 0 };
   /** The list rows on screen, for taps: filled as the scene is drawn. */
   private hits: Hit[] = [];
 
-  constructor({ army, tables, shops, assets, text, title, onContinue, continueLabel, story, settings, chapter, chapterOrder, flags, onUnlock }: CampSceneOptions) {
+  constructor({ army, tables, shops, assets, text, title, onContinue, continueLabel, story, settings, chapter, chapterOrder, flags, onUnlock, extraItems, names }: CampSceneOptions) {
     this.army = army;
+    this.names = names;
+    this.extraItems = extraItems;
     this.assets = assets;
     this.story = story;
     this.settings = settings ?? DEFAULT_SETTINGS;
@@ -209,6 +218,7 @@ export class CampScene implements Scene {
     items.push({ label: 'Maydan', run: list('maydan') });
     items.push({ label: `Class${ready > 0 ? `  (${ready})` : ''}`, run: list('class') });
     if (this.army.fallen.length > 0) items.push({ label: 'Casualty roll', run: list('roll') });
+    for (const extra of this.extraItems?.() ?? []) items.push({ label: extra.label, run: extra.run });
     const next = this.onContinue;
     if (next) items.push({ label: this.continueLabel, run: next });
     return items;
@@ -323,14 +333,24 @@ export class CampScene implements Scene {
         return army.units.map((u) => {
           const weapon = equippedWeapon(u, this.tables.weapons);
           const drilled = army.camp.drilled.has(u.id);
-          return { label: u.name, right: drilled ? 'drilled' : weapon ? kindLabel(weapon.kind) : 'no weapon', dim: drilled || !weapon };
+          const away = isAway(army, u);
+          return { label: u.name, right: away ? 'away' : drilled ? 'drilled' : weapon ? kindLabel(weapon.kind) : 'no weapon', dim: away || drilled || !weapon };
         });
       case 'class':
         return promotable(army, this.env).map((p) => ({ label: p.unit.name, right: `to ${p.targetName}` }));
       case 'roll':
         return army.fallen.map((u) => ({ label: u.name, right: `lost in ${army.fallenIn.get(u.id) ?? 'battle'}`, dim: true }));
       case 'prepare':
-        return army.units.map((u) => ({ label: `${isDeployed(army, u) ? '✔' : '  '} ${u.name}`, right: `${this.source.classOf(u).name}  Lv ${u.level}`, dim: !isDeployed(army, u) }));
+        return army.units.map((u) => {
+          // the font has no tick: a bullet marks who goes, and "must" those the map cannot do without
+          const away = isAway(army, u);
+          const must = !away && (army.required.has(u.id) || u.tags.includes('lord'));
+          return {
+            label: `${away || !isDeployed(army, u) ? '  ' : '•'} ${u.name}`,
+            right: away ? 'away' : must ? 'must go' : `${this.source.classOf(u).name}  Lv ${u.level}`,
+            dim: away || !isDeployed(army, u),
+          };
+        });
     }
   }
 
@@ -393,12 +413,16 @@ export class CampScene implements Scene {
       assets: this.assets,
       text: this.text,
       settings: this.settings,
+      ...(this.names ? { names: this.names } : {}),
       onEffect: (effect) => this.apply(effect),
     });
+    audio.playMusic('story');
     this.mode = {
       kind: 'scene',
       player,
       then: () => {
+        audio.playMusic('camp');
+        audio.playSfx('support');
         completeTalk(this.army, talk, this.gate());
         back.index = 0;
         back.note = `${talk.a.name} and ${talk.b.name}: rank ${talk.rank}`;
@@ -557,8 +581,8 @@ export class CampScene implements Scene {
 
   private drawMain(ctx: CanvasRenderingContext2D, mode: Extract<Mode, { kind: 'main' }>): void {
     const items = this.mainItems();
-    this.text.drawCentered(ctx, this.title, LOGICAL_WIDTH / 2, 12, { color: COLORS.text, shadow: COLORS.ink, scale: 2 });
-    this.dinars(ctx);
+    this.text.drawCentered(ctx, this.title, LOGICAL_WIDTH / 2, 8, { color: COLORS.text, shadow: COLORS.ink, scale: 2 });
+    this.text.drawRight(ctx, `Dinars ${this.army.dinars}`, LOGICAL_WIDTH - 8, 26, GOLD);
     const { w } = menuSize(this.text, items);
     const x = Math.round((LOGICAL_WIDTH - w) / 2);
     const y = 36;
@@ -577,7 +601,7 @@ export class CampScene implements Scene {
       const y = 31 + i * ROW;
       if (index === mode.index) this.text.draw(ctx, '→', 9, y, GOLD);
       this.text.draw(ctx, unit.name, 18, y, PLAIN);
-      this.text.drawRight(ctx, `${this.source.classOf(unit).name}  Lv ${unit.level}`, LOGICAL_WIDTH - 12, y, DIM);
+      this.text.drawRight(ctx, isAway(this.army, unit) ? 'away' : `${this.source.classOf(unit).name}  Lv ${unit.level}`, LOGICAL_WIDTH - 12, y, DIM);
       this.hits.push({ x: 8, y, w: LOGICAL_WIDTH - 16, index });
     });
     if (this.army.units.length === 0) this.text.draw(ctx, 'No one is in the army.', 18, 31, DIM);

@@ -1,4 +1,5 @@
-import type { Action } from '../core/input';
+import { DIRECTION_ACTIONS, type Action } from '../core/input';
+import { audio } from './audio';
 import type { Point } from '../core/types';
 import type { Assets } from './assets';
 import type { Display } from './display';
@@ -7,7 +8,8 @@ import type { TextRenderer } from './text';
 
 /** One screen of the game: the title, a battle, a dialogue. */
 export interface Scene {
-  update(dtMs: number, actions: ReadonlySet<Action>, taps: readonly Point[]): void;
+  /** `pan` is how far the player dragged this frame, in logical pixels; most scenes ignore it. */
+  update(dtMs: number, actions: ReadonlySet<Action>, taps: readonly Point[], pan?: Point): void;
   draw(ctx: CanvasRenderingContext2D): void;
 }
 
@@ -43,7 +45,12 @@ export class Game {
     this.last = now;
     const { display, input } = this.services;
     if (this.scene) {
-      this.scene.update(dt, input.update(dt), input.takeTaps());
+      const actions = input.update(dt);
+      // the interface sounds, the same everywhere: moving, choosing, going back
+      if (actions.has('confirm')) audio.playSfx('confirm');
+      else if (actions.has('cancel')) audio.playSfx('cancel');
+      else if (DIRECTION_ACTIONS.some((a) => actions.has(a))) audio.playSfx('cursor');
+      this.scene.update(dt, actions, input.takeTaps(), input.takePan());
       this.scene.draw(display.ctx);
     }
     requestAnimationFrame((t) => this.frame(t));

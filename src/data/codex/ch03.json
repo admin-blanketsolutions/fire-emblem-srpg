@@ -1,0 +1,299 @@
+[
+  {
+    "id": "CDX-P-ISA",
+    "category": "people",
+    "title": "Diya ad-Din Isa al-Hakkari",
+    "unlock": {"chapter": "CH-03", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IAT", "CH-03.E5"],
+    "body": [
+      "A jurist and emir of the Hakkari Kurds, who stayed at Salah ad-Din's side after Shirkuh's death. When the emirs would not pay Salah ad-Din the slightest respect, it was he, Ibn al-Athir says, who went to them one by one, with a different argument for each, and brought three of the four to the vizier's side.",
+      "Ibn Khallikan has a separate entry on him. Ibn al-Athir, who tells this, was partisan; but here he is favourable to Isa and not hostile to Salah ad-Din."
+    ]
+  },
+  {
+    "id": "CDX-P-TURANSHAH",
+    "category": "people",
+    "title": "Shams ad-Dawla Turan-Shah",
+    "unlock": {"chapter": "CH-03", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IAT", "SRC-ASH", "MOD-PPTS-IS", "CH-03.E12", "CH-03.E13"],
+    "body": [
+      "Salah ad-Din's elder brother, the son of Ayyub. Nur ad-Din refused at first to let Salah ad-Din's brothers come to Egypt, afraid that one of them might oppose his plans; but when he heard that the Franks were gathering, he sent troops, and Turan-Shah with them, and warned him to serve Salah ad-Din as lord of Egypt and as Nur ad-Din's own lieutenant.",
+      "Imad ad-Din, quoted by Abu Shama, says that he reached Cairo on the 8th of Dhu'l-Qa'da 564 AH (about 30 July or 3 August 1169) and fought with great courage in the affair of the Black regiments. The 1897 translators of Ibn Shaddad note that he later governed Damascus, led an expedition against Nubia in 1172-73, and died at Alexandria in 1180."
+    ]
+  },
+  {
+    "id": "CDX-P-ADID",
+    "category": "people",
+    "title": "al-Adid",
+    "unlock": {"chapter": "CH-03", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IS", "CH-03.E3", "CH-03.E5", "CH-03.E14"],
+    "body": [
+      "The last Fatimid caliph of Egypt. In 1169 he gave the vizier's robe first to Shirkuh and then, when Shirkuh died, to Salah ad-Din, hoping, Ibn al-Athir says, to rule through a vizier who had no troops and no party.",
+      "He followed the fighting in August 1169 from a high pavilion between the two palaces; what he ordered from it is told differently (see 'The uprising of the Fatimid regiments'). He died on Monday the 10th of Muharram 567 AH (13 September 1171)."
+    ]
+  },
+  {
+    "id": "CDX-P-EMIRS",
+    "category": "people",
+    "title": "The emirs of Shirkuh's army",
+    "unlock": {"chapter": "CH-03", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IAT", "CH-03.E5"],
+    "body": [
+      "Ibn al-Athir names four emirs who aspired to the command after Shirkuh's death. Ain ad-Dawla al-Yaruqi was the chief of them, with the most troops; he refused to serve under Salah ad-Din and went back to Nur ad-Din. Qutb ad-Din Khusraw ibn Talil, a nephew of the emir Abu'l-Hayja, founded the Qutbiyya college at Cairo. Sayf ad-Din Ali al-Hakkari was called al-Mashtub, 'the scarred', and Shihab ad-Din Mahmud al-Harimi was Salah ad-Din's uncle on his mother's side.",
+      "In the game each is a unit of the army, and each, except al-Yaruqi, joins it in the council of the chapter. Their classes are the game's own assignment, not a claim from any source."
+    ]
+  },
+  {
+    "id": "CDX-P-MUTAMIN",
+    "category": "people",
+    "title": "The Mu'taman al-Khilafa",
+    "unlock": {"chapter": "CH-03", "at": "start"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IAT", "SRC-IAI-BARQ", "SRC-ASH", "MOD-LANEPOOLE", "CH-03.E8"],
+    "body": [
+      "A title, not a name: 'the trusted of the caliphate'. It was held by the eunuch who ruled the caliph's palace. Imad ad-Din and Ibn al-Athir say that he plotted with others to call the Franks into Egypt, and that he was killed at his country house at Kharrakaniyya, near Qalyub, on Wednesday the 25th of Dhu'l-Qa'da 564 AH (20 August 1169).",
+      "Lane-Poole, in 1898, calls him 'Nejah' and puts his death in July. Some modern historians are reported to doubt that the plot was real; this game has not read them, and says so."
+    ],
+    "differ": [
+      {
+        "claim": "His name and the day of his death",
+        "positions": [
+          {"source": "SRC-IAI-BARQ", "says": "Imad ad-Din, quoted by Abu Shama: the Mu'taman al-Khilafa, killed on Wednesday the 25th of Dhu'l-Qa'da 564 (20 August 1169). The weekday agrees with the calendar."},
+          {"source": "SRC-IAT", "says": "Ibn al-Athir: the same title, and a date at the beginning of Dhu'l-Qa'da (late July 1169)."},
+          {"source": "MOD-LANEPOOLE", "says": "Lane-Poole: a eunuch he names Nejah, killed in July."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-P-QARAQUSH",
+    "category": "people",
+    "title": "Baha ad-Din Qaraqush",
+    "unlock": {"chapter": "CH-03", "at": "end"},
+    "confidence": "attested",
+    "sources": ["SRC-IAT", "SRC-IKH", "CH-03.E9"],
+    "body": [
+      "A white eunuch, who had been freed by Shirkuh. After the Mu'taman's death Salah ad-Din dismissed the eunuchs of the palace and put Qaraqush over its household, and nothing was done there without his order. Ibn al-Athir adds that when al-Adid died in 1171, Qaraqush handed over to Salah ad-Din everything the palace held.",
+      "Qaraqush's later career is outside this chapter; the game brings him back in Chapter 4."
+    ]
+  },
+  {
+    "id": "CDX-L-CAIRO",
+    "category": "places",
+    "title": "Cairo: Bayn al-Qasrayn",
+    "unlock": {"chapter": "CH-03", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IAT", "SRC-ASH", "CH-03.E8", "CH-03.E14"],
+    "body": [
+      "Cairo was the Fatimid capital, a walled royal city with two great palaces, the eastern and the western. The ground between them, which later writers call Bayn al-Qasrayn ('between the two palaces'), is where, Imad ad-Din says, the fighting of August 1169 was fought, for two days.",
+      "The game's streets, its night and its fog are drawn from that and no more: no source describes the buildings or the lanes."
+    ]
+  },
+  {
+    "id": "CDX-E-SHAWAR1169",
+    "category": "events",
+    "title": "The fall of Shawar",
+    "unlock": {"chapter": "CH-03", "at": "end"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IS", "SRC-IKH", "CH-03.E3"],
+    "body": [
+      "Shirkuh saw that Shawar was playing him off against the Franks. The vizier was seized on one of his visits to the Syrian camp, near al-Maks, held in a tent, and beheaded when a palace eunuch brought a written demand for his head from the caliph. The Egyptians then sent Shirkuh the vizier's robe: it was their custom to give the office to the man who had overcome his rival.",
+      "Ibn Khallikan gives the day as Saturday the 17th of Rabi' II 564 AH (18 January 1169); the weekday agrees with the calendar."
+    ],
+    "differ": [
+      {
+        "claim": "Who seized Shawar, and whether Shirkuh knew",
+        "positions": [
+          {"source": "SRC-IS", "says": "Shirkuh resolved to have him arrested; when none of his officers dared lay a hand on the vizier, it was Salah ad-Din himself who seized him by the collar."},
+          {"source": "SRC-IKH", "says": "In a note of his own, Salah ad-Din and Jurdik, with other officers, met Shawar on the road while Shirkuh was away at the tomb of the Imam al-Shafi'i; Shirkuh had forbidden the plan. Another statement in the same note has Shirkuh not present at the deed."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-S-SHAWAR",
+    "category": "sources",
+    "title": "Who seized Shawar?",
+    "unlock": {"chapter": "CH-03", "at": "end"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IS", "SRC-IKH", "SRC-ASH", "CH-03.E3"],
+    "body": [
+      "All the accounts agree on the outcome, and on the part of the caliph's palace: the demand for the head came in writing, by a palace eunuch. They differ about who took the lead and what Shirkuh knew. The game shows both accounts in turn and chooses neither."
+    ],
+    "differ": [
+      {
+        "claim": "The seizure",
+        "positions": [
+          {"source": "SRC-IS", "says": "Salah ad-Din alone seized Shawar by the collar and ordered the escort attacked, on Shirkuh's resolve."},
+          {"source": "SRC-IKH", "says": "Salah ad-Din and Jurdik, with others, on the road, against Shirkuh's prohibition, or without his being present."},
+          {"source": "SRC-ASH", "says": "Imad ad-Din, quoted by Abu Shama: Salah ad-Din rode out, joined the escort, and seized Shawar by the collar and unhorsed him; the Syrian troops then fell on the escort."}
+        ]
+      },
+      {
+        "claim": "The day Shirkuh took the vizierate",
+        "positions": [
+          {"source": "SRC-IS", "says": "The 17th of Rabi' II 564 (18 January 1169), in the translation by Wilson and Conder."},
+          {"source": "SRC-IKH", "says": "De Slane's translation of the same passage of Ibn Shaddad gives the 17th of the first Rabi' (19 December 1168), but Ibn Khallikan's own note gives Saturday the 17th of the second Rabi'."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-S-SHIRKUH-DEATH",
+    "category": "sources",
+    "title": "The death of Shirkuh",
+    "unlock": {"chapter": "CH-03", "at": "end"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IS", "SRC-IKH", "CH-03.E4"],
+    "body": [
+      "Shirkuh held the vizierate for two months and five days. Ibn Shaddad says that he was a very hearty eater, often ill from rich dishes, and that when a severe illness came it brought an inflammation of the throat, of which he died.",
+      "Ibn Khallikan, who gives suffocation or quinsy, adds that some say he died of a poisoned robe, put on him as he was dressed for the vizierate. The game reports it as a rumour and does not use it."
+    ],
+    "differ": [
+      {
+        "claim": "The day and the cause",
+        "positions": [
+          {"source": "SRC-IS", "says": "The 22nd of Jumada II 564 (23 March 1169), of an inflammation of the throat after a lifetime of rich food."},
+          {"source": "SRC-IKH", "says": "In his entry on Shirkuh: the 28th of the month, or the 23rd on another authority; suffocation (quinsy); some say a poisoned robe."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-E-SUCCESSION",
+    "category": "events",
+    "title": "The succession of 1169",
+    "unlock": {"chapter": "CH-03", "at": "end"},
+    "confidence": "attested",
+    "sources": ["SRC-IAT", "SRC-IKH", "CH-03.E5", "CH-03.E7"],
+    "body": [
+      "After Shirkuh's death four emirs aspired to the command. The caliph al-Adid invited Salah ad-Din to the vizierate, hoping to rule through a man without troops. Salah ad-Din hesitated, and accepted against his will, and was given the vizier's robe and the title al-Malik an-Nasir; the emirs paid him no respect, until Isa al-Hakkari won three of them over by different arguments. Al-Yaruqi refused and returned to Nur ad-Din.",
+      "In the years that followed Salah ad-Din acted as Nur ad-Din's lieutenant and had the khutba said in Nur ad-Din's name; Nur ad-Din addressed him as 'the emir isfahsalar'.",
+      "Ibn al-Athir, who tells this, wrote for the Zengid house, and is cooler towards Salah ad-Din than to Nur ad-Din; but this passage is favourable to Isa and not hostile to Salah ad-Din. Isa's appeal to a shared Kurdish origin is reported as the politics of a camp of emirs, not as a rule of the age."
+    ],
+    "differ": [
+      {
+        "claim": "Who pressed Salah ad-Din to accept the vizierate",
+        "positions": [
+          {"source": "SRC-IKH", "says": "De Slane's English, quoting Ibn al-Athir: he yielded at length to the remonstrances of his father."},
+          {"source": "SRC-IAT", "says": "The French edition of Ibn al-Athir's history of the atabegs: forced by the entreaties of the prince, he accepted in spite of himself."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-E-UPRISING1169",
+    "category": "events",
+    "title": "The uprising of the Fatimid regiments",
+    "unlock": {"chapter": "CH-03", "at": "end"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IAT", "SRC-IAI-BARQ", "SRC-ASH", "MOD-LANEPOOLE", "CH-03.E8", "CH-03.E13", "CH-03.E14"],
+    "body": [
+      "Content note: this entry speaks of a fight in which many died. The game shows no one die in the burned quarter, and does not show the aftermath.",
+      "When the Mu'taman was killed, the Black regiments of the caliph's army rose, in great numbers, and fought Salah ad-Din's troops, led by the emir Abu'l-Hayja, in the ground between the two palaces for two days. Turan-Shah, who had arrived a few weeks before, fought with great courage. The caliph followed the fight from a high pavilion; when Turan-Shah ordered his naphtha-throwers to burn it, an officer came out saying that the Commander of the Faithful bade him fall on the rebels, and the regiments, who had believed they had his approval, lost heart and scattered.",
+      "On Saturday the 28th of Dhu'l-Qa'da (23 August) they were driven out to Giza, and hunted down. The quarter they held near Bab Zuwayla was burned; Ibn al-Athir says that women and children were in it.",
+      "Both early sources favour Salah ad-Din or the Zengids, and use of the regiments' colour as an insult in Imad ad-Din's rhymed prose is not repeated here. Both say that more than fifty thousand rose; the figure is not used, because rhymed prose of that kind exaggerates numbers."
+    ],
+    "differ": [
+      {
+        "claim": "What the caliph ordered from the pavilion",
+        "positions": [
+          {"source": "SRC-ASH", "says": "Imad ad-Din, quoted by Abu Shama: it is said that he ordered the palace's eunuchs to shower arrows and stones on the Syrian troops; others say it was against his will."},
+          {"source": "SRC-ASH", "says": "Then, as the naphtha-throwers began, a palace officer came out, saying that the Commander of the Faithful bade Turan-Shah fall on the rebels."}
+        ]
+      },
+      {
+        "claim": "When Turan-Shah came, and how long the pursuit lasted",
+        "positions": [
+          {"source": "SRC-ASH", "says": "He reached Cairo on 8 Dhu'l-Qa'da (30 July by the translator, 3 August by the tabular calendar) and fought in the affair."},
+          {"source": "SRC-IAT", "says": "Ibn al-Athir has him afterwards marching against the fugitives and destroying them."},
+          {"source": "MOD-LANEPOOLE", "says": "Lane-Poole dates Turan-Shah's campaigns in Upper Egypt and Nubia to 1171-73."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-S-PLOT1169",
+    "category": "sources",
+    "title": "The plot of 1169: was it real?",
+    "unlock": {"chapter": "CH-03", "at": "end"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IAT", "SRC-IAI-BARQ", "SRC-ASH", "MOD-LEV", "CH-03.E8"],
+    "body": [
+      "The story of the plot is told by two early writers, and both tell it the same way: the Mu'taman wrote to the Franks to call them in; the letter was found sewn into a ragged man's new sandals; and Salah ad-Din kept it secret until he could have the eunuch killed.",
+      "Modern historians of the period are reported to regard the sandals as a stock device of the chronicles, to doubt whether there was a plot at all, and to suspect that the story justified a move against the Fatimid regiments and palace. This game has not read them; it tells the story as the two early sources tell it, marks it as disputed, and does not decide."
+    ],
+    "differ": [
+      {
+        "claim": "Was there a plot?",
+        "positions": [
+          {"source": "SRC-IAI-BARQ", "says": "Imad ad-Din: a plot with the Franks; a copyist confessed; the eunuch was the sole author of the crime."},
+          {"source": "SRC-IAT", "says": "Ibn al-Athir: the same story, with the same sandals."},
+          {"source": "MOD-LEV", "says": "Reported, not read for this game: modern doubt about the plot, and about the sandals as a literary commonplace."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-T-KHUTBA",
+    "category": "terms",
+    "title": "Khutba",
+    "unlock": {"chapter": "CH-03", "at": "end"},
+    "confidence": "attested",
+    "sources": ["SRC-IS", "SRC-IKH", "CH-03.E7"],
+    "body": [
+      "The khutba is the sermon of Friday prayer, in which the ruler's name is spoken. Whose name is said in it is the sign of whose authority the city recognises. In Egypt, after 1169, it was said in the name of Nur ad-Din, though the caliph of the Fatimids was still on his throne; Ibn al-Athir tells how it was later changed to the name of the Abbasid caliph.",
+      "In the game it appears only as the sign of whom Salah ad-Din served."
+    ]
+  },
+  {
+    "id": "CDX-L-DAMIETTA",
+    "category": "places",
+    "title": "Damietta",
+    "unlock": {"chapter": "CH-03", "at": "end"},
+    "confidence": "attested",
+    "sources": ["SRC-IS", "SRC-IKH", "CH-03.E10"],
+    "body": [
+      "A port at the mouth of the Nile. Ibn Shaddad says that the Franks, joined to the Greeks, meant to take it first, because the master of it would command both land and sea. He says that Salah ad-Din threw footmen and horsemen of proved courage into it, with provisions and engines, and that in the end the Franks departed disappointed."
+    ]
+  },
+  {
+    "id": "CDX-E-DAMIETTA1169",
+    "category": "events",
+    "title": "The siege of Damietta",
+    "unlock": {"chapter": "CH-03", "at": "end"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IS", "SRC-IKH", "CH-03.E10"],
+    "body": [
+      "The Franks and a Byzantine fleet came to Damietta in the autumn of 1169 with mangonels, movable towers and arbalists, and besieged it for some weeks. Salah ad-Din reinforced and supplied it, and sortied against the besiegers; the allies burned their engines and left.",
+      "The game does not play the siege of Damietta; it was planned as a stretch chapter."
+    ],
+    "differ": [
+      {
+        "claim": "The year of the siege",
+        "positions": [
+          {"source": "SRC-IS", "says": "Ibn Shaddad's narrative, as translated, puts it with Nur ad-Din's diversion at Kerak in Sha'ban 565 (April to May 1170), and the 1897 editors say the treaty was signed in December 1170."},
+          {"source": "SRC-IKH", "says": "Later scholarship dates the siege from 25 October to 19 December 1169."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-G-CH03",
+    "category": "game",
+    "title": "Game vs History: the Vizier",
+    "unlock": {"chapter": "CH-03", "at": "end"},
+    "confidence": null,
+    "sources": ["CH-03.E5", "CH-03.E8"],
+    "body": [
+      "Shawar's seizure is shown in both of the accounts that survive and in none of its own; no one speaks in them but the narrator. The conversations of Shirkuh and Salah ad-Din at the table and the sickbed, and of Isa with the emirs, are invented around what the sources report; the arguments Isa makes are reported by Ibn al-Athir and put into the scenes in paraphrase.",
+      "The council is a puzzle the game made: the sources say that Isa won the emirs over one by one, and the turn limit, the camp and the routes are invented. The night streets and the fog are invented too: the sources say that there was fighting between the palaces, and that the caliph watched from a pavilion, but give no map. The Fire Thrower's burning of the pavilion is from Imad ad-Din; the fights, the waves and the people of the regiments in the game are not.",
+      "Salah ad-Din's levels at this point are bookkeeping: the years of service that the story passes over are paid for in levels, so that the rank of the Lord and his army match the weight of what they do."
+    ],
+    "dramatized": ["ch03.bilbays", "ch03.shawar", "ch03.vizier", "ch03.deathbed", "ch03.succession", "ch03.talk-mashtub", "ch03.talk-harimi", "ch03.talk-qutb", "ch03.talk-yaruqi", "ch03.appointment", "ch03.plot", "ch03.pavilion", "ch03.aftermath", "sup.shirkuh-salah.a", "sup.isa-salah.c", "sup.turanshah-salah.c"]
+  }
+]

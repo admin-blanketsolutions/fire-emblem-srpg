@@ -1,0 +1,21 @@
+{
+  "id": "sup.ayyub-shirkuh.c",
+  "title": "The Halberd",
+  "ledger": ["SUP-AYYUB-SHIRKUH-C", "CH-00.E5"],
+  "cmds": [
+    {"bg": "camp-night"},
+    {"show": {"who": "ayyub", "at": "left"}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"say": {"who": "narrator", "text": "On the road to Mosul, at night. The household has stopped to rest the animals.", "kind": "narration"}},
+    {"say": {"who": "shirkuh", "text": "You have not spoken of the gate since we left Tikrit.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "What is there to say? I shut you in a tower and wrote to Bihruz. Every word of it was my duty, and I have not slept well since.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "It was your duty. I had that halberd out of his belt before I knew my own hand.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Bihruz had written back that he owed a debt to their father and could not deal harshly with either of them.", "kind": "narration", "src": ["CH-00.E5"]}},
+    {"say": {"who": "shirkuh", "text": "A kind sentence to be driven out on.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "A kind sentence. We are alive, we have a lord who remembers a boat, and I have known worse exiles.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "I would have you tell me once that I was wrong.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "You were wrong to strike. You were not wrong about the woman. Keep the halberd, brother: a man should keep what he has paid for.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "And you?", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "I will keep the letter. Now sleep. There is a child in the next tent who will want his uncle in the morning.", "kind": "dramatized"}}
+  ]
+}

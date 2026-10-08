@@ -1,6 +1,6 @@
 # Sultan of Two Banners — Design Document
 
-**Status:** Draft 0.2 · 2026-10-06 · direction approved; updated for classic-reset promotion, three class tiers with common names, and four added weapon types
+**Status:** Draft 0.3 · 2026-10-08 · direction approved; the vertical slice (M7) is built, and paragraphs headed *As built* record what shipped and how it differs from the plan
 This document is the contract the milestones are built against.
 
 Companion documents
@@ -68,10 +68,12 @@ The outline below was checked against the sources (SOURCES.md §3). Two adjustme
 | CH-00 | Prologue: The Boats of Tikrit | 1132 / 526 (+ epilogue 532–534) | 1 map + scenes | Hold the Pass (ferry piers) | movement, terrain, triangle, danger zone, forecast, first Camp | ✔ |
 | CH-01 | Damascus: The East Gate | 1154 / 549 | 1 map | Seize | orchards and light units, Talk, healer, Maydan training | ✔ |
 | CH-02 | The Road to Egypt | 1163–1167 / 558–562 | 1 map (Alexandria); *stretch:* al-Babain | Defend 12 turns | structures (mangonels), Fire Thrower, Sapper, crossbows, fire, sapping, reinforcement waves | ✔ (+ stretch) |
-| CH-03 | The Vizier | 1168–1169 / 564–565 | Council stage (Talk), 1 map (Bayn al-Qasrayn); *stretch:* Damietta | Persuade; then Survive → Seize | recruit via Talk, rank-event promotion, ally phase, night fog | ✔ (+ stretch) |
+| CH-03 | The Vizier | 1168–1169 / 564–565 | Council stage (Talk), 1 map (Bayn al-Qasrayn); *stretch:* Damietta | Persuade; then Survive 8, or burn the pavilion | recruit via Talk, rank-event promotion, ally phase, night fog | ✔ (+ stretch) |
 | CH-04 – CH-FIN | see §11.2 | 1170–1193 | planned | | | later |
 
 Slice content target: **4 battle maps + 1 council stage**, 9 support scenes, about 45 Codex entries, about 20 named historical characters (about 8 of them playable or on-map units, the rest NPCs) plus generic troops, and one fictional viewpoint unit (the Recruit, §9.5). Stretch maps are added if M7 has room.
+
+As built (M7): the target was met, and the stretch maps (al-Babain, Damietta) were not built. The slice is **four battles and the council stage** (`CH-00`, `CH-01`, `CH-02`, `CH-03B` the council, `CH-03C` Bayn al-Qasrayn), **39 scenes** (30 of story and 9 support conversations over 6 pairs), **54 Codex entries**, 23 characters (a plate and a portrait each) and 44 unit definitions, played in order from the title screen to a closing page, with a Camp (Majlis) between chapters. Al-Babain is told in a scene (`ch02.babain`) and in the Codex. The stage letters (`CH-03B`, `CH-03C`) are battle ids, not chapter ids: the chapters are `CH-00` to `CH-03`, and a chapter is a list of steps (§3.10).
 
 ---
 
@@ -96,17 +98,23 @@ Slice content target: **4 battle maps + 1 council stage**, 9 support scenes, abo
 ├─ docs/                    DESIGN.md · SOURCES.md · DECISIONS.md
 ├─ src/
 │  ├─ core/                 PURE: rng, grid, pathfinding, danger, combat, exp, level,
-│  │                        classes, promotion, support, ai, objectives, events,
-│  │                        fire/structures, state, save (serialize only)
-│  ├─ data/                 JSON/TS data: balance, terrain, classes, skills, items,
-│  │                        units, supports, chapters/, dialogue/, codex/, scripture.json
+│  │                        classes, promotion, supports, ai, objectives, events,
+│  │                        fire/structures, battle, setup, army, camp, campaign, chapters
+│  │                        (the story's steps), naming, dialogue, codex, save, and bot
+│  │                        (the headless player the tests and the balance tool use)
+│  ├─ data/                 JSON and the loaders over it: balance and campaignBalance,
+│  │                        terrain, classes, skills, items, units, characters, chapters,
+│  │                        supports, scenes/, codex/, maps/; battles.ts, story.ts and
+│  │                        campaign.ts join them into the campaign and the demos
 │  ├─ engine/               display (integer scaling), input (key/touch pad), assets
 │  │                        (sprites rendered from definitions, optional overrides), bitmap
 │  │                        text, window/menu/gauge drawing, game loop; later audio synth,
 │  │                        storage adapter
-│  ├─ scenes/               battle (M1); later title, settings, camp, preparations,
-│  │                        dialogue, shop, convoy, codex, results. Scene-specific panels
-│  │                        (forecast, unit info) live beside their scene
+│  ├─ scenes/               flow (title, chapters, camps and battles in order), battle,
+│  │                        camp (Preparations, units, convoy, shops, talks, Maydan, class),
+│  │                        story (cards, dialogue, pages), naming, title/settings/slots/Codex
+│  │                        screens. Scene-specific panels (forecast, unit info) live beside
+│  │                        their scene
 │  └─ main.ts
 ├─ assets/
 │  ├─ sprites/*.sprite.json palette-indexed sprite definitions (the source of truth)
@@ -121,7 +129,8 @@ Slice content target: **4 battle maps + 1 council stage**, 9 support scenes, abo
 │  │                        preview.html + preview-page.ts (served by the dev server)
 │  ├─ lint-boundaries.ts    layering and purity lint
 │  ├─ lint-sources.ts       data ↔ ledger join check
-│  └─ validate-data.ts      schema + referential integrity
+│  ├─ mapview.ts            a map and its spawns as text (`npx tsx tools/mapview.ts ch02-alexandria`)
+│  └─ balance.run.ts        the balance tool: `npm run balance` (§14)
 └─ tests/                   Vitest suites (mirror src/core)
 ```
 
@@ -130,7 +139,7 @@ Layering rules (enforced by an import-boundary lint in M1):
 1. `core/` imports nothing from `data/`, `engine/`, `scenes/`, or the DOM, and uses no `Math.random`, `Date.now`, `performance.now` or timers. The import direction is `core ← data ← engine ← scenes`; `tools/lint-boundaries.ts` enforces it and runs in `npm run lint` and in the tests.
 2. `engine/` never contains game rules.
 3. Scenes orchestrate: they call `core/` functions and render the results.
-4. Data is validated once at load (`validate-data`) and typed afterwards.
+4. Data is validated once at load (the `validate*` and `build*Table` functions of `core/`, and for the story `data/story.ts`) and typed afterwards; `tests/data.test.ts` and `tests/campaignData.test.ts` check it as a whole.
 
 ### 3.3 Determinism
 
@@ -163,7 +172,7 @@ Screen layout (map view, 15×10 tiles of 16 px = 240×160):
 
 | Action | Keyboard | Touch |
 |---|---|---|
-| Move cursor | Arrow keys (hold to repeat) | Tap a tile; drag to pan (drag arrives with M6) |
+| Move cursor | Arrow keys (hold to repeat) | Tap a tile; drag to pan |
 | **Confirm** | `Z` | Tap the cursor tile again, or the on-screen **OK** |
 | **Cancel** | `X` | On-screen **Back**, or two-finger tap |
 | **Info** (unit/terrain details; previous unit in lists) | `A` | On-screen **Info** |
@@ -175,7 +184,7 @@ Touch devices (`pointer: coarse`) show a translucent virtual pad and the five bu
 
 ### 3.6 Data schemas (excerpt)
 
-All data is JSON, typed in `src/data/schema.ts`, validated by `validate-data`.
+All data is JSON, validated at load by the `validate*` and `build*Table` functions of `core/` (there is no separate schema file).
 
 ```ts
 type MoveType   = 'foot' | 'light' | 'mounted' | 'armored';
@@ -277,6 +286,25 @@ As built (`core/events.ts`): events live inline in the map's `events` array. A `
 - **Versioning:** every save has `schemaVersion`; migrations are pure functions with tests.
 - **Resilience:** all storage calls are wrapped; if storage is unavailable (private mode, quota), the game continues with an in-memory store and shows a notice.
 - Save contents are plain JSON and compressed with a tiny RLE for map layers only if size becomes a problem (not expected).
+
+As built (M6, `core/save.ts`, `core/campaign.ts`, `engine/storage.ts`): a save holds the campaign (mode, seed, story, chapter reached, flags, Codex unlocks and the army with its convoy, dinars, fallen, supports and deployment) and, for the suspend-save, the battle's *source* (what the data layer needs to build it again: a chapter, a demo) and its snapshot. Every unit is written once and referred to by number, so a unit in both the army and the battle is one unit when the save is read back. `BattleState.snapshot()` covers everything that is not fixed by the map, the tables and the rules (DECISIONS D-030 lists it), and `restore()` re-runs nothing, so the next random draw is the one the suspended battle would have made. Reading a save checks every field and refuses unknown classes, items, stories and battles with a message that names the field; the save list shows a damaged save as damaged. Keys are `s2b:v1:slot1` to `slot3`, `s2b:v1:auto`, `s2b:v1:suspend` and `s2b:v1:settings`. The autosave is written as a chapter's battle begins; a defeat returns to it.
+
+As built (M7): the save format is **2**. It adds the step the campaign stands at, the Recruit's name and the units that are away (`army.away`, by definition id); a format-1 save migrates to it as step 0 with the name *Recruit* and no one away, and the migration is a pure function with a test. The storage keys keep `v1`: that names the layout of the keys, and `schemaVersion` names the contents. The autosave is written **as a camp is left**, so loading it resumes in that camp with its choices made, and **as a battle begins when no camp came right before it** (the council stage follows a scene, not a camp). A defeat loads it. A camp's conversations and drills are given when the campaign *arrives* at the camp, never when a save is loaded into it, so a save cannot be used to draw them twice.
+
+### 3.10 The story as steps (as built, M7)
+
+A story is an ordered table of chapters (`data/chapters.json`, built and checked by `core/chapters.ts`), and a chapter is a list of **steps**. The campaign stands at one step (`campaign.chapter`, `campaign.step`) and the flow (`scenes/flow.ts`) does what the step says, then goes on to the next.
+
+| Step | What it does |
+|---|---|
+| `card` | a title card: the chapter's number, name and date (AH, then the Julian month and year, per D-002) |
+| `name` | the screen that names the Recruit (§9.5) |
+| `scenes` | dialogue scenes, played in order; what they raise (flags, Codex entries) is kept |
+| `apply` | effects on the campaign with no screen of their own: `join` a unit (`count` for generic troops), `leave`, `away` (the units that are away *from now on*; it sets the list, it does not add to it), `grant` a support pair a rank (for what happened between chapters, off the screen), `train` (the story gives a unit levels: §5.7), `give` an item to the convoy, `dinars`, `flag`, `unlock` a Codex entry |
+| `camp` | the Majlis (§8), with the label of the way on (*Hold the landings*, *Into the night*, …) |
+| `battle` | a map; a win goes on, a defeat goes back to the camp before it |
+
+So a chapter is data: a new one is a few lines in `chapters.json`, a map, scenes and units, and nothing in the flow changes. The headless player (`core/bot.ts`, §14) walks the very same steps, which is how the whole slice is tested from the title to the last page without a screen.
 
 ---
 
@@ -582,6 +610,11 @@ class action (counsel, mend…) :  8
 - Stat caps come from the class: Tier I default 20 (HP 40), Tier II 30 (HP 60), Tier III 40 (HP 80); BLD caps are lower (14 / 20 / 26); class overrides live in data.
 - **Tuning target** (checked by a balance script): in the slice a front-line unit reaches level 10 about the end of Chapter 3, and Salah ad-Din, who earns bonus EXP as the Lord, is level 10 or higher by the Chapter 3 rank event.
 
+As built (M7), the numbers above are the engine's (`balance.json`), and the campaign differs from them in two ways:
+
+- **The campaign's own balance** (`data/campaignBalance.json`, laid over `balance.json` by `data/campaign.ts`) sets the tier EXP rates to ×2.0, ×1.7 and ×1.4. The slice gives an army four or five fights and no ground to grind on; at ×1.0, 0.85 and 0.7 a Tier I soldier who fought through all of it ended at level 3 or 4 and the army earned 150 to 370 EXP a battle, which made a level a rare event. Now an army earns about 250 to 640 a battle, and the generic troops end the slice at levels 3 to 5. The proving ground, the demos and the engine's tests keep the engine's rates.
+- **Story levels.** The tuning target above is not met by fighting and was dropped for the slice: Salah ad-Din joins at level 1 in Chapter 1, so the story *gives* him levels (`train`, §3.10): +3 at the start of Chapter 2 (he holds Alexandria as a Young Lord at level 4), +3 at the start of Chapter 3 and +3 at Shirkuh's deathbed, which brings him to level 10 for the rank event of the council, where he is promoted to Lord at level 1. The levels are rolled with a seed drawn from the campaign's, so the same campaign always trains the same Salah. A level of 10 for the rest of the army was a target for a longer story: the Charter of Iqta' goes to those the story names, and the army's levy stays Tier I through the slice.
+
 ---
 
 ## 6. Classes, skills, promotion
@@ -878,6 +911,14 @@ As built (M5, `core/camp.ts`, `scenes/campScene.ts`): the camp has *Preparations
 - **Preparations:** choose who takes the field; the Lord always goes; the map's `deployLimit` is the most.
 - **Casualty roll:** who left the army under the Classic rules, and in which chapter.
 
+As built (M7): the camp is a step of the story (§3.10). *Codex and saves* holds saving, the Codex, the settings, the mode and the way back to the title (and says how many entries are new); *Majlis talks* says how many conversations are waiting; the last entry is the way on, named by the chapter (*Hold the landings*, *Ride into the Ghouta*, *March for Egypt*, *Hold Alexandria*, *To Shirkuh's sickbed*, *Into the night*, *End of the slice*), and taking it writes the autosave. **Deployment** works from what each map asks of the army:
+
+- A **named** player spawn (`ayyub`, `recruit`) is filled by the army's unit of that definition, who is then *required*: the list shows "must go", and he cannot be released. The Lord is always required.
+- An **open** spawn (tagged `slot`) takes any unit the player chose, in the order the units joined; the number of open and named places is the map's limit, shown as *Deployed 15/15*.
+- A unit that is **away** (the story sent it, `away` steps) is greyed and marked *away*; it cannot be chosen, drilled or talked to, and a named spawn it would have filled is taken off the map.
+- A **reserve** spawn stands off the map until an event brings it on (`arrive`): Ayyub, who comes through the East Gate when it opens. A **guest** spawn is a unit of the map's own that stays when the army has none like it (supported; no slice map needs it). A spawn can name its **side**: an ally spawn of a unit the army has is the army's unit and stands where the map puts it, and an ally spawn the army has no unit for (Abu'l-Hayja in Stage C, the emirs of the council) is the map's own, who joins the army if he is won by Talk and the battle is won.
+- The map's tags belong to the map: a unit takes the tags, side and behaviour its spawn gives it, so the Lord of one chapter is not the Lord of the next. When a battle is settled, units placed as allies are put back, and a unit won over in a battle who fell in it is not taken in (Classic).
+
 ---
 
 ## 9. Dialogue, portraits, Codex, source markers
@@ -937,9 +978,15 @@ interface CodexEntry {
 - **Game vs History** entries per chapter list exactly what the game invents (e.g., the Prologue's rear-guard skirmish).
 - Partisan or late sources are flagged in the entry that uses them (e.g., Ibn al-Athir's Zengid sympathies).
 
+As built (M6, `core/codex.ts`, `scenes/menus.ts`): an entry's id is its ledger row (`CDX-P-…`, `CDX-S-…`); the letter after `CDX-` must match the category. Entries carry `confidence` (`attested`, `attested-differ`, `inferred`, `fictional`; unverified claims never reach the Codex) except Game vs History entries, which carry none. An `attested-differ` entry must have at least one `differ` block, and every block at least two positions. Sources are ledger ids (`SRC-…`, `MOD-…`, `CH-02.E2`) and the screen shows them by name (`data/sourceNames.ts`). Campaign entries live in `src/data/codex/*.json` and are checked against the ledger by the source lint; demo entries in `src/data/test/codex.json` say that they are demos. Entries unlock at a chapter's start or end and by an event's `unlockCodex`; the reader has the six categories, each entry's badge, its paragraphs, each disputed claim with every source's position, and its sources.
+
+As built (M7): the slice has **54 entries** (`src/data/codex/ch00.json` to `ch03.json`: 20, 7, 10 and 17) and one of sources (`sources.json`). Each chapter has a *Game vs History* entry that says what the game invents (`CDX-G-CH00` to `CDX-G-CH03`), and an entry that is disputed carries a `differ` block for every claim the sources do not agree on. An entry about a fight in which many died (the uprising of 1169, `CDX-E-UPRISING1169`) opens with a **content note**, and says that the game shows no one die in the burned quarter and does not show the aftermath. A line of an early source that is an insult is not repeated: the entry says that the source uses one, and paraphrases around it (D-012). The words of every entry are checked against the font (a glyph the font lacks would print as "?") and against the page they are drawn on (`tests/campaignText.test.ts`).
+
 ### 9.5 The fictional viewpoint unit
 
 One fictional unit exists: **the Recruit**, a player-named levy (a Soldier) who joins in the Prologue. The Recruit is flagged *Fictional* in the unit window, the Codex and the ledger (`CHR-RECRUIT`). Generic troops (Tikrit Garrison, Caliphal Cavalry, etc.) are unnamed composites, also flagged. All named characters are historical.
+
+As built (M7): a new game opens on **Name the Recruit** (`scenes/nameScene.ts`, `core/naming.ts`), an on-screen keyboard that the arrow keys, Confirm and a tap all work, so no physical keyboard is needed. A name has one to twelve characters, begins with a letter, and is made of Latin letters, spaces, hyphens, apostrophes and full stops: the font has no accents and no Arabic script, and a name in script would be unchecked text. A name is refused if it contains a word the project never gives to a person in the game (*prophet*, *rasul*, *nabi*, *sahaba*, *sahabi*, *companion*: the list in `core/sensitive.ts` that the data lint also uses) or the name of God; ordinary names, *Muhammad* among them, are not refused. The name is kept in the campaign and the save (`recruitName`) and replaces the Recruit's name everywhere it is shown, including in dialogue (`{recruit}`). No scene says who the Recruit is beyond a levy soldier of Tikrit.
 
 ### 9.6 Writing rules
 
@@ -1035,7 +1082,7 @@ All numbers are initial. Ledger IDs refer to SOURCES.md. Dramatized elements are
 
 - **Map:** 22×16. The Ghouta orchards on the east, canals (shallows), Damascus's east wall and gate, a minaret that grants vision.
 - **Objective:** *Seize* the East Gate by turn 10.
-- **Player:** Shirkuh (Axe Knight), Salah ad-Din (Young Lord Lv 1, aged ~16), Ayyub (Spear Knight; joins turn 3 at the inner gate), Soldiers ×4, Pikemen ×2, Horse Archers ×3, one Healer, the Recruit.
+- **Player:** Shirkuh (Axe Knight), Salah ad-Din (Young Lord Lv 1, aged ~16), Ayyub (Spear Knight; he comes out through the East Gate when it opens), Soldiers ×4, Pikemen ×2, Horse Archers ×3, one Healer, the Recruit.
 - **Enemy:** the Burid garrison (Soldiers ×6, Horsemen ×2).
 - **Beats:** orchards favour Light and Foot; first healer; first *Talk* (a gate captain; dramatized).
 - **Source basis:** siege dates, the city's transfer and Abaq's exile **attested**; Ayyub's/Shirkuh's role in the surrender **sources not yet collated** (UNV-03); the skirmishes are **inferred/dramatized**.
@@ -1055,9 +1102,17 @@ All numbers are initial. Ledger IDs refer to SOURCES.md. Dramatized elements are
 
 - **Stage A, scenes:** the seizure of Shawar (alternative accounts shown); Shirkuh's vizierate; the deathbed (support A available before it).
 - **Stage B, The Succession (Persuade):** a talk-only council: Isa al-Hakkari and Salah ad-Din persuade the emirs (al-Mashtub, Shihab ad-Din al-Harimi, Qutb ad-Din Khusraw); Ain ad-Dawla al-Yaruqi refuses and leaves. Uses *Talk* as a puzzle with a turn limit. **Rank event:** the appointment unlocks Salah ad-Din's promotion from Young Lord to Lord (by tuning he is level 10 or higher; otherwise the event grants the Charter).
-- **Stage C, Bayn al-Qasrayn (Survive 8, then Seize):** night streets between the Fatimid palaces (fog). Player: Salah ad-Din, Turan-Shah (guest), Isa, Qutb ad-Din, al-Mashtub, Pikemen and Horse Archers. Opponents: Fatimid regiments (the *Sudani* infantry, Armenian archers, city militia), portrayed with dignity (DECISIONS D-012). The aftermath is told, not shown.
+- **Stage C, Bayn al-Qasrayn (Survive 8, or burn the pavilion):** night streets between the Fatimid palaces (fog). Player: Salah ad-Din, Turan-Shah (guest), Isa, Qutb ad-Din, al-Mashtub, Pikemen and Horse Archers. Opponents: Fatimid regiments (the *Sudani* infantry, Armenian archers, city militia), portrayed with dignity (DECISIONS D-012). The aftermath is told, not shown.
 - **Source basis:** attested but disputed: modern scholarship questions the plot that precipitated the fighting (CH-03.E8). The Codex presents both positions.
 - **Stretch map:** Damietta (25 Oct–19 Dec 1169): *Defend*, river chain and fleets.
+
+As built (M7), where the maps differ from the plan above (map files under `src/data/maps/`, scenes under `src/data/scenes/`; each scene and Codex entry names its ledger rows):
+
+- **CH-00, 20×15.** *Hold the Pass* is the objective as planned, with the three piers as anchors: the enemy standing on two of them at the end of an enemy phase, or more than five different enemies reaching one, loses; holding through turn 8 (or no enemy left) wins. Waves of 6, 3 and 3 arrive at turns 1, 3 and 5 on the east edge; the third carries the captain. A granary at (4, 10) holds a cordial. Ayyub is the Lord of this chapter only.
+- **CH-01, 22×16.** *Seize* the East Gate (7, 8) by turn 10; at turn 11 the Franks arrive and the chapter is lost. The gate is a structure: it falls to the player's weapons, or **opens by Talk** with the captain of the urban guard, waiting in the orchard (`openGate`; the conversation is dramatized, ledger CH-01), and three of the urban guard come over to the player's side as allies. When the gate falls, Ayyub comes through it (the `father` scene, then `arrive`). A message at turn 6 gives the reason for the clock: Mujir ad-Din has sent to the Franks.
+- **CH-02, 24×18.** *Defend 12 turns* inside a walled city: a wall of ramparts and towers (the new `tower` terrain, which grants sight), a land **gate** and two wall **segments** that the mangonels break (the engines are structures too, and burn), and one **postern** in the east wall, the door the player can hold. Thirteen enemies stand before the walls with three mangonels, and waves of 4, 5 and 7 follow at turns 3, 6 and 9. Eight Alexandrian militia and pikemen hold the ramparts on the player's side. Destroying every engine does not end the siege; it gives a cordial and the Codex entry on naphtha. At turn 7 a scene of the siege plays (`ch02.siege`).
+- **CH-03B, 18×12, the council.** *Persuade*: the three emirs by turn 6, by *Talk* with Isa al-Hakkari (who may win all three) or with Salah ad-Din. The fourth emir, al-Yaruqi, cannot be won: talking to him makes him strike his tents and leave. Isa's *Dispatch* lets Salah ad-Din act again. When all three are won the appointment scene plays and Salah ad-Din is promoted to Lord.
+- **CH-03C, 24×16, Bayn al-Qasrayn.** *Survive 8 turns* in fog (sight reduced by 1) against ten regimental troops and waves of 4, 4 and 5 at turns 2, 4 and 6 (the last with the regiment commander), **or burn the caliph's pavilion** at the head of the square, which ends the fighting at once (`ch03.pavilion`; ledger CH-03.E14, where Imad ad-Din has Turan-Shah's naphtha-throwers set it alight and the regiments, who thought they had the caliph's leave, lose heart). The pavilion is a structure with Guard 12 and the *fireWeak* tag: spears and arrows scarcely mark it (a test pins the best blow at 6), and a naphtha pot does about 19 a strike, so the Fire Thrower must be taken (Preparations) and brought through the guard; the fire the pot lights burns it further. Abu'l-Hayja fights on the player's side as a captain who charges; Turan-Shah is in the army from the council on.
 
 ### 11.2 Later chapters (planning stubs; full ledger in SOURCES.md §3)
 
@@ -1165,6 +1220,8 @@ Everything is a **placeholder** behind a manifest; real assets replace entries w
 - **Respect:** no adhan, takbir or recitation is synthesised or used as an effect.
 - Autoplay policy: audio starts on the first user gesture; mute and volume settings persist.
 
+As built (M6, `core/music.ts`, `engine/audio.ts`): songs are `assets/music/*.song.json` with patterns written as `NOTE:steps` tokens (`D4:2 -:2 x:4`, a step being a sixteenth), validated and timed in the core; the engine schedules notes 0.2 s ahead and loops from `loopFrom`. Sound effects are `assets/sfx/effects.json`. The override manifest is `public/assets/override/audio/manifest.json` with `music` and `sfx` maps. Ids naming the call to prayer, takbir or recitation are refused by validation. The interface sounds (move, choose, back) are played by the game loop for every scene.
+
 ---
 
 ## 14. Testing and quality gates
@@ -1186,13 +1243,27 @@ Everything is a **placeholder** behind a manifest; real assets replace entries w
 | `data` | schema and referential integrity (every unit/class/item/scene id resolves) |
 | `ledger` | every chapter, unit, support, Codex entry has a ledger row; every `src` resolves; no main-story line cites an `UNV-` row; `documented` lines have `src` |
 
-**Scripts:** `npm test`, `npm run build`, `npm run lint:data`, `npm run lint:sources`, `npm run sprites:lint`.
+**Scripts:** `npm test`, `npm run build` (typecheck, then the production build), `npm run lint` (layering, the ledger join and the sprites), `npm run balance` (§14).
 
 **Definition of done for any milestone:** tests pass, a production build succeeds, lints pass, and the milestone's acceptance list below is demonstrated.
 
 ---
 
 As built (M5, `tools/lint-sources.ts`, run by `npm run lint`): the ledger's tables are read for the ids in their first column (a row ending in `*` stands for a family, as `CHR-GEN-*` does for generic troops). Over the campaign's story data (`characters.json`, `scenes/`, `supports.json`) it checks that every character, scene and support names rows that exist; that a documented line cites; that nothing cites an `UNV-` or `EXC-` row; that every support's scene exists and carries its `SUP-` row; and that no data file contains Arabic script. The demos' data under `src/data/test/` is checked for structure but not for rows, and says in its own text that it is not history. A slice support in the ledger with no scene written yet is reported as a warning, which becomes an error when the slice is declared complete.
+
+As built (M7): the slice adds these suites (874 tests in 57 files in all). `chapters` checks the step table (every step kind, `away` setting rather than adding, `train` rolling the same levels for the same seed). `campaignData` checks the campaign as a whole: every unit has a class, items, colours and a sprite, every map plays, every event points at something that exists, every scene, support and Codex entry is used, and the campaign's balance is the engine's except for the pace of growth. `campaignText` checks the words against the screen: every character has a glyph in the font, every spoken line fits the dialogue box in at most three pages, every plate fits, and every battle message fits its window. `screenText` measures every line a menu shows about a chosen row (two rows fit) and every one-row line of the name screen against the real font, and `pageScene` that a page of words runs on to a second page rather than being cut off. `deployment`, `campaign` and `naming` cover the army on the field (§8), the campaign's flow and the Recruit's name. `story` plays the whole slice through the real flow (title, naming, every card, scene, camp and battle, to the last page), saving and reading back at every camp, and `stageC` pins that the pavilion yields to fire and not to steel. `npm run lint` joins the layering lint, the ledger join (`tools/lint-sources.ts`, §14 above) and the sprite lint.
+
+**The headless player and the balance tool.** `core/bot.ts` plays the story as the flow does: it names the Recruit, passes the scenes, spends the camp (deployment sized to the map, every conversation, promotions), and plays each battle with the same AI that moves the enemy, in a stance per battle (`aggressive`, or `defensive` with an `aggroRange`); the Lord holds back, and units *Talk* and *Seize* where a map asks for it. `npm run balance` (`tools/balance.run.ts`, under its own Vitest config) plays the slice over many seeds and reports, per battle, how often it is won, how long it takes, who is lost, how far the army has levelled, how much EXP it earned and why the lost ones were lost. It is configured by environment variables: `SEEDS` (default 40), `MODE=casual`, `ONLY=CH-02` and `STANCE=defensive`. The computer plays carelessly (it sorties through the postern at Alexandria and charges at Damascus), so a win rate is a **floor** for a person and the units lost a ceiling. The slice's last run, 100 seeds, Classic, charging / holding the line:
+
+| Battle | Won | Turns | Units lost per run | Army EXP |
+|---|---|---|---|---|
+| CH-00 The Boats of Tikrit | 94% / 91% | 7.9 | 3.2 / 3.0 | 614 |
+| CH-01 Damascus, the East Gate | 85% / 76% | 4.3 | 0.8 / 0.6 | 250 |
+| CH-02 Alexandria | 99% / 96% | 12.0 | 4.7 / 4.9 | 376 |
+| CH-03B the council | 100% | 3.0 | 0 | none |
+| CH-03C Bayn al-Qasrayn | 100% | 7.1 | 2.8 / 2.6 | 387 |
+
+Alexandria costs the army most because the computer's horse archers ride out of the postern and are lost in the open. In an experiment with every unit but the Lord standing still, the army lost fewer than two a run and the Lord, who stands in the crossbows' reach, fell in about half the runs, so the siege rewards neither extreme. In Chapter 3 the computer takes the siege of the square for about seven of its eight turns: the pavilion is the earned shortcut, not something steel does in two turns (it did, before the pavilion's Guard was raised to 12).
 
 ## 15. Milestones
 
@@ -1206,7 +1277,7 @@ Each milestone ends with tests green, a production build, and a commit (the repo
 | **M4** | Classes (fourteen lines, three tiers), skills, promotion with the classic reset (items and rank events); inventory, convoy, shops; **structures and flames; class actions (Sap, Entrench, Mend, Ignite, Counsel, Dispatch)** | Promotion tests; shop and convoy flows; a structure/fire demo map. *(Done: `tests/promotion.test.ts`, `tests/army.test.ts`, `tests/camp.test.ts` (the camp walked with key presses), `tests/structures.test.ts`, `tests/fire.test.ts`, `tests/classActions.test.ts`, `tests/art.test.ts`; `?demo=siege` is the structure and fire demo and `?demo=camp` the camp.)* |
 | **M5** | Support system; Camp / Majlis hub; dialogue and portrait engine; source markers | A support pair advances C→B in play; scenes show ◆/◇; ledger lint runs. *(Done: `tests/supports.test.ts` plays a pair from C to B over two chapters; `tests/dialogue.test.ts`, `tests/dialoguePlayer.test.ts`, `tests/majlis.test.ts`, `tests/majlisScreens.test.ts`, `tests/sources.test.ts`; `?demo=camp` has a talk waiting.)* |
 | **M6** | Save/load (slots + suspend); Codex; title screen; settings; Classic/Casual; touch controls; placeholder audio | Suspend/resume reproduces RNG; Casual returns wounded units; Codex shows differ-blocks; touch playable |
-| **M7** | Content: Prologue + Ch.1–3 with source-backed dialogue, supports, Codex, art placeholders; README; final lint pass | Slice playable start to finish; every line traceable; production build deployed locally |
+| **M7** | Content: Prologue + Ch.1–3 with source-backed dialogue, supports, Codex, art placeholders; README; final lint pass | Slice playable start to finish; every line traceable; production build deployed locally. *(Done: `tests/story.test.ts` plays the whole slice through the real flow and saves and reads back at each camp; `tools/lint-sources.ts` joins every scene, support and Codex entry to the ledger; `npm run build` is clean; `npm run balance` plays it over many seeds; `?chapter=CH-02` and `?battle=CH-03C` open the slice part-way for a tester.)* |
 
 ---
 
@@ -1215,6 +1286,8 @@ Each milestone ends with tests green, a production build, and a commit (the repo
 - **Mode:** Classic or Casual, chosen at New Game. Classic → Casual may be switched at any Camp; Casual → Classic is not allowed mid-campaign (it would retroactively condemn units).
 - Text speed; battle animations (Scene / Map / Off); music and SFX volume; hit-roll mode (Honest / Weighted); *Guaranteed progress*; auto-end-turn; danger-zone default; source markers on/off; **portraits: illustrated / name plates only**; **class names: Common / Historical / Both**; screen-shake off; high-contrast overlays; larger-text option (doubles to 2× font in dialogue only); colour-blind-safe range colours (blue/orange instead of blue/red); remappable keys.
 - Touch controls scale with screen size; all menus are reachable with one hand.
+
+As built (M6, `scenes/menus.ts`): the settings screen shows only what the game honours: text speed, battle animations (Map or Off; Scene waits for battle sprites, D-028), music and sound volume, hit rolls and guaranteed progress (from the next battle), ending the turn when all have acted, the danger zone at the start, source marks, portraits, and colour-blind-safe ranges (orange for attack). Class-name style, screen shake, high contrast, larger text and remappable keys are not shown yet (DECISIONS D-032). The mode is chosen at New Game and changed only in camp.
 
 ---
 
@@ -1227,7 +1300,9 @@ Each milestone ends with tests green, a production build, and a commit (the repo
 | Arabic script rendering | Latin transliteration by default; Arabic plates rendered at build time if wanted |
 | `localStorage` unavailable or full | Adapter with in-memory fallback and a visible notice |
 | Scope creep in systems | Features marked *stretch* are cut first (reclassing, pair-up, Babain/Damietta maps) |
-| Three tiers of reset levels make EXP pacing hard | Tier EXP rates in `balance.json`; a balance script checks the slice's level targets |
+| Three tiers of reset levels make EXP pacing hard | Tier EXP rates in `balance.json`; a balance script checks the slice's level targets. *(M7: the campaign has its own faster rates, and the story gives Salah ad-Din his levels; §5.7.)* |
+| The bundle grows with the campaign | The slice builds to one 542 kB script (137 kB gzipped) with all its data and placeholder art, and Vite says so; split the chapters' data and maps into lazily loaded chunks (`import()` in `data/story.ts` and `data/campaign.ts`) when the later chapters arrive, and not before |
+| A person plays better than the balance tool, and worse in other ways | The tool's numbers are floors and ceilings, not forecasts; the Casual mode is there for the player who does not want a battle to cost units; the first human play-tests should read the *lost* column first |
 
 **Decisions confirmed (2026-10-06)**
 
@@ -1240,6 +1315,9 @@ Each milestone ends with tests green, a production build, and a commit (the repo
 
 **Open items**
 
-1. **Class names (§6.2)** are my first mapping into the common format. I avoided a few names that belong to one well-known series' class list, so the Sword line reads Swordsman → Blademaster → Legend rather than *Swordmaster*; changing it is a one-word data edit.
+1. **Class names (§6.2)** are my first mapping into the common format. I avoided a few names that belong to one well-known series' class list, so the Sword line reads Swordsman → Blademaster → Legend rather than *Swordmaster*; changing it is a one-word data edit. The *Common / Historical / Both* class-name setting (§16) is not built: the historical names are in the data (`historical`) and wait for a screen to choose them.
 2. **Tier III** numbers and skills are first drafts; Tier III only matters from the late chapters.
 3. **Repository settings:** the GitHub repository's name and description still say "Fire Emblem" and "Phaser 3". I have not changed repository settings.
+4. **Faces.** The portraits are types (age, beard, headgear, faction colours), not likenesses (ledger UNV-05), and two older men in turbans look alike in one scene (Isa and al-Harimi at the council). Real portraits drop in through the override manifest (§12.3).
+5. **Balance by people.** Nobody but the computer has played the slice through yet. Chapter 0 costs a careless player a third of the army (3 of 9) and the Lord in 6 to 9 runs in a hundred; that may be too hard for a tutorial and is the first number to look at once a person has played it.
+6. **The campaign after Chapter 3** (Chapters 4 to the end, §11.2) is planned in the ledger and not built; nothing in the engine stands in its way (a chapter is data, §3.10), but the later classes and Tier III have never met a map.

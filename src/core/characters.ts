@@ -16,6 +16,8 @@ export interface CharacterDef {
   readonly portrait: string | null;
   /** A faction palette, for the placeholder portrait's colours. */
   readonly faction?: string;
+  /** A skin ramp (`s1` to `s5`) for the portrait; `s2` if absent. */
+  readonly skin?: string;
   readonly fictional?: boolean;
 }
 

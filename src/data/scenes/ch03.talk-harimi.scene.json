@@ -1,0 +1,19 @@
+{
+  "id": "ch03.talk-harimi",
+  "title": "Isa and al-Harimi",
+  "ledger": ["CH-03.E5"],
+  "cmds": [
+    {"bg": "council-tent"},
+    {"show": {"who": "isa", "at": "left"}},
+    {"show": {"who": "al-harimi", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Then Isa went to Shihab ad-Din al-Harimi, Salah ad-Din's uncle on his mother's side.", "kind": "narration", "src": ["CH-03.E5"]}},
+    {"say": {"who": "isa", "text": "Here is Salah ad-Din, your sister's son. What he has is yours. Now that the power is in his hands, do not be the first to take it from him: it would never come to you.", "kind": "documented", "src": ["CH-03.E5"]}},
+    {"say": {"who": "al-harimi", "text": "My sister's son. I held him on my knee. He had a toy sword then, and a great deal to say.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Isa did not stop until he had brought him before Salah ad-Din to take the oath of fidelity.", "kind": "narration", "src": ["CH-03.E5"]}},
+    {"hide": "isa"},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "salah-ad-din", "text": "Uncle.", "kind": "dramatized"}},
+    {"say": {"who": "al-harimi", "text": "Nephew. I do not come as your uncle. I come as your man. Hold out your hand.", "kind": "dramatized"}},
+    {"flag": "harimi-won"}
+  ]
+}

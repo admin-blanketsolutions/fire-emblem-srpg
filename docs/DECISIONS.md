@@ -1,6 +1,6 @@
 # Sultan of Two Banners — Decisions Log
 
-**Status:** v0.5 · 2026-10-07
+**Status:** v0.6 · 2026-10-08
 Every place where I had to make a judgment call about history, sensitivity or engineering. Where it was a close call, I chose the **more conservative, source-backed option** and recorded it here. Entries marked **Approved** were confirmed by the project owner on 2026-10-06; the rest are policies I follow unless told otherwise.
 
 Companion documents: [DESIGN.md](DESIGN.md) · [SOURCES.md](SOURCES.md)
@@ -36,6 +36,15 @@ Companion documents: [DESIGN.md](DESIGN.md) · [SOURCES.md](SOURCES.md)
 | D-027 | No religious emblems on generic art | Policy |
 | D-028 | Combat and progression as built (M2) | Policy |
 | D-029 | Phases, AI, fog and objectives as built (M3) | Policy |
+| D-030 | Structures, fire, class actions and the camp as built (M4) | Policy |
+| D-031 | Supports, scenes and the Majlis as built (M5) | Policy |
+| D-032 | Saving, the Codex, the title, settings and sound as built (M6) | Policy |
+| D-033 | The story as steps, and save format 2 (M7) | Policy |
+| D-034 | The Recruit's name (M7) | Policy |
+| D-035 | Who takes the field: slots, required, away, reserve (M7) | Policy |
+| D-036 | The pace of growth, and the levels the story gives (M7) | Policy |
+| D-037 | The slice's history and sensitivity calls, chapter by chapter (M7) | Policy |
+| D-038 | The headless player, the balance tool and the tester routes (M7) | Policy |
 
 ---
 
@@ -121,8 +130,8 @@ Companion documents: [DESIGN.md](DESIGN.md) · [SOURCES.md](SOURCES.md)
 - The Fatimid regiments, including the *Sudani* infantry and Armenian archers, are portrayed as **professional soldiers of a court faction** defending the dynasty they served, not as caricatures.
 - **Every faction is drawn with the same care and the full range of skin tones.** No racialized dialogue or descriptions.
 - The Codex states that **modern scholarship questions whether the plot that triggered the fighting happened as reported**, that the traditional account leans on a letter by al-Qadi al-Fadil, that the figures are unreliable, and that civilians suffered.
-- The chapter's objective is **"Survive, then Seize"**, not annihilation. The burning of the Mansura quarter and the aftermath are told, not shown. Saladin's own troops include Kurdish and Turkish regiments, and the tension among them is part of the story.
-- **Before M7** I will read the primary accounts (Ibn al-Athir, Ibn Abi Tayy via Abu Shama, Maqrizi); my current ledger entry rests on a modern summary (SOURCES CH-03.E8).
+- The chapter's objective is **"Survive eight turns, or burn the caliph's pavilion"** (as built, M7: DESIGN §11.1; planned as "Survive, then Seize"), not annihilation. The burning of the Mansura quarter and the aftermath are told, not shown. Saladin's own troops include Kurdish and Turkish regiments, and the tension among them is part of the story.
+- **Before M7** I will read the primary accounts (Ibn al-Athir, Ibn Abi Tayy via Abu Shama, Maqrizi); my current ledger entry rests on a modern summary (SOURCES CH-03.E8). *Done 2026-10-08:* Ibn al-Athir and Imad ad-Din (through Abu Shama) were read in the *Recueil des historiens des croisades* and the ledger rows CH-03.E8, E13 and E14 now rest on them; Maqrizi and Ibn Abi Tayy were not read.
 
 ## D-013 Fatimids, sects and language
 
@@ -272,8 +281,70 @@ They appear in the Codex and in carefully framed scenes, never as spectacle.
 - **Settings are defined now,** with defaults and tolerant reading, so that dialogue can honour text speed, the source markers and the portraits setting; the settings screen and their storage arrive with M6.
 - **Drills and talks are small.** A drill is 4 weapon EXP and a talk 10 support points, once a camp; the numbers are first drafts for the balance pass in M7.
 
+## D-032 Saving, the Codex, the title, settings and sound as built (M6)
+
+- **A suspend-save rebuilds, then restores.** The battle is built again from its source (the chapter or demo it came from) and then put into the saved state; nothing is re-run on the way, so a resumed battle draws exactly the numbers the suspended one would have. A test plays a battle on from a save and from the original and compares them move for move.
+- **Units are saved once.** The army and the battle share unit objects in play (the army's units are the ones on the field), and the save keeps that: every unit is written once and referred to by number.
+- **Reading a save trusts nothing.** Every field is checked, and an unknown class, item, story or battle source is refused with the field named. A damaged save is listed as damaged rather than hidden, so the player knows it is there.
+- **Classic uses up the suspend-save when it is resumed;** Casual keeps it (DESIGN §3.9). Classic may become Casual in camp, never the reverse.
+- **A defeat goes back to the chapter-start autosave** instead of settling the army: under DESIGN §4.8 a lost chapter is retried, and settling a defeat in Classic would cost units for a battle that is about to be replayed.
+- **The demo stands in for the campaign.** Until the chapters exist, New Game plays the demo story: the camp army and the siege. Its army's units replace the map's units of the same definition where the map places them (`fieldArmy`), keeping the map's tags such as `lord`. The demo campaign has every Codex entry unlocked, so the Codex can be read.
+- **One real Codex entry, written only from the ledger.** *The first Egyptian expedition: 558 or 559 AH?* (`CDX-S-EXPEDITION-DATES`) says no more than ledger row CH-02.E2 and the source register say, and shows both years. Every other campaign entry is written in M7 with its chapter. The two demo entries are about the game itself (the test maps; the Three Postures as a game rule) and say they are demos.
+- **Settings show only what works.** Class-name style, screen shake (there is none yet), high contrast, larger text and remappable keys are defined but not on the screen until they do something. *End turn when all have acted* now defaults to on, which is what the game already did. Settings are kept apart from campaigns, under their own key.
+- **Sound is original and placeholder.** Seven short pieces in modes on D (the camp theme leans on Hijaz) and fourteen effects, all synthesised. Validation refuses any song or sound whose id names the call to prayer, takbir or recitation (D-004). Audio waits for the first key press or tap, as browsers require.
+- **A tap is reported when the finger lifts.** That is what lets a drag pan the map without also moving the cursor; a pointer that moves more than 4 logical pixels is a drag.
+
+## D-033 The story as steps, and save format 2 (M7)
+
+- **A chapter is a list of steps, not a script.** Card, name, scenes, apply, camp and battle are the six kinds of step (DESIGN §3.10), and everything the player does between maps is one of them. The reasons: the flow has nothing to know about any chapter; a new chapter is data; the headless player and the real flow walk the same table, so what the tests play is what the player plays; and a save is just "this step of this chapter".
+- **What happened off the screen is told in `apply` steps.** A support pair can be granted a rank (`grant`) for the years between chapters, a unit can be sent away (`away`) or given levels (`train`), and the story can hand over items and dinars. Each is a plain, tested effect, so no scene can quietly change the army, and a scene's own effects are limited to flags and Codex entries.
+- **`away` sets the list.** It does not add to it, so "Ayyub is away" cannot be left over from a chapter in which he is not; the chapter that brings him back writes `away: []`.
+- **Save format 2** adds the step, the Recruit's name and the away list. A format-1 save migrates to step 0 and *Recruit*. The storage keys stay `s2b:v1:` because they name the layout of the keys, not the contents (D-021).
+- **The autosave is a promise about where a load lands.** It is written as a camp is left and as a battle begins when no camp came right before it, and a defeat loads it, so a player never loses more than the battle. A camp's conversations and drills are given on *arrival*, not on load, so a load cannot draw them twice or bring back ones already spent.
+- **A defeat is not settled.** (D-032 again, now with real chapters:) the army returns to the camp before the battle exactly as it left it, so a Classic player is not charged units for a battle that is retried.
+
+## D-034 The Recruit's name (M7)
+
+- **The player names the Recruit,** on an on-screen keyboard that works with the arrows, Confirm and a tap, so a phone needs no keyboard. The name is up to twelve Latin letters, spaces, hyphens, apostrophes and full stops, beginning with a letter.
+- **Why Latin only.** The font has no accents, and a name in Arabic script would be text that nothing checks (the project draws no Arabic script that is not verified, D-004). *Muhammad* and the other common names are fine; the words the project never gives to a person in the game (*prophet*, *rasul*, *nabi*, *sahaba*, *sahabi*, *companion*) and the name of God are refused, with a short reason.
+- **The Recruit is nobody.** No scene says who the Recruit is beyond a levy soldier of Tikrit; the Recruit has one support pair, with Ayyub, about the provisions and the boats of the Prologue (CH-00.E3), the one thing the histories give a man of the ranks to say anything about. The closing page and the Codex say that the Recruit was never a person in the histories.
+
+## D-035 Who takes the field: slots, required, away, reserve (M7)
+
+- **The map says how many, and who must go.** A named spawn is that unit and no other, and the player cannot release it; the Lord is always required. An open `slot` takes whoever the player picks. This keeps the story's people where the story needs them (Ayyub at Tikrit, Salah ad-Din at Alexandria) while the rest of the army remains the player's to choose, and it means the Preparations screen never offers a choice that would break a scene.
+- **A unit that is away is not an option.** It is greyed and marked, cannot be drilled or talked to, and its named spawn is taken off the map: Ayyub is not at Alexandria, and nothing should suggest he could be.
+- **Arrival by event.** Ayyub in Damascus is a `reserve` that an event brings through the East Gate when it opens, not a unit that is simply there from turn 3. The sources say only that he lived at Damascus as one of its greatest emirs (CH-01.E3; what he did on the day is not stated, UNV-03), so the scene opens by saying so, and what he does in it is dramatized.
+- **The map's tags are the map's.** A unit takes the tags, side and behaviour the spawn gives it, so a Lord is a Lord for one chapter. Ayyub is the Lord of the Prologue and a veteran in Chapter 1.
+- **Classic and the story.** A unit won by Talk who falls in the chapter that wins him is not taken in (it would be a gift that costs nothing, to be lost at once); the chronicled named units never leave (D-032).
+
+## D-036 The pace of growth, and the levels the story gives (M7)
+
+- **The campaign's balance is not the engine's.** The tier EXP rates in `balance.json` (×1, ×0.85, ×0.7) suit a long campaign; the slice has four or five fights and no ground to grind, and at those rates a soldier who fought through all of it was level 3 or 4. The campaign lays `campaignBalance.json` over the engine's numbers (×2.0, ×1.7, ×1.4) and the proving ground keeps its own. A change of this kind belongs in a data file for the story that needs it, never in logic and never as a quiet edit of the numbers the engine's tests pin.
+- **Salah ad-Din's levels are given, not earned,** at three points of the story (`train`: the years between Damascus and Egypt, the years between Egypt and the vizierate, and the weeks of Shirkuh's illness), so he is a level-10 emir when the council makes him Lord. The alternative, a boost to his EXP, would have made every fight of his the same fight, and would have left his level to the player's choices in a story where his rank was never the player's to choose. The levels are rolled with a seed derived from the campaign's, so the same campaign trains the same man.
+- **The target of level 10 for the army was dropped for the slice.** The levy ends at levels 3 to 5; the Charter of Iqta' goes to those the story names. It stays a target for the campaign after Chapter 3.
+- **Why the pavilion is armoured against steel.** Imad ad-Din has Turan-Shah's naphtha-throwers set the pavilion alight (ledger CH-03.E14); the game gives the pavilion a Guard of 12 so that the Fire Thrower is the way to do what the source says was done, and an army that took no Fire Thrower must hold the square for eight turns.
+
+## D-037 The slice's history and sensitivity calls, chapter by chapter (M7)
+
+- **What the game tells and what it dramatizes is on every line.** A line marked ◆ cites a ledger row; a line marked ◇ is dramatized, and the Game-vs-History entry of its chapter lists what is invented. Scene lines that put words in the mouths of real people are dramatized unless a source gives the words, and a documented line is a paraphrase of a public-domain text, never a copy of a modern translation.
+- **Prologue.** The boats, Ayyub's part, and Usama's presence are attested; the pursuit is dramatized, and the Codex says so.
+- **Damascus (1154).** That the young men of the city's urban guard promised Nur ad-Din the city and rose and opened the East Gate is attested (CH-01.E2); the captain, who he is and what he says are dramatized, and the scene says so. The Franks' coming, which sets the clock, is the sources' own reason for the haste: Mujir ad-Din had appealed to them.
+- **Alexandria (1167).** Salah ad-Din holding Alexandria against Shawar and the Egyptian army while Shirkuh was in Upper Egypt, and the peace and the departure, are attested (CH-02.E7); how long it lasted, who besieged and on what terms differ between the sources, and the Codex says so. The siege's days (the engines, the waves, the militia on the ramparts) are dramatized. The battle of al-Babain is told in a scene and in the Codex and is not played: Ibn Shaddad omits it, Ibn Khallikan's notes put it near Ushmunayn, and the 'feigned retreat' is a modern reconstruction (UNV-15) that a map would have had to show as fact.
+- **The council (1169).** The emirs, Isa al-Hakkari's winning three of them in turn, and al-Yaruqi's refusal and return to Nur ad-Din are attested (CH-03.E5, in Ibn al-Athir as Ibn Khallikan quotes him, a partisan source here favourable to Isa and not hostile to Salah ad-Din); the words of the talks are dramatized, and Isa's appeal to the emirs' fellow-feeling is shown as the politics of the day, not as a message to ours.
+- **The uprising of 1169.** It is told with the dignity D-012 requires: the Fatimid regiments are soldiers with a grievance and a reason to fear, they are given no insulting name (both early sources use one for them, and the game does not), their numbers are omitted because the sources' figure is rhetorical, and the burned quarter, where Ibn al-Athir says women and children were, is told in the Codex with a content note and never shown. The game shows no one die in it, and it shows no aftermath.
+- **The plot letter.** The scene tells the story as the two early sources tell it (a Turkoman, a ragged man's new sandals, a letter in the stitching) and says, in its own voice, that whether the plot was real is disputed, and the Codex presents both positions. The sources name the copyist's religion; the scene and the Codex say only that a copyist confessed. Naming it would add nothing a player needs and would leave the guilt of a minority in a plot that a modern historian doubts.
+- **Ibn al-Athir and Imad ad-Din are partisan,** the first for the Zengids and the second for Salah ad-Din; where one is the only source for a line, the Codex says whose voice it is (D-011).
+- **Faces are types.** No source describes what anyone looked like (UNV-05), so the portraits are an age, a beard and a headgear in a faction's colours, and none claims to be a likeness. Two men of the same age and headgear look alike for it (a known and recorded weakness: DESIGN §17).
+
+## D-038 The headless player, the balance tool and the tester routes (M7)
+
+- **The computer plays the story so that the tests can.** `core/bot.ts` walks the very steps the flow walks; the tests play the slice start to finish through it, and through the real flow with the scenes' own screens. It is deliberately careless, so a win rate it reports is a floor for a person; its losses (units lost, the Lord fallen) are a ceiling on what a careless player pays. A battle is not "balanced" by it, only found out of reach or trivial.
+- **`npm run balance`** reports the slice over many seeds (DESIGN §14). It is a tool, not a test: it takes a minute and the numbers are for reading, not for asserting.
+- **Tester routes.** `?chapter=CH-02` starts the campaign at a chapter and `?battle=CH-03C` at the camp before a battle, with an army the computer has brought there (`?mode=classic`, `?seed=7`). They exist for those who test the game and do not appear in it. `?objective=`, `?fog=1`, `?demo=siege` and `?demo=camp` still open the proving ground and the demos.
+- **A text that does not fit is a bug the tests catch.** Several lines were found cut off at the screen's edge only by looking at the game (the mode choice, the Recruit's naming screen, the closing page, a setting's note), and the checks that now measure every such line against the real font exist so that the next one is found by a test.
+
 ## Confirmed and open
 
 **Confirmed 2026-10-06:** Canvas 2D (D-001); date display rule (D-002); Three Postures plus added weapon types (D-006, D-024); classic reset and three tiers (D-018); slice scope and the Tikrit Prologue (D-019).
 
-**Open:** the class-name mapping (D-023) is a first pass; Tier III numbers and skills are first drafts; the repository name and description (D-025).
+**Open:** the class-name mapping (D-023) is a first pass; Tier III numbers and skills are first drafts; the repository name and description (D-025); the balance has been tested only by the computer (D-038), so the first people to play it will find what it could not; the *Common / Historical / Both* class-name setting is not built (DESIGN §17).

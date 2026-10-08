@@ -1,0 +1,12 @@
+[
+  {
+    "id": "CH-00",
+    "title": "The Siege Demo",
+    "date": "test data, not history",
+    "steps": [
+      { "kind": "camp", "label": "Ride to the siege" },
+      { "kind": "battle", "battle": "siege" },
+      { "kind": "camp", "label": "End the demo" }
+    ]
+  }
+]

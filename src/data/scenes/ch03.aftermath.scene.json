@@ -1,0 +1,18 @@
+{
+  "id": "ch03.aftermath",
+  "title": "What came after",
+  "ledger": ["CH-03.E8", "CH-03.E9", "CH-03.E11"],
+  "cmds": [
+    {"bg": "cairo-palace"},
+    {"music": "story"},
+    {"say": {"who": "narrator", "text": "On Saturday, the 28th of Dhu'l-Qa'da, 564 AH: 23 August, 1169, the Black regiments were driven out to Giza. Wherever they stopped afterwards, they were hunted down.", "kind": "narration", "src": ["CH-03.E8"]}},
+    {"say": {"who": "narrator", "text": "The quarter they held near Bab Zuwayla was burned. Ibn al-Athir says that women and children were in it. The game does not show it; the Codex says what is known, and where the sources are silent.", "kind": "narration", "src": ["CH-03.E8"]}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"show": {"who": "qaraqush", "at": "right"}},
+    {"say": {"who": "narrator", "text": "After the Mu'taman's death, Salah ad-Din dismissed the eunuchs of the palace, and put over its household Baha ad-Din Qaraqush, a white eunuch. Nothing happened in the palace afterwards without Qaraqush's order.", "kind": "narration", "src": ["CH-03.E9"]}},
+    {"say": {"who": "qaraqush", "text": "My lord. The keys of the household are in my keeping. I answer to you for every door.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "Then see to it that no door opens that should not. And see that the people of the palace are not made to pay for what was done in the street.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Salah ad-Din said later that when God gave him Egypt so easily, he understood that the conquest of the coast was meant for him.", "kind": "narration", "src": ["CH-03.E11"]}},
+    {"unlock": "CDX-P-QARAQUSH"}
+  ]
+}

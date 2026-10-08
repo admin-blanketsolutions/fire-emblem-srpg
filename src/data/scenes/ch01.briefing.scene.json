@@ -1,0 +1,23 @@
+{
+  "id": "ch01.briefing",
+  "title": "The blockade of Damascus",
+  "ledger": ["CH-01.E1", "CH-01.E2", "CH-01.E3", "CH-01.E4"],
+  "cmds": [
+    {"bg": "ghouta-spring"},
+    {"music": "story"},
+    {"say": {"who": "narrator", "text": "Damascus, in the oasis of the Ghouta. Safar, 549 AH: April, 1154. The city is ruled by Mujir ad-Din Abaq; Nur ad-Din, lord of Aleppo, has laid siege to it.", "kind": "narration", "src": ["CH-01.E1"]}},
+    {"say": {"who": "narrator", "text": "Damascus lay between Nur ad-Din and the Franks of Ascalon, who laid a yearly tribute on it. Nur ad-Din feared that they would take it, and chose guile over force.", "kind": "narration", "src": ["CH-01.E2"]}},
+    {"say": {"who": "narrator", "text": "He sent Mujir ad-Din gifts and friendship. From time to time he warned him that one or another of his emirs had offered to betray the city, until Mujir ad-Din had dismissed or imprisoned the able ones.", "kind": "narration", "src": ["CH-01.E2"]}},
+    {"say": {"who": "narrator", "text": "And Nur ad-Din wrote to the young men of the city's urban guard, and they promised to hand the city to him.", "kind": "narration", "src": ["CH-01.E2"]}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "narrator", "text": "Salah ad-Din, about sixteen years old, is a son of one of the emirs of Damascus and has come into the service of Nur ad-Din. He rides in the vanguard of Shirkuh.", "kind": "narration", "src": ["CH-01.E3", "CH-01.E4"]}},
+    {"say": {"who": "shirkuh", "text": "The prince is shut up with his purse. The people and the guard are the gate, boy. Everything else is a wall.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "My father is inside, uncle. He is one of this city's emirs.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "Your father is a careful man. He will be where he is needed, and not where he is not.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "I have never been in a battle.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "Everyone has a first. Stand where I can see you, and do not go through a gate before you have asked who is behind it.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "When Mujir ad-Din appealed to the Franks, offering them money and Baalbek, they began to gather their horse and foot to relieve him.", "kind": "narration", "src": ["CH-01.E2"]}},
+    {"say": {"who": "shirkuh", "text": "The guard has promised the East Gate. Find their captain: he will show himself when he knows it is us. Then it is a matter of reaching the wall before the Franks reach us.", "kind": "dramatized"}}
+  ]
+}

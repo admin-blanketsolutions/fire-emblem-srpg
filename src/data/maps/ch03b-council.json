@@ -1,0 +1,44 @@
+{
+  "id": "CH-03B",
+  "name": "The Succession",
+  "size": [18, 12],
+  "tileset": "camp",
+  "terrain": [
+    "....G:....:G...r~~",
+    ".TT..:.TT.:..TTr~~",
+    ".TT..:.T..:..TTr~~",
+    ":::::::::::::::r~~",
+    ".....:....:....r~~",
+    ".TTT.:GTT.:.TTTr~~",
+    ".....:....:....p~~",
+    ".TTT.:GTT.:.TT.r~~",
+    ".....:....:....r~~",
+    ":::::::FF::::::r~~",
+    ".TTT.:.FF.:.TTTr~~",
+    "....G:....:G...r~~"
+  ],
+  "legend": {".": "plain", ":": "road", "~": "river", "r": "reeds", "p": "pier", "T": "tent", "F": "fort", "G": "grove"},
+  "spawns": {
+    "player": [
+      {"unit": "salah-ad-din", "at": [8, 10], "tags": ["lord"]},
+      {"unit": "isa", "at": [6, 10]}
+    ],
+    "ally": [
+      {"unit": "al-mashtub", "at": [3, 3], "side": "ally", "ai": {"mode": "stationary"}},
+      {"unit": "al-harimi", "at": [13, 9], "side": "ally", "ai": {"mode": "stationary"}},
+      {"unit": "qutb-ad-din", "at": [14, 3], "side": "ally", "ai": {"mode": "stationary"}},
+      {"unit": "al-yaruqi", "at": [9, 3], "ai": {"mode": "stationary"}}
+    ]
+  },
+  "exits": [[0, 6]],
+  "objective": {"type": "persuade", "targets": ["al-mashtub", "al-harimi", "qutb-ad-din"], "turns": 6},
+  "events": [
+    {"id": "t1", "when": {"type": "turnStart", "turn": 1, "phase": "player"}, "then": [{"type": "message", "text": "Four emirs hold their tents and mean to rule. Bring Isa beside one and choose Talk: he will win al-Mashtub, al-Harimi and Qutb ad-Din in turn. Salah ad-Din may speak to them too. Win all three before the end of turn 6. Isa's Dispatch lets Salah ad-Din move again."}]},
+    {"id": "mashtub", "when": {"type": "talk", "a": "isa", "b": "al-mashtub"}, "then": [{"type": "dialogue", "scene": "ch03.talk-mashtub"}, {"type": "recruit", "unit": "al-mashtub"}, {"type": "flag", "name": "mashtub-won"}]},
+    {"id": "harimi", "when": {"any": [{"type": "talk", "a": "isa", "b": "al-harimi"}, {"type": "talk", "a": "salah-ad-din", "b": "al-harimi"}]}, "then": [{"type": "dialogue", "scene": "ch03.talk-harimi"}, {"type": "recruit", "unit": "al-harimi"}, {"type": "flag", "name": "harimi-won"}]},
+    {"id": "qutb", "when": {"any": [{"type": "talk", "a": "isa", "b": "qutb-ad-din"}, {"type": "talk", "a": "salah-ad-din", "b": "qutb-ad-din"}]}, "then": [{"type": "dialogue", "scene": "ch03.talk-qutb"}, {"type": "recruit", "unit": "qutb-ad-din"}, {"type": "flag", "name": "qutb-won"}]},
+    {"id": "yaruqi", "when": {"any": [{"type": "talk", "a": "isa", "b": "al-yaruqi"}, {"type": "talk", "a": "salah-ad-din", "b": "al-yaruqi"}]}, "then": [{"type": "dialogue", "scene": "ch03.talk-yaruqi"}, {"type": "setAi", "unit": "al-yaruqi", "ai": {"mode": "flee"}}]},
+    {"id": "t4", "when": {"type": "turnStart", "turn": 4, "phase": "player"}, "then": [{"type": "message", "text": "Al-Yaruqi has begun to strike his tents. Whoever is not won by the end of turn 6 will go with him."}]},
+    {"id": "appointment", "when": {"all": [{"type": "flag", "name": "mashtub-won"}, {"type": "flag", "name": "harimi-won"}, {"type": "flag", "name": "qutb-won"}]}, "then": [{"type": "dialogue", "scene": "ch03.appointment"}, {"type": "promote", "unit": "salah-ad-din"}]}
+  ]
+}

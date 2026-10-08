@@ -1,0 +1,20 @@
+{
+  "id": "ch00.pursuit",
+  "title": "The rout reaches Tikrit",
+  "ledger": ["CH-00.E1", "CH-00.E2", "CH-00.E3"],
+  "cmds": [
+    {"bg": "tigris-dawn"},
+    {"music": "story"},
+    {"say": {"who": "narrator", "text": "Tikrit, on the Tigris. The month of Rabi' II, 526 AH: March, 1132.", "kind": "narration", "src": ["CH-00.E3"]}},
+    {"say": {"who": "narrator", "text": "Near this fortress the armies of Zengi, lord of Mosul, and of the Seljuk prince Mas'ud have been routed by Qaraja as-Saqi, who came to the aid of the Caliph al-Mustarshid.", "kind": "narration", "src": ["CH-00.E3"]}},
+    {"say": {"who": "narrator", "text": "What is left of Zengi's host is falling back toward the river.", "kind": "narration", "src": ["CH-00.E3"]}},
+    {"show": {"who": "ayyub", "at": "left"}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Ayyub keeps the citadel of Tikrit for Bihruz, the Seljuk governor of Iraq, as his father Shadi kept it before him. His brother Shirkuh serves beside him.", "kind": "narration", "src": ["CH-00.E1", "CH-00.E2"]}},
+    {"say": {"who": "ayyub", "text": "Look at the river road, Shirkuh. That is no army. Those are men walking home with their wounds.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "Qaraja's riders cannot be far behind them. They will not stop at our gate.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "No. But Zengi is somewhere in that crowd, with the water at his back.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "Bihruz will have his own view of who may pass through this gate, brother. Think before you open it.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "A man with nothing left in his hands is a guest at my door, whoever sent him there.", "kind": "dramatized"}}
+  ]
+}

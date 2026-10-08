@@ -1,0 +1,26 @@
+{
+  "id": "ch03.shawar",
+  "title": "Shawar",
+  "ledger": ["CH-03.E3"],
+  "cmds": [
+    {"bg": "cairo-camp"},
+    {"say": {"who": "narrator", "text": "Rabi' II, 564 AH: January, 1169. Shirkuh's army is camped on the bank of the Nile near al-Maks, outside Cairo.", "kind": "narration", "src": ["CH-03.E3"]}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "narrator", "text": "Shirkuh knew that Shawar was playing, now with him, now with the Franks. He was convinced that so long as the vizier lived, he would not be able to take Egypt. He resolved to have him arrested on one of his visits.", "kind": "narration", "src": ["CH-03.E3"]}},
+    {"say": {"who": "narrator", "text": "Two accounts of what followed survive. This is Ibn Shaddad's.", "kind": "narration", "src": ["CH-03.E3"]}},
+    {"hide": "shirkuh"},
+    {"show": {"who": "shawar", "at": "center"}},
+    {"say": {"who": "narrator", "text": "Shawar came on horseback with drums, trumpets and banners, as the viziers of that country did, and none of Shirkuh's officers dared lay a hand on him. It was Salah ad-Din himself who arrested him.", "kind": "narration", "src": ["CH-03.E3"]}},
+    {"say": {"who": "narrator", "text": "He mounted and rode out to meet him, and riding by his side, seized him by the collar, and commanded his men to fall upon the vizier's retinue, who took to flight.", "kind": "narration", "src": ["CH-03.E3"]}},
+    {"hide": "shawar"},
+    {"say": {"who": "narrator", "text": "The second account is Ibn Khallikan's, from a note of his own. Shirkuh had forbidden the plan. Shawar rode out to meet him on a day when Shirkuh was away at the tomb of the Imam al-Shafi'i, and Salah ad-Din and Jurdik, with other officers, met Shawar on the road.", "kind": "narration", "src": ["CH-03.E3"]}},
+    {"show": {"who": "jurdik", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Another statement in the same note: Shirkuh was not present at the deed. Ibn Khallikan, who sets down both, adds only: God knows best.", "kind": "narration", "src": ["CH-03.E3"]}},
+    {"hide": "jurdik"},
+    {"say": {"who": "narrator", "text": "In both accounts the end was the same. Shawar was held in a tent. A palace eunuch came with a written demand for his head. His head was struck off, and sent to the palace; and the Egyptians sent Shirkuh the robe of the vizier.", "kind": "narration", "src": ["CH-03.E3"]}},
+    {"say": {"who": "narrator", "text": "It was the custom of the country to give the vizierate to the man who had overcome his rival. Shirkuh was invested on Saturday, the 17th of Rabi' II, 564 AH: 18 January, 1169.", "kind": "narration", "src": ["CH-03.E3"]}},
+    {"unlock": "CDX-E-SHAWAR1169"},
+    {"unlock": "CDX-S-SHAWAR"}
+  ]
+}

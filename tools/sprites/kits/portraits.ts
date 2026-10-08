@@ -147,11 +147,53 @@ function portrait(id: string, face: Face): SpriteDef {
   };
 }
 
-/** The faces: the demos' stand-ins now; the cast of the chapters arrives with them. */
+/**
+ * The faces: the demos' stand-ins, and the cast of the chapters. No source describes what any of
+ * them looked like (ledger UNV-05), so each is a type, not a likeness: age, beard and headgear
+ * tell people apart, and the faction colours do the rest. None is a picture of a real face.
+ */
+const F = (hair: Face['hair'], hairColor: Face['hairColor'], beard: Face['beard'], head: Face['head'], brow: Face['brow'], age: Face['age'], scar?: boolean): Face => ({
+  hair,
+  hairColor,
+  beard,
+  head,
+  brow,
+  age,
+  ...(scar ? { scar: true } : {}),
+});
+
 export const FACES: ReadonlyArray<readonly [string, Face]> = [
   ['demo-lord', { hair: 'short', hairColor: 'dark', beard: 'stubble', head: 'band', brow: 'heavy', age: 'young' }],
   ['demo-pike', { hair: 'none', hairColor: 'dark', beard: 'full', head: 'helm', brow: 'heavy', age: 'mid', scar: true }],
   ['demo-scribe', { hair: 'none', hairColor: 'grey', beard: 'short', head: 'turban', brow: 'thin', age: 'old' }],
+  // the family
+  ['ayyub', F('none', 'dark', 'full', 'turban', 'thin', 'mid')],
+  ['shirkuh', F('none', 'dark', 'full', 'helm', 'heavy', 'mid', true)],
+  ['salah-ad-din', F('short', 'dark', 'stubble', 'cap', 'thin', 'young')],
+  ['turan-shah', F('short', 'dark', 'full', 'helm', 'heavy', 'mid')],
+  ['recruit', F('short', 'dark', 'none', 'cap', 'heavy', 'young')],
+  // Tikrit and Mosul
+  ['zengi', F('none', 'grey', 'short', 'helm', 'heavy', 'mid')],
+  ['bihruz', F('none', 'dark', 'none', 'turban', 'thin', 'mid')],
+  ['usama', F('short', 'dark', 'short', 'turban', 'thin', 'mid')],
+  // Damascus
+  ['nur-ad-din', F('none', 'dark', 'short', 'turban', 'thin', 'mid')],
+  ['mujir-ad-din', F('none', 'dark', 'none', 'band', 'thin', 'young')],
+  ['gate-captain', F('short', 'dark', 'stubble', 'helm', 'heavy', 'mid')],
+  // Egypt
+  ['silafi', F('none', 'white', 'long', 'turban', 'thin', 'old')],
+  ['shawar', F('none', 'dark', 'short', 'turban', 'thin', 'mid')],
+  ['jurdik', F('short', 'dark', 'full', 'helm', 'heavy', 'mid')],
+  ['al-adid', F('short', 'dark', 'none', 'band', 'thin', 'young')],
+  ['mutamin', F('none', 'dark', 'none', 'turban', 'thin', 'mid')],
+  ['qaraqush', F('none', 'dark', 'none', 'cap', 'thin', 'mid')],
+  ['abul-hayja', F('short', 'dark', 'full', 'helm', 'heavy', 'mid')],
+  // the emirs of Shirkuh's army
+  ['isa', F('none', 'grey', 'short', 'turban', 'thin', 'mid')],
+  ['qutb-ad-din', F('short', 'dark', 'stubble', 'cap', 'thin', 'mid')],
+  ['al-mashtub', F('none', 'dark', 'short', 'helm', 'heavy', 'mid', true)],
+  ['al-harimi', F('none', 'grey', 'full', 'turban', 'thin', 'old')],
+  ['al-yaruqi', F('short', 'grey', 'long', 'band', 'heavy', 'old')],
 ];
 
 export function portraitSprites(): SpriteDef[] {

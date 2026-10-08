@@ -1,0 +1,15 @@
+{
+  "id": "ch03.vizier",
+  "title": "The vizier",
+  "ledger": ["CH-03.E3", "CH-03.E4"],
+  "cmds": [
+    {"bg": "vizier-hall"},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "narrator", "text": "Shirkuh was made vizier of Egypt, and given the titles al-Malik al-Mansur and Commander of the Troops. The caliph al-Adid received him politely, and arrayed him in the robe of the vizierate.", "kind": "narration", "src": ["CH-03.E3"]}},
+    {"say": {"who": "narrator", "text": "From that time Shirkuh held supreme authority, and he entrusted the general management of affairs to Salah ad-Din, on account of his great abilities and the knowledge, good judgment and administrative talents he showed.", "kind": "narration", "src": ["CH-03.E4"]}},
+    {"say": {"who": "shirkuh", "text": "A week ago I was a stranger with an army and a debt. Today I have a title, a palace and a treasury I cannot count. I trust the first more.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "The army is hungry, uncle. And the treasury is less than they say.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "That is your department now. Count it, and tell me what is left. I will do what I am good at: sit and be a vizier where they can see me.", "kind": "dramatized"}}
+  ]
+}

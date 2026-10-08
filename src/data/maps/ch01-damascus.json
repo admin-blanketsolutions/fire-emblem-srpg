@@ -1,0 +1,72 @@
+{
+  "id": "CH-01",
+  "name": "Damascus: The East Gate",
+  "size": [22, 16],
+  "tileset": "damascus-ghouta",
+  "terrain": [
+    ".......#....s....,,,,,",
+    ".......#.GG.sGG..,,,,,",
+    "FF...H.#.GGGs.G..,,,,,",
+    "FF.H...#....sGGG.,,,,,",
+    "FF.....#..T.=...G,,,,,",
+    "....H.R#....sGG.G,,,,,",
+    "..H...R#.G.GsG.G.,,,,,",
+    "......R#....s..h.,,,,,",
+    ":::::::O::::=:::::::::",
+    "......R#....s....,,,,,",
+    "..H...R#.G.Gs.GG.,,,,,",
+    "....H.R#...GsGG.G,,,,,",
+    ".H.....#..T.=...G,,,,,",
+    ".....H.#....sGGG.,,,,,",
+    ".......#.GGGs.GG.,,,,,",
+    ".......#..G.s....,,,,,"
+  ],
+  "legend": {".": "plain", ",": "steppe", ":": "road", "G": "grove", "s": "shallows", "=": "bridge", "#": "wall", "R": "rampart", "O": "gate", "T": "tower", "h": "hill", "H": "house", "F": "fort"},
+  "spawns": {
+    "player": [
+      {"unit": "salah-ad-din", "at": [19, 8], "tags": ["lord"]},
+      {"unit": "shirkuh", "at": [18, 7]},
+      {"unit": "recruit", "at": [19, 7]},
+      {"unit": "garrison-soldier", "at": [19, 6], "tags": ["slot"]},
+      {"unit": "garrison-soldier", "at": [19, 10], "tags": ["slot"]},
+      {"unit": "garrison-soldier", "at": [18, 9], "tags": ["slot"]},
+      {"unit": "garrison-soldier", "at": [20, 7], "tags": ["slot"]},
+      {"unit": "garrison-pikeman", "at": [18, 5], "tags": ["slot"]},
+      {"unit": "garrison-pikeman", "at": [18, 11], "tags": ["slot"]},
+      {"unit": "army-horse-archer", "at": [20, 5], "tags": ["slot"]},
+      {"unit": "army-horse-archer", "at": [20, 11], "tags": ["slot"]},
+      {"unit": "army-horse-archer", "at": [19, 12], "tags": ["slot"]},
+      {"unit": "army-healer", "at": [20, 9], "tags": ["slot"]},
+      {"unit": "ayyub", "at": [4, 8], "tags": ["reserve"]}
+    ],
+    "ally": [
+      {"unit": "gate-captain", "at": [14, 8]}
+    ],
+    "enemy": [
+      {"unit": "gate", "at": [7, 8], "faction": "burid"},
+      {"unit": "burid-captain", "at": [5, 8], "ai": {"mode": "defensive", "aggroRange": 3, "leash": 3}, "tags": ["leader"]},
+      {"unit": "burid-soldier", "at": [6, 8], "ai": {"mode": "defensive", "aggroRange": 2}},
+      {"unit": "burid-soldier", "at": [5, 7], "ai": {"mode": "defensive", "aggroRange": 2}},
+      {"unit": "burid-soldier", "at": [5, 9], "ai": {"mode": "defensive", "aggroRange": 2}},
+      {"unit": "burid-soldier", "at": [4, 8], "ai": {"mode": "defensive", "aggroRange": 2}},
+      {"unit": "burid-soldier", "at": [10, 6], "ai": {"mode": "stationary"}},
+      {"unit": "burid-soldier", "at": [10, 10], "ai": {"mode": "stationary"}},
+      {"unit": "burid-horseman", "at": [3, 7], "ai": {"mode": "defensive", "aggroRange": 6}},
+      {"unit": "burid-horseman", "at": [3, 9], "ai": {"mode": "defensive", "aggroRange": 6}},
+      {"unit": "burid-archer", "at": [6, 7], "ai": {"mode": "stationary"}},
+      {"unit": "burid-archer", "at": [6, 9], "ai": {"mode": "stationary"}},
+      {"unit": "burid-archer", "at": [10, 4], "ai": {"mode": "stationary"}}
+    ]
+  },
+  "objective": {"type": "seize", "tiles": [[7, 8]]},
+  "events": [
+    {"id": "t1", "when": {"type": "turnStart", "turn": 1, "phase": "player"}, "then": [{"type": "message", "text": "Nur ad-Din has the city blockaded, and the young men of its urban guard have promised him the East Gate. Their captain waits in the orchard by the road: bring Salah ad-Din beside him and choose Talk. Seize the gate by the end of turn 10."}]},
+    {"id": "gate-talk", "when": {"type": "talk", "a": "salah-ad-din", "b": "gate-captain"}, "then": [{"type": "dialogue", "scene": "ch01.gate-captain"}, {"type": "openGate", "at": [7, 8]}, {"type": "spawn", "units": [{"def": "urban-guard", "at": [6, 8]}, {"def": "urban-guard", "at": [6, 7]}, {"def": "urban-guard", "at": [6, 9]}]}, {"type": "unlockCodex", "id": "CDX-E-DAMASCUS1154"}]},
+    {"id": "gate-broken", "when": {"type": "unitDefeated", "unit": "gate"}, "then": [{"type": "flag", "name": "gate-open"}]},
+    {"id": "father", "when": {"type": "flag", "name": "gate-open"}, "then": [{"type": "dialogue", "scene": "ch01.father"}, {"type": "arrive", "unit": "ayyub", "at": [4, 8]}]},
+    {"id": "t4", "when": {"type": "turnStart", "turn": 4, "phase": "player"}, "then": [{"type": "message", "text": "A wounded unit can be healed: bring the Healer beside it and choose Heal."}]},
+    {"id": "t6", "when": {"type": "turnStart", "turn": 6, "phase": "player"}, "then": [{"type": "message", "text": "Mujir ad-Din has sent to the Franks for help, and they are gathering their horse and foot. The East Gate must fall before they come: four turns remain."}]},
+    {"id": "t10", "when": {"type": "turnStart", "turn": 10, "phase": "player"}, "then": [{"type": "message", "text": "The Franks are on the road. This is the last turn."}]},
+    {"id": "late", "when": {"type": "turnStart", "turn": 11, "phase": "player"}, "then": [{"type": "endChapter", "result": "lost", "reason": "The Franks came before the East Gate fell."}]}
+  ]
+}

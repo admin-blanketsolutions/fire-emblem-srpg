@@ -1,6 +1,9 @@
 [
   { "id": "gate", "name": "Closed Gate", "hp": 24, "grd": 4, "tags": ["gate", "blocks"], "sprite": "unit.gate" },
+  { "id": "city-gate", "name": "Land Gate", "hp": 44, "grd": 6, "tags": ["gate", "blocks"], "sprite": "unit.gate" },
+  { "id": "city-wall", "name": "City Wall", "hp": 56, "grd": 6, "tags": ["wall", "blocks"], "breach": "plain", "sprite": "unit.wall-segment" },
   { "id": "wall-segment", "name": "Wall", "hp": 30, "grd": 6, "tags": ["wall", "blocks"], "breach": "plain", "sprite": "unit.wall-segment" },
   { "id": "barricade", "name": "Barricade", "hp": 12, "grd": 2, "tags": ["barricade", "blocks"], "fireWeak": true, "crossable": ["foot", "light"], "sprite": "unit.barricade" },
+  { "id": "pavilion", "name": "The Caliph's Pavilion", "hp": 44, "grd": 12, "tags": ["pavilion", "blocks"], "fireWeak": true, "sprite": "unit.pavilion" },
   { "id": "mangonel", "name": "Mangonel", "hp": 20, "grd": 3, "weapon": "mangonel-stone", "tags": ["engine", "siege"], "fireWeak": true, "sprite": "unit.mangonel" }
 ]

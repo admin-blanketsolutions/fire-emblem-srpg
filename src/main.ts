@@ -1,3 +1,7 @@
+import { runCampaign } from './core/bot';
+import { stepAt } from './core/chapters';
+import { botEnvFor, newCampaignFor, STORIES } from './data/battles';
+import { campaignBattleIds } from './data/campaign';
 import { createCampDemo, createSiegeDemo, demoSupports } from './data/demos';
 import { demoStory } from './data/story';
 import { shops } from './data';
@@ -5,9 +9,13 @@ import { createProvingBattle, PROVING_OBJECTIVES } from './data/proving';
 import { Assets } from './engine/assets';
 import { Display } from './engine/display';
 import { Game } from './engine/game';
+import { audio } from './engine/audio';
 import { Input } from './engine/input';
 import { TextRenderer } from './engine/text';
 import { installTouchControls } from './engine/touch';
+import { openBrowserStore } from './engine/storage';
+import { SaveSlots } from './core/save';
+import { GameFlow } from './scenes/flow';
 import { BattleScene } from './scenes/battleScene';
 import { CampScene } from './scenes/campScene';
 
@@ -28,10 +36,46 @@ async function boot(): Promise<void> {
   const input = new Input(display);
   installTouchControls(input);
   const game = new Game({ display, input, assets, text });
+  // browsers allow sound only after the player has pressed something
+  for (const event of ['keydown', 'pointerdown'] as const) window.addEventListener(event, () => audio.unlock(), { capture: true });
 
-  // The proving ground can be played under each objective: ?objective=seize, ?fog=1, ?seed=42.
-  // ?demo=siege opens a walled courtyard with gates, mangonels and dry grass to burn.
   const params = new URLSearchParams(window.location.search);
+
+  // The game opens on the title screen. The address can instead go straight to a test battle:
+  // the proving ground under each objective (?objective=seize, ?fog=1, ?seed=42), the siege
+  // (?demo=siege) or the camp (?demo=camp).
+  // For testers, the campaign can start part-way, with an army the computer has brought there:
+  // ?chapter=CH-02 at the start of a chapter, ?battle=CH-03C at the camp before a battle
+  // (add ?mode=classic and ?seed=7 to choose the mode and the seed).
+  const startChapter = params.get('chapter');
+  const startBattle = params.get('battle');
+  const direct = !startChapter && !startBattle && ['objective', 'demo', 'fog', 'seed'].some((key) => params.has(key));
+  if (!direct) {
+    const { store, persistent } = openBrowserStore();
+    const flow = new GameFlow({
+      game,
+      assets,
+      text,
+      slots: new SaveSlots(store),
+      persistent,
+      now: () => new Date().toISOString(),
+      newSeed: () => Math.floor(Math.random() * 0x7fffffff),
+    });
+    game.run(flow.title());
+    const target = startChapter && STORIES.campaign.chapters.has(startChapter) ? { untilChapter: startChapter } : startBattle && campaignBattleIds.has(startBattle) ? { until: startBattle } : null;
+    if (target) {
+      const env = botEnvFor('campaign');
+      const campaign = newCampaignFor('campaign', params.get('mode') === 'classic' ? 'classic' : 'casual', Number(params.get('seed')) || 7);
+      runCampaign(env, campaign, { talks: true, keepGoing: true, ...target });
+      // for a battle, stop at the camp before it, where its deployment is chosen
+      const before = { chapter: campaign.chapter ?? '', step: campaign.step - 1 };
+      if ('until' in target && stepAt(env.chapters, before)?.kind === 'camp') campaign.step = before.step;
+      flow.play(campaign);
+    }
+    if (import.meta.env.DEV) Object.assign(window, { sultan: { flow, assets, audio } });
+    return;
+  }
+
   const objective = PROVING_OBJECTIVES.find((o) => o === params.get('objective')) ?? 'rout';
   const seed = Number(params.get('seed'));
   const makeSiege = (): BattleScene => {

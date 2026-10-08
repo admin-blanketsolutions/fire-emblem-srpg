@@ -1,0 +1,15 @@
+{
+  "id": "ch02.silafi",
+  "title": "The scholar of Alexandria",
+  "ledger": ["CH-02.E9"],
+  "cmds": [
+    {"bg": "alexandria-wall"},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"show": {"who": "silafi", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Salah ad-Din loved to hear the traditions told, and when he was at Alexandria, he often visited the scholar al-Hafiz al-Silafi, and learned a great number from him. Ibn Shaddad says so.", "kind": "narration", "src": ["CH-02.E9"]}},
+    {"say": {"who": "silafi", "text": "Shawar's men are in sight of the south wall, and you come to me to hear traditions? Have you no better use for your hour, young emir?", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "I have a great deal else to do. I will do it better for having sat here.", "kind": "dramatized"}},
+    {"say": {"who": "silafi", "text": "Then sit. The wall has stood a long time, and it can stand an hour.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Years later, Ibn Shaddad would see Salah ad-Din moved to tears by a tradition that taught something. He was a man who would go himself to find a scholar who did not come to courts.", "kind": "narration", "src": ["CH-02.E9"]}}
+  ]
+}

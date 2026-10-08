@@ -15,6 +15,7 @@
   { "id": "tent",     "name": "Tent",          "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 0, "avoid": 5,  "flammable": true },
   { "id": "fort",     "name": "Fort floor",    "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 2, "avoid": 20 },
   { "id": "rampart",  "name": "Rampart",       "cost": { "foot": 2, "light": 2, "mounted": null, "armored": 3 },   "cover": 2, "avoid": 30, "vision": 1 },
+  { "id": "tower",    "name": "Watchtower",    "cost": { "foot": 1, "light": 1, "mounted": null, "armored": 2 },   "cover": 2, "avoid": 20, "vision": 3 },
   { "id": "wall",     "name": "Wall",          "cost": { "foot": null, "light": null, "mounted": null, "armored": null }, "cover": 0, "avoid": 0 },
   { "id": "gate",     "name": "Gate",          "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 3, "avoid": 20 },
   { "id": "hospice",  "name": "Hospice",       "cost": { "foot": 1, "light": 1, "mounted": 1, "armored": 1 },       "cover": 0, "avoid": 0,  "heals": 0.1 }

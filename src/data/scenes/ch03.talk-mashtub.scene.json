@@ -1,0 +1,16 @@
+{
+  "id": "ch03.talk-mashtub",
+  "title": "Isa and al-Mashtub",
+  "ledger": ["CH-03.E5"],
+  "cmds": [
+    {"bg": "council-tent"},
+    {"show": {"who": "isa", "at": "left"}},
+    {"show": {"who": "al-mashtub", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Isa went first to Sayf ad-Din Ali, called al-Mashtub, and won him over.", "kind": "narration", "src": ["CH-03.E5"]}},
+    {"say": {"who": "al-mashtub", "text": "The jurist. Have you come to tell me to bend my knee to a young man with no troops?", "kind": "dramatized"}},
+    {"say": {"who": "isa", "text": "That high place will never be yours, as long as al-Yaruqi and Ibn Talil live.", "kind": "documented", "src": ["CH-03.E5"]}},
+    {"say": {"who": "al-mashtub", "text": "Hm. So the question is not whether I bow, but to whom. And which of them leaves me my castles.", "kind": "dramatized"}},
+    {"say": {"who": "isa", "text": "The one who has nothing yet to take from you. Think of what you will have if he keeps his place.", "kind": "dramatized"}},
+    {"flag": "mashtub-won"}
+  ]
+}

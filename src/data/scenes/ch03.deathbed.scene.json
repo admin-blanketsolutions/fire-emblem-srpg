@@ -1,0 +1,21 @@
+{
+  "id": "ch03.deathbed",
+  "title": "The last illness",
+  "ledger": ["CH-03.E4"],
+  "cmds": [
+    {"bg": "sickroom"},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "narrator", "text": "Jumada II, 564 AH: March, 1169. Shirkuh has been vizier of Egypt for two months and five days.", "kind": "narration", "src": ["CH-03.E4"]}},
+    {"say": {"who": "narrator", "text": "A new illness came upon him, an inflammation of the throat, and it was of this that he died.", "kind": "narration", "src": ["CH-03.E4"]}},
+    {"say": {"who": "shirkuh", "text": "It is a poor sort of end for a man who thought he would die on a field.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "Rest your throat, uncle. Do not speak.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "You have said that to me many times, and I have not once listened. Hear me this time.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "They will tell you that you are too young, and too gentle, and that you have no troops. Remember who counted the bread in Alexandria.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Shirkuh died on Sunday the 22nd of Jumada II, 564 AH: 23 March, 1169. The day and the cause are told differently in different books. Some said a poisoned robe; the Codex gives the rumour as a rumour.", "kind": "narration", "src": ["CH-03.E4"]}},
+    {"hide": "shirkuh"},
+    {"say": {"who": "salah-ad-din", "text": "He said that I would manage.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "His body was buried in the palace of the vizierate, and was later taken to Medina.", "kind": "narration", "src": ["CH-03.E4"]}},
+    {"unlock": "CDX-S-SHIRKUH-DEATH"}
+  ]
+}

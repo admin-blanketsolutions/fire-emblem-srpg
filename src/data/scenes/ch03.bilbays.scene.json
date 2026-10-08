@@ -1,0 +1,19 @@
+{
+  "id": "ch03.bilbays",
+  "title": "The Franks at Bilbays",
+  "ledger": ["CH-03.E1", "CH-03.E2", "CH-02.E3"],
+  "cmds": [
+    {"bg": "desert"},
+    {"music": "story"},
+    {"say": {"who": "narrator", "text": "Egypt, the autumn of 1168. The Franks of King Amalric have taken Bilbays. What was done to its people is told in the Codex, and not shown here.", "kind": "narration", "src": ["CH-03.E1"]}},
+    {"say": {"who": "narrator", "text": "Shawar learned that the Franks were marching on Egypt in force, and sent to Shirkuh to ask for help at once. Shirkuh set out in all haste and reached Egypt in Rabi' I, 564 AH: December, 1168, or January, 1169.", "kind": "narration", "src": ["CH-03.E2"]}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "salah-ad-din", "text": "Of all men, I was the one who least wished to go on that expedition. It was not of my own accord that I went with my uncle.", "kind": "documented", "src": ["CH-02.E3"]}},
+    {"say": {"who": "narrator", "text": "When the Franks learned that Shirkuh had come, they made a treaty with the government of Egypt, and turned back.", "kind": "narration", "src": ["CH-03.E2"]}},
+    {"say": {"who": "shirkuh", "text": "They did not wait to see my face. That tells you what they think of Egypt's defenders.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "And Shawar? What does he think?", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Shawar visited Shirkuh often. He had promised to pay the costs of the expedition, but he gave him nothing.", "kind": "narration", "src": ["CH-03.E2"]}},
+    {"say": {"who": "shirkuh", "text": "He thinks I am a debt he has not yet decided how to pay.", "kind": "dramatized"}}
+  ]
+}

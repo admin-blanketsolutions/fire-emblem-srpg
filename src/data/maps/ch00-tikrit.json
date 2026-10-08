@@ -1,0 +1,62 @@
+{
+  "id": "CH-00",
+  "name": "The Boats of Tikrit",
+  "size": [20, 15],
+  "tileset": "steppe-river",
+  "terrain": [
+    "~~r######..,,,,,,,,,",
+    "~~rRFFFF#..,,,,,,,,,",
+    "~~rRFFFF#..,,GG,,,,,",
+    "~~pRFFFF#..,,,,,,,,,",
+    "~~r###O##.h,,,,,,,,,",
+    "~~r........,,,,,,,,,",
+    "~~r........,,,,,,,,,",
+    "~~p:::::::::::::::::",
+    "~~r........,,,,,,,,,",
+    "~~r....hh..,,,,,,,,,",
+    "~~r.H......,,,,,,,,,",
+    "~~p........,,,,,,,,,",
+    "~~r......h.,,,,GG,,,",
+    "~~r...GG...,,,,,,,,,",
+    "~~r....GG..,,,,,,,,,"
+  ],
+  "legend": {".": "plain", ",": "steppe", ":": "road", "~": "river", "r": "reeds", "p": "pier", "#": "wall", "R": "rampart", "F": "fort", "O": "gate", "h": "hill", "G": "grove", "H": "house"},
+  "spawns": {
+    "player": [
+      {"unit": "ayyub", "at": [6, 7], "tags": ["lord"]},
+      {"unit": "shirkuh", "at": [5, 6]},
+      {"unit": "recruit", "at": [5, 8]},
+      {"unit": "garrison-soldier", "at": [5, 5], "tags": ["slot"]},
+      {"unit": "garrison-soldier", "at": [5, 9], "tags": ["slot"]},
+      {"unit": "garrison-soldier", "at": [4, 7], "tags": ["slot"]},
+      {"unit": "garrison-soldier", "at": [6, 5], "tags": ["slot"]},
+      {"unit": "garrison-pikeman", "at": [6, 9], "tags": ["slot"]},
+      {"unit": "garrison-pikeman", "at": [7, 7], "tags": ["slot"]}
+    ],
+    "ally": [
+      {"unit": "zengid-soldier", "at": [12, 5]},
+      {"unit": "zengid-soldier", "at": [13, 6]},
+      {"unit": "zengid-soldier", "at": [12, 8]},
+      {"unit": "zengid-soldier", "at": [13, 9]},
+      {"unit": "zengid-soldier", "at": [14, 7]},
+      {"unit": "zengid-soldier", "at": [14, 10]},
+      {"unit": "zengid-horse-archer", "at": [15, 6]},
+      {"unit": "zengid-horse-archer", "at": [15, 8]}
+    ]
+  },
+  "exits": [[2, 3], [2, 7], [2, 11]],
+  "wind": "W",
+  "reinforcements": [
+    {"turn": 1, "phase": "enemy", "units": [{"def": "caliphal-horseman", "at": [19, 6]}, {"def": "caliphal-horseman", "at": [19, 8]}, {"def": "caliphal-soldier", "at": [19, 4]}, {"def": "caliphal-soldier", "at": [19, 5]}, {"def": "caliphal-soldier", "at": [19, 9]}, {"def": "caliphal-soldier", "at": [19, 10]}]},
+    {"turn": 3, "phase": "enemy", "units": [{"def": "caliphal-horse-archer", "at": [19, 6]}, {"def": "caliphal-horse-archer", "at": [19, 7]}, {"def": "caliphal-horse-archer", "at": [19, 8]}]},
+    {"turn": 5, "phase": "enemy", "units": [{"def": "caliphal-man-at-arms", "at": [19, 6]}, {"def": "caliphal-man-at-arms", "at": [19, 8]}, {"def": "caliphal-captain", "at": [19, 7], "tags": ["leader"]}]}
+  ],
+  "objective": {"type": "hold-the-pass", "anchors": [[2, 3], [2, 7], [2, 11]], "holdLimit": 2, "leakLimit": 5, "turns": 8},
+  "events": [
+    {"id": "t1", "when": {"type": "turnStart", "turn": 1, "phase": "player"}, "then": [{"type": "message", "text": "Zengi's routed men are coming down the road, and the Caliph's ally is close behind. Keep the enemy off at least two of the three landings until the end of turn 8. Press S to see where the enemy can strike."}]},
+    {"id": "zengi", "when": {"type": "turnStart", "turn": 2, "phase": "player"}, "then": [{"type": "dialogue", "scene": "ch00.zengi-crosses"}, {"type": "unlockCodex", "id": "CDX-P-ZENGI"}]},
+    {"id": "t3", "when": {"type": "turnStart", "turn": 3, "phase": "enemy"}, "then": [{"type": "message", "text": "Horse Archers ride behind the horsemen. A bow strikes from two tiles away, where a spear cannot answer."}]},
+    {"id": "t5", "when": {"type": "turnStart", "turn": 5, "phase": "enemy"}, "then": [{"type": "message", "text": "Men-at-Arms carry maces. A spear beats a mace, and a mace beats a sabre: the Three Postures. Check the forecast before you strike."}]},
+    {"id": "granary", "when": {"type": "visit", "tile": [4, 10]}, "then": [{"type": "giveItem", "unit": "lord", "item": "cordial"}, {"type": "message", "text": "The granary keeps more than bread: Ayyub finds a cordial."}]}
+  ]
+}
