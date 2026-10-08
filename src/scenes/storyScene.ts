@@ -150,38 +150,79 @@ export interface PageOptions {
   readonly onDone: () => void;
 }
 
-/** A page of words on the dark backdrop: the end of the slice, with what to do next. */
+const PAGE_TOP = 30;
+const PAGE_BOTTOM = LOGICAL_HEIGHT - 26;
+
+/**
+ * The paragraphs wrapped to the page and cut into pages that each fit above the hint. A gap ('')
+ * stands for the space between paragraphs, and never opens or closes a page.
+ */
+export function paginate(text: Pick<TextRenderer, 'wrap'>, paragraphs: readonly string[]): string[][] {
+  const pages: string[][] = [[]];
+  let y = PAGE_TOP;
+  let gap = false;
+  for (const paragraph of paragraphs) {
+    if (paragraph === '') {
+      gap = true;
+      continue;
+    }
+    for (const row of text.wrap(paragraph, LOGICAL_WIDTH - 28)) {
+      if (gap && y + 5 <= PAGE_BOTTOM && pages[pages.length - 1]!.length > 0) {
+        pages[pages.length - 1]!.push('');
+        y += 5;
+      }
+      gap = false;
+      if (y > PAGE_BOTTOM) {
+        pages.push([]);
+        y = PAGE_TOP;
+      }
+      pages[pages.length - 1]!.push(row);
+      y += 10;
+    }
+  }
+  return pages;
+}
+
+/** A page of words on the dark backdrop: the end of the slice, with what to do next. Long words run on to further pages. */
 export class PageScene implements Scene {
   private age = 0;
   private done = false;
+  private shown = 0;
+  private readonly pages: string[][];
 
-  constructor(private readonly o: PageOptions) {}
+  constructor(private readonly o: PageOptions) {
+    this.pages = paginate(o.text, o.lines);
+  }
 
   update(dtMs: number, actions: ReadonlySet<Action>, taps: readonly Point[]): void {
     this.age += dtMs;
     if (this.done || this.age < 400) return;
     if (actions.has('confirm') || actions.has('cancel') || taps.length > 0) {
+      if (this.shown < this.pages.length - 1) {
+        this.shown += 1;
+        this.age = 0;
+        return;
+      }
       this.done = true;
       this.o.onDone();
     }
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
-    const { text, title, lines, hint } = this.o;
+    const { text, title, hint } = this.o;
     drawBackdrop(ctx);
     text.drawCentered(ctx, title, LOGICAL_WIDTH / 2, 8, { color: COLORS.text, shadow: COLORS.ink, scale: 2 });
-    let y = 30;
-    for (const paragraph of lines) {
-      if (paragraph === '') {
+    let y = PAGE_TOP;
+    for (const row of this.pages[this.shown] ?? []) {
+      if (row === '') {
         y += 5;
         continue;
       }
-      for (const row of text.wrap(paragraph, LOGICAL_WIDTH - 28)) {
-        if (y > LOGICAL_HEIGHT - 26) break;
-        text.draw(ctx, row, 14, y, PLAIN);
-        y += 10;
-      }
+      text.draw(ctx, row, 14, y, PLAIN);
+      y += 10;
     }
-    text.drawCentered(ctx, hint ?? 'OK Continue', LOGICAL_WIDTH / 2, LOGICAL_HEIGHT - 14, DIM);
+    const last = this.shown >= this.pages.length - 1;
+    text.drawCentered(ctx, last ? (hint ?? 'OK Continue') : 'OK More', LOGICAL_WIDTH / 2, LOGICAL_HEIGHT - 14, DIM);
+    if (this.pages.length > 1) text.drawRight(ctx, `${this.shown + 1}/${this.pages.length}`, LOGICAL_WIDTH - 8, LOGICAL_HEIGHT - 14, DIM);
   }
 }

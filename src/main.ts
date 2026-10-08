@@ -1,5 +1,7 @@
 import { runCampaign } from './core/bot';
+import { stepAt } from './core/chapters';
 import { botEnvFor, newCampaignFor, STORIES } from './data/battles';
+import { campaignBattleIds } from './data/campaign';
 import { createCampDemo, createSiegeDemo, demoSupports } from './data/demos';
 import { demoStory } from './data/story';
 import { shops } from './data';
@@ -42,9 +44,12 @@ async function boot(): Promise<void> {
   // The game opens on the title screen. The address can instead go straight to a test battle:
   // the proving ground under each objective (?objective=seize, ?fog=1, ?seed=42), the siege
   // (?demo=siege) or the camp (?demo=camp).
-  const direct = ['objective', 'demo', 'fog', 'seed'].some((key) => params.has(key));
-  // ?chapter=CH-02 starts the campaign at a chapter, with an army the computer has brought there (for testers; ?mode=casual, ?seed=7)
+  // For testers, the campaign can start part-way, with an army the computer has brought there:
+  // ?chapter=CH-02 at the start of a chapter, ?battle=CH-03C at the camp before a battle
+  // (add ?mode=classic and ?seed=7 to choose the mode and the seed).
   const startChapter = params.get('chapter');
+  const startBattle = params.get('battle');
+  const direct = !startChapter && !startBattle && ['objective', 'demo', 'fog', 'seed'].some((key) => params.has(key));
   if (!direct) {
     const { store, persistent } = openBrowserStore();
     const flow = new GameFlow({
@@ -57,9 +62,14 @@ async function boot(): Promise<void> {
       newSeed: () => Math.floor(Math.random() * 0x7fffffff),
     });
     game.run(flow.title());
-    if (startChapter && STORIES.campaign.chapters.has(startChapter)) {
+    const target = startChapter && STORIES.campaign.chapters.has(startChapter) ? { untilChapter: startChapter } : startBattle && campaignBattleIds.has(startBattle) ? { until: startBattle } : null;
+    if (target) {
+      const env = botEnvFor('campaign');
       const campaign = newCampaignFor('campaign', params.get('mode') === 'classic' ? 'classic' : 'casual', Number(params.get('seed')) || 7);
-      runCampaign(botEnvFor('campaign'), campaign, { talks: true, keepGoing: true, untilChapter: startChapter });
+      runCampaign(env, campaign, { talks: true, keepGoing: true, ...target });
+      // for a battle, stop at the camp before it, where its deployment is chosen
+      const before = { chapter: campaign.chapter ?? '', step: campaign.step - 1 };
+      if ('until' in target && stepAt(env.chapters, before)?.kind === 'camp') campaign.step = before.step;
       flow.play(campaign);
     }
     if (import.meta.env.DEV) Object.assign(window, { sultan: { flow, assets, audio } });
