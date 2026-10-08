@@ -25,7 +25,8 @@ Dialogue has a separate marker, independent of confidence: **documented** (faith
 
 | Value | Meaning |
 |---|---|
-| **PD** | Read in this session in a public-domain translation of a primary source: **IS-PPTS** (Ibn Shaddad, Wilson & Conder, 1897) or **IKh-dS** (Ibn Khallikan, de Slane, 1842–71). Page numbers are from the OCR page markers and may be off by one; verify against the printed page. |
+| **PD** | Read in this session in a public-domain translation of a primary source: **IS-PPTS** (Ibn Shaddad, Wilson & Conder, 1897), **IKh-dS** (Ibn Khallikan, de Slane, 1842–71), or **RHC** (the *Recueil des historiens des croisades: Historiens orientaux*, with the French translations, now public domain, of **IA-RHC** Ibn al-Athir and **AS-RHC** Abu Shama, the Arabic beside them). Page numbers are from the OCR page markers and may be off by one; verify against the printed page. |
+| **PD-MOD** | Read in a public-domain scholarly history from before 1930 (Lane-Poole), which cites the Arabic writers. Used to cross-check an outline, never as the basis of a documented line. |
 | **WEB** | Seen only in a web summary or encyclopedia page (a *finding aid*, never cited as evidence). Not used in the main story until checked against a primary or scholarly source. |
 | **—** | Not yet checked. Provisional. |
 
@@ -62,10 +63,10 @@ Ordered as in the brief. "Read" says what I actually looked at in this session.
 | ID | Source | Why it matters | Caveats | Read |
 |---|---|---|---|---|
 | `SRC-IS` | **Baha' ad-Din ibn Shaddad**, *al-Nawadir al-Sultaniyya wa'l-Mahasin al-Yusufiyya* (a life of Saladin). Judge of the army (*qadi al-'askar*) from 1188; eyewitness to Acre, Arsuf, Jaffa, Ramla, and the last illness | The best single source on Saladin's character, routine, generosity and final years; the most intimate anecdotes | **Eyewitness only from 1188.** Earlier chapters rest on Saladin's own recollections ("the Sultan said to me…") and on others. Devotional, admiring tone. Some early dates are inconsistent (first expedition given as 558 AH where Ibn Khallikan prefers 559). Chronology of the 1169–70 events is confused | **PD**: IS-PPTS full text downloaded; the chapters cited in §3–§5 were read (not every page). Richards (2001) not consulted |
-| `SRC-IAI-BARQ` | **Imad ad-Din al-Isfahani**, *al-Barq al-Shami* ("Syrian Lightning"): his account of Saladin's service, c. 1166–1193; partly lost, preserved in Abu Shama | Eyewitness secretary from 1175 | Ornate rhymed prose; hyperbole, especially numbers | — |
+| `SRC-IAI-BARQ` | **Imad ad-Din al-Isfahani**, *al-Barq al-Shami* ("Syrian Lightning"): his account of Saladin's service, c. 1166–1193; partly lost, preserved in Abu Shama | Eyewitness secretary from 1175 (he was not in Egypt in 1169) | Ornate rhymed prose; hyperbole, especially numbers | **PD indirect:** the passages Abu Shama quotes on the Mu'taman and the fighting of 1169 and on Turan-Shah's arrival (AS-RHC IV pp. 145–149). The *Barq* itself was not consulted |
 | `SRC-IAI-FATH` | **Imad ad-Din**, *al-Fath al-Qussi fi'l-Fath al-Qudsi* (the conquest of Jerusalem, 1187–93) | Eyewitness; major source for Hattin and Jerusalem | As above | — |
-| `SRC-IAT` | **Ibn al-Athir**, *al-Kamil fi'l-Ta'rikh* and *al-Ta'rikh al-Bahir fi'l-Dawla al-Atabakiyya* (history of the Zengid atabegs of Mosul) | Rich on Zengid and Nurid history, Egypt 1160s, the Fatimid fall | **Partisan.** A Mosul historian partial to the Zengids; cool or hostile to Saladin's takeover of Zengid lands, more admiring after Jerusalem. Treat his framing of Saladin–Nur ad-Din relations with care | **Indirect only:** the long extracts that Ibn Khallikan quotes from the Atabeg history (IKh-dS IV pp. 481–504). The *Kamil* itself and Richards's translation were not consulted |
-| `SRC-ASH` | **Abu Shama**, *Kitab al-Rawdatayn* (the Nurid and Salahid dynasties) | Preserves long extracts from lost works (Imad, **Ibn Abi Tayy**, al-Qadi al-Fadil's letters) | Compiler; late (13th c.) | — |
+| `SRC-IAT` | **Ibn al-Athir**, *al-Kamil fi'l-Ta'rikh* and *al-Ta'rikh al-Bahir fi'l-Dawla al-Atabakiyya* (history of the Zengid atabegs of Mosul) | Rich on Zengid and Nurid history, Egypt 1160s, the Fatimid fall | **Partisan.** A Mosul historian partial to the Zengids; cool or hostile to Saladin's takeover of Zengid lands, more admiring after Jerusalem. Treat his framing of Saladin–Nur ad-Din relations with care | **PD (RHC):** the French translations of the *Kamil* for the years 549 and 564–565 (RHC Or. I pp. 492–497, 566–569) and of the *Atabegs* for Damascus in 549 (RHC Or. II.2 pp. 190–191), and the long extracts Ibn Khallikan quotes from the Atabeg history (IKh-dS IV pp. 481–504). Richards's translation was not consulted |
+| `SRC-ASH` | **Abu Shama**, *Kitab al-Rawdatayn* (the Nurid and Salahid dynasties) | Preserves long extracts from lost works (Imad, **Ibn Abi Tayy**, al-Qadi al-Fadil's letters) | Compiler; late (13th c.) | **PD (RHC IV):** Barbier de Meynard's French extracts for the years 542–569, read for 1169 (pp. 145–149) and 549; the Arabic edition was not read |
 | `SRC-IKH` | **Ibn Khallikan**, *Wafayat al-A'yan* (biographical dictionary, 1256–74) | Entries on Salah ad-Din, Ayyub, Shirkuh, Nur ad-Din and others. He quotes his teachers Ibn Shaddad and Ibn al-Athir, adds his own notes, and sometimes corrects dates | Later than the events; but he is careful about dates and flags uncertainty | **PD** (de Slane vols. I, III, IV: Ayyub, Shirkuh, Nur ad-Din, Saladin) |
 | `SRC-IW` | **Ibn Wasil**, *Mufarrij al-Kurub* (Ayyubid history, 13th c.) | Good Ayyubid narrative from earlier lost sources | Later compiler | — |
 | `SRC-IK` | **Ibn Kathir**, *al-Bidaya wa'l-Nihaya* | Late compilation; useful for cross-checks | Late (14th c.) | — |
@@ -99,6 +100,8 @@ None of these was read this session unless stated. They are recommended for the 
 |---|---|
 | `MOD-PPTS-IS` | C. W. Wilson and C. R. Conder (trans.), *The Life of Saladin by Beha ed-Din*, Palestine Pilgrims' Text Society, 1897. **PD, read.** Full text: archive.org item `lifesaladin00condgoog` |
 | `MOD-DESLANE` | Baron de Slane (trans.), *Ibn Khallikan's Biographical Dictionary*, 4 vols, 1842–71. **PD, read vols. I, III, IV (parts).** Full texts: archive.org items `india.history.resource.41158` (vol. I), `india.history.resource.53346` (vol. III), `india.history.resource.53344` (vol. IV). Page numbers in this ledger follow the OCR page markers of these scans |
+| `MOD-RHC` | *Recueil des historiens des croisades: Historiens orientaux*, Académie des Inscriptions et Belles-Lettres, Paris: vol. I (1872: Ibn al-Athir, *Kamil*, extracts, trans. de Slane), vol. II part 2 (1876: Ibn al-Athir, *Atabegs*), vol. IV (1898: Abu Shama, *Rawdatayn*, extracts, trans. Barbier de Meynard). Arabic text with French translation. **PD, read** for the passages named in §3. Full texts: archive.org items `recueildeshistor01acad`, `recueildeshistoriensdescroisorienv2p2`, `recueildeshistor04acad_0` |
+| `MOD-LANEPOOLE` | S. Lane-Poole, *Saladin and the Fall of the Kingdom of Jerusalem* (1898) and *A History of Egypt in the Middle Ages* (1901). **PD, read** for the outline of 1169 and Saladin's first years in Egypt (cross-check only). Full texts: archive.org items `saladinfallofkin00lane`, `historyofegyptin00lane` |
 | `MOD-RICHARDS-IS` | D. S. Richards (trans.), *The Rare and Excellent History of Saladin*, Ashgate, 2001 |
 | `MOD-RICHARDS-IAT` | D. S. Richards (trans.), *The Chronicle of Ibn al-Athir for the Crusading Period*, 3 parts, Ashgate, 2006–08 |
 | `MOD-GABRIELI` | F. Gabrieli (ed.), *Arab Historians of the Crusades* (trans. E. J. Costello), 1969 |
@@ -164,13 +167,13 @@ Overall: **Attested** frame; the playable skirmish is **inferred/dramatized** (C
 
 ### 3.1 `CH-01` Damascus: The East Gate (1154 / 549 AH)
 
-Overall: frame **attested**; the fighting is **inferred/dramatized**; the mechanism of the surrender is **not yet collated** (UNV-03).
+Overall: frame **attested**; the mechanism of the city's transfer is now **collated** from Ibn al-Athir (2026-10-08); the fighting in the orchards is **inferred/dramatized**; Ayyub's and Shirkuh's roles remain **unverified** (UNV-03, narrowed).
 
 | ID | Claim | Confidence | Sources and location | Checked | Notes |
 |---|---|---|---|---|---|
-| `CH-01.E1` | Nur ad-Din besieged Damascus from 3 Safar 549 (≈ 18 April 1154) and took it on **Sunday 9 Safar** (≈ 25 April). Mujir ad-Din Abaq, the Burid ruler, received Homs in exchange, later Balis, and finally a pension at Baghdad | **Attested** | IKh-dS III pp. 338–339 | PD | A web summary of Ibn al-Qalanisi agrees in outline (people's welcome); not read directly |
-| `CH-01.E2` | The roles of Ayyub and Shirkuh in the city's transfer (negotiation, gate) | **Unverified** (in detail) | `SRC-IAT`, `SRC-IQ`, `SRC-ASH` | WEB / — | Kept out of the main story until collated (UNV-03). The game may show Ayyub's *presence* in Damascus (attested) but not a specific gate action as fact |
-| `CH-01.E3` | Ayyub, after surrendering Baalbek, lived at Damascus as one of its greatest emirs; he and his son were attached to Nur ad-Din's service | **Attested** | IKh-dS IV pp. 483–485; IS-PPTS pp. 4–5 | PD | |
+| `CH-01.E1` | Nur ad-Din besieged Damascus from 3 Safar 549 (≈ 18 April 1154) and took it on **Sunday 9 Safar** (≈ 25 April). Mujir ad-Din Abaq, the Burid ruler, received Homs in exchange, later Balis, and finally a pension at Baghdad | **Attested** (day and length of siege differ) | IKh-dS III pp. 338–339; IA-RHC *Atabegs* (RHC Or. II.2 p. 191: the 10th of Safar, 26 April, after a blockade of ten days); IA-RHC *Kamil* (RHC Or. I p. 495: "Safar") | PD | Ibn Khallikan's weekday agrees with the tabular calendar (§8); the Codex shows both days. A web summary of Ibn al-Qalanisi agrees in outline (people's welcome); not read directly |
+| `CH-01.E2` | **How the city changed hands.** Damascus lay between Nur ad-Din and the Franks at Ascalon, and the Franks had laid a yearly tribute on it; Nur ad-Din feared they would take it and chose guile over force. He sent Mujir ad-Din gifts and friendship and warned him, from time to time, that one or another of his emirs had offered to betray the city, until Mujir ad-Din had dismissed or imprisoned the able ones and had killed 'Ata ibn Hafiz al-Sulami, a capable officer (a eunuch, says the *Kamil*) who ran his affairs. Nur ad-Din meanwhile wrote to the young men of the city, its urban guard, and won their promise to hand him the place. When he blockaded the city and Mujir ad-Din appealed to the Franks, offering money and Baalbek, **the urban guard rose and opened the East Gate**; Nur ad-Din entered, pledging the lives and property of the people, then besieged Mujir ad-Din in the citadel and offered him a fief including Homs, which he accepted. The Franks, who had been gathering to relieve the city, turned back | **Attested** | IA-RHC *Kamil* (RHC Or. I pp. 495–497); IA-RHC *Atabegs* (RHC Or. II.2 pp. 190–191); IKh-dS III pp. 338–339 | PD | **Neither Ibn al-Athir text names Ayyub or Shirkuh in the capture** (a verified absence in these two passages). The East Gate is the gate the urban guard opened: the chapter's objective rests on this. Ibn al-Athir is Zengid-friendly and writes of Nur ad-Din with admiration; the Codex says so. UNV-03 is narrowed, not closed |
+| `CH-01.E3` | Ayyub, after surrendering Baalbek, lived at Damascus as one of its greatest emirs; he and his son were attached to Nur ad-Din's service | **Attested** (in general; his position in April 1154 is **not** stated) | IKh-dS IV pp. 483–485; IS-PPTS pp. 4–5 | PD | The game shows Ayyub *present* in the city and nothing more specific (UNV-03) |
 | `CH-01.E4` | Salah ad-Din (aged about 16), raised under his father's care, entered Nur ad-Din's service; Nur ad-Din advanced him and admitted him among his friends | **Attested** | IS-PPTS pp. 4–5; IKh-dS IV p. 485 | PD | |
 | `CH-01.E5` | Ibn Khallikan's assessment: from Nur ad-Din, Saladin learned righteousness and zeal in the war against the Franks | **Attested** (as Ibn Khallikan's view) | IKh-dS IV p. 485 | PD | Used in Codex, labelled as a later writer's verdict |
 | `CH-01.E6` | Nur ad-Din: just, pious, built colleges across Syria, a hospital and a hadith school at Damascus | **Attested** | IKh-dS III p. 339 | PD | |
@@ -207,11 +210,13 @@ Overall: **attested**, with disputed episodes presented as disputed.
 | `CH-03.E5` | **The succession:** emirs of Shirkuh's army (Ain ad-Dawla al-Yaruqi, Qutb ad-Din Khusraw ibn Talil, Sayf ad-Din Ali al-Mashtub, Shihab ad-Din al-Harimi, Saladin's maternal uncle) each aspired to power; the caliph al-Adid invited Saladin hoping to rule through a weak vizier; Saladin hesitated; the jurist **Isa al-Hakkari** won over al-Mashtub, al-Harimi and Qutb ad-Din in turn; al-Yaruqi refused and returned to Nur ad-Din; Saladin was invested and titled *al-Malik al-Nasir* | **Attested** (partisan source) | IKh-dS IV pp. 494–495, quoting IAT | PD | IAT is Zengid-partisan, but this passage is favourable to Isa and not hostile to Saladin. Investiture date 26 March 1169 is WEB only (UNV-16). Isa's appeals to Kurdish solidarity ("not to let power pass to the Turks") are shown as period politics, not as a modern ethnic message |
 | `CH-03.E6` | Saladin's lasting turn to seriousness after taking power: he gave up wine and the pleasures of youth and devoted himself to work | **Attested** | IS-PPTS p. 55; IKh-dS IV p. 492 | PD | A candid, documented detail; used in narration |
 | `CH-03.E7` | Nur ad-Din addressed Saladin as "the emir *isfahsalar*", and the khutba in Egypt was in Nur ad-Din's name | **Attested** | IKh-dS IV p. 496 (IAT) | PD | |
-| `CH-03.E8` | **The Mu'tamin plot and the uprising of the Fatimid regiments**, 21–23 Aug 1169: Mu'tamin al-Khilafa, the palace majordomo, was said to have written to the Franks; he was executed (20 Aug); the black African (*Sudani*) infantry, joined by Armenian soldiers and Cairo's populace, fought Saladin's troops around the great square between the palaces; the Mansura quarter was burned; the survivors were driven off | **Attested, sources differ** | Not in IS or in IKh's Saladin entry (checked). Early accounts: `SRC-IAT`, `SRC-ABT` via `SRC-ASH`, `SRC-MQ`. Modern: `MOD-LEV` (doubts that the conspiracy was real; the traditional account leans on a letter of al-Qadi al-Fadil, and the "mismatched sandals" detail is a literary commonplace) | WEB only | **Must be collated against the primary texts before M7** (UNV-07). Numbers (the 50,000 figure) are omitted. See D-012 for how the regiments are portrayed |
-| `CH-03.E9` | After the uprising black eunuchs were removed from the palace and Baha ad-Din Qaraqush took charge of its household | **Attested** (the later role); the 1169 timing **WEB** | IKh-dS IV p. 498 (Qaraqush placed as *ustadh-dar* before al-Adid's death in 1171) | PD (1171) / WEB (1169) | |
+| `CH-03.E8` | **The palace plot and the fighting of the black regiments, August 1169.** Saladin was taking the Egyptians' fiefs for his own officers. The palace eunuch who ruled the household, known by the title *Mu'taman al-Khilafa* ("the trusted of the caliphate"), is said to have agreed with others to write to the Franks and call them back, planning that when Saladin marched out against them they would fall on the garrison left in Cairo and then on his rear. The letter came to light when a Turkmen took a ragged courier's unworn new sandals and had them unstitched; the copyist, a Jew, declared himself a Muslim and confessed; Saladin kept the matter secret until the eunuch left the palace for his country house at Kharrakaniyya near Qalyub, where Saladin's men killed him (**Wednesday 25 Dhu'l-Qa'da 564, 20 August 1169**, in Imad ad-Din; "the beginning of Dhu'l-Qa'da", late July, in Ibn al-Athir). The Black (*Sudani*) soldiers, angered, rose in great numbers and fought Saladin's troops, led by the emir Abu'l-Hayja, in the space between the two palaces for two days; the quarter they held near Bab Zuwayla (*al-Mansuriyya*) was burned; they were driven out to Giza on **Saturday 28 Dhu'l-Qa'da (23 August)** and later hunted down | **Attested, sources differ** (the day; the details; whether the plot was real) | IA-RHC *Kamil* (RHC Or. I pp. 566–568); AS-RHC quoting Imad ad-Din (RHC Or. IV pp. 145–149); PD-MOD Lane-Poole 1898 pp. 101–103 (calls the eunuch "Nejah" and gives July); doubts: `MOD-LEV` | PD (IA, AS); PD-MOD (LP); WEB (Lev) | Both early accounts favour Saladin or the Zengids, and both tell the plot with the same sandal story. Modern historians (Lev; reported, not read here) regard that detail as a literary commonplace and doubt the plot itself, and suspect that it justified the move against the Fatimid regiments. Both sources say more than 50,000 rose: **the figure is omitted from play** and the Codex says why. Ibn al-Athir says women and children were in the burned quarter: **told in the Codex with restraint, never shown**. The slur both sources use of the Black soldiers is not used in the game (§1.4). UNV-07 narrowed |
+| `CH-03.E9` | After the Mu'taman's death Saladin dismissed the eunuchs of the palace and put Baha ad-Din Qaraqush, a white eunuch, over its household; nothing happened there thereafter without Qaraqush's order | **Attested** | IA-RHC *Kamil* (RHC Or. I p. 568, in the same passage as the killing); IKh-dS IV p. 498 (Qaraqush as *ustadh-dar* before al-Adid's death in 1171) | PD | |
 | `CH-03.E10` | **Damietta:** the Franks and a Byzantine fleet attacked Damietta (25 Oct–19 Dec 1169); Saladin reinforced and supplied it, sortied against the besiegers, and the allies burned their engines and left | **Attested, sources differ** (chronology) | IS-PPTS pp. 56–59; IKh-dS IV pp. 492–493; `SRC-WT` | PD (outline); dates WEB | Ibn Shaddad's narrative places Nur ad-Din's diversion at Kerak in Sha'ban 565 (spring 1170) and the 1897 editors date the settlement to 1170; later scholarship dates the siege Oct–Dec 1169 |
 | `CH-03.E11` | Saladin later recalled that when God gave him Egypt so easily he understood that the conquest of the coast (*al-Sahil*) was meant for him | **Attested** (documented saying, paraphrased) | IS-PPTS p. 55; IKh-dS IV p. 492 | PD | |
-| `CH-03.E12` | Nur ad-Din refused Saladin's request to bring his brothers, then, when the Franks gathered against Egypt, sent troops with them. He warned Turan-Shah to serve Saladin as lord of Egypt and Nur ad-Din's lieutenant, not as the younger man who once waited on him | **Attested** (partisan source) | IKh-dS IV pp. 496–497 (IAT) | PD | Arrival date relative to the August 1169 uprising unverified (UNV-08) |
+| `CH-03.E12` | Nur ad-Din refused Saladin's request to bring his brothers, then, when the Franks gathered against Egypt, sent troops with them. He warned Turan-Shah to serve Saladin as lord of Egypt and Nur ad-Din's lieutenant, not as the younger man who once waited on him | **Attested** (partisan source) | IKh-dS IV pp. 496–497 (IAT) | PD | UNV-08 resolved by `CH-03.E13` |
+| `CH-03.E13` | **Turan-Shah was in Cairo for the fighting.** Nur ad-Din sent Saladin's elder brother Shams ad-Dawla Turan-Shah from Damascus with reinforcements on the first news of the Franks' approach and of the plot in the palace; he reached Cairo on 8 Dhu'l-Qa'da 564 (30 July 1169, the translator's conversion; the tabular calendar gives 3 August) and took part in the affair of the Blacks, with great courage. Ibn al-Athir has him afterwards marching against the fugitives and destroying them; Lane-Poole dates Turan-Shah's campaigns in Upper Egypt and Nubia to 1171–73 | **Attested, sources differ** (when, and how long the pursuit lasted) | AS-RHC quoting Imad ad-Din (RHC Or. IV p. 148); IA-RHC *Kamil* (RHC Or. I p. 568); PD-MOD Lane-Poole 1898 p. 102 | PD (AS, IA); PD-MOD | The game follows Imad ad-Din: Turan-Shah fights in Stage C. His later campaigns are told in the Codex |
+| `CH-03.E14` | **The caliph's pavilion.** Al-Adid followed the fighting from a high pavilion between the two palaces. It is said that he ordered the palace's eunuchs to shower arrows and stones on the Syrian troops (others say it was against his will). Shams ad-Dawla then ordered his naphtha-throwers to set the pavilion on fire; as the first of them began, the door opened and a palace officer came out crying that the Commander of the Faithful greeted him and bade him fall on the rebels and drive them from the country. The Blacks, who had believed they had the caliph's approval, lost heart and scattered | **Attested** (as reported by Imad ad-Din; "it is said" for the first order) | AS-RHC quoting Imad ad-Din (RHC Or. IV p. 148) | PD | Stage C's turning point and the Fire Thrower's historical anchor (*naffat*). Imad ad-Din's insult for the Black soldiers in the caliph's message is paraphrased out (§1.4); the Codex notes the source's voice |
 
 ### 3.4 `CH-04` The End of an Era (1170–1173 / 565–569 AH) — *planned*
 
@@ -354,7 +359,7 @@ All major named characters are historical. Fictional characters are flagged. "Cl
 | `CHR-DIRGHAM` | Dirgham, vizier who displaced Shawar (d. 1164) | NPC (mention) | IKh-dS IV pp. 485–486 | Attested | PD |
 | `CHR-ADID` | al-Adid li-Din Allah, last Fatimid caliph (d. 10 Muharram 567 / Sept 1171) | NPC (CH-03–04) | IKh-dS IV pp. 490–499; IS-PPTS pp. 61–62 | Attested | PD |
 | `CHR-ISA` | Diya' ad-Din Isa al-Hakkari, jurist and emir | Counselor / ally (CH-03) | IKh-dS IV pp. 494–495; IS-PPTS p. 76 note | Attested | PD |
-| `CHR-TURANSHAH` | Shams ad-Dawla Turan-Shah, Saladin's elder brother (to Yemen 1174; d. Alexandria 1180) | guest ally (CH-03) | IKh-dS IV pp. 496–497; IS-PPTS pp. 64, 75 | Attested | PD |
+| `CHR-TURANSHAH` | Shams ad-Dawla Turan-Shah, Saladin's elder brother (to Yemen 1174; d. Alexandria 1180) | guest ally (CH-03) | IKh-dS IV pp. 496–497; IS-PPTS pp. 64, 75; AS-RHC IV p. 148 | Attested | PD |
 | `CHR-MASHTUB` | Sayf ad-Din Ali ibn Ahmad al-Hakkari, called al-Mashtub ("the scarred") | recruit by Talk (CH-03) | IKh-dS IV pp. 494–495 | Attested | PD |
 | `CHR-HARIMI` | Shihab ad-Din Mahmud al-Harimi, Saladin's maternal uncle | recruit by Talk (CH-03) | IKh-dS IV p. 494 | Attested | PD |
 | `CHR-QUTBKHUSRAW` | Qutb ad-Din Khusraw ibn Talil, Kurdish emir (founder of the Qutbiyya college at Cairo) | recruit by Talk (CH-03) | IKh-dS IV p. 494 | Attested | PD |
@@ -363,7 +368,8 @@ All major named characters are historical. Fictional characters are flagged. "Cl
 | `CHR-SILAFI` | al-Hafiz Abu Tahir al-Silafi, hadith scholar of Alexandria | NPC (CH-02) | IS-PPTS p. 10; IKh-dS IV p. 486 | Attested | PD |
 | `CHR-USAMA` | Usama ibn Munqidh | cameo/witness (CH-00) | IKh-dS IV p. 482 | Attested | PD (indirect) |
 | `CHR-AMALRIC` | Amalric I, king of Jerusalem (r. 1163–74) | enemy commander (CH-02–03) | `SRC-WT`; IS-PPTS mentions "the Franks" | Attested | — |
-| `CHR-MUTAMIN` | Mu'tamin al-Khilafa, Fatimid palace majordomo, executed Aug 1169 | disputed NPC (CH-03) | `SRC-IAT`, `SRC-MQ`; `MOD-LEV` | **Attested, sources differ** | WEB |
+| `CHR-MUTAMIN` | The *Mu'taman al-Khilafa* (a title, "the trusted of the caliphate"), the eunuch who ruled the Fatimid palace; killed in August 1169 (given as "Nejah" by Lane-Poole) | disputed NPC (CH-03) | IA-RHC I pp. 566–568; AS-RHC IV pp. 145–148 | **Attested, sources differ** | PD |
+| `CHR-ABULHAYJA` | The emir Abu'l-Hayja, who led Saladin's troops against the Black regiments in 1169 | ally NPC (CH-03) | AS-RHC IV p. 147 (Imad ad-Din); no other detail read | Attested (single source) | PD |
 | `CHR-RECRUIT` | **The Recruit**, a player-named levy | viewpoint unit (CH-00 on) | n/a | **Fictional (game-only)** | n/a |
 | `CHR-GEN-*` | Generic troops: Tikrit Garrison, Caliphal Cavalry, Burid Guard, Alexandrian Militia, Fatimid Regiments, Frankish Knights, and so on | unnamed composites | n/a | **Fictional (game-only)** | n/a |
 
@@ -483,7 +489,9 @@ Entries unlock by chapter. All entries carry their confidence badge and sources.
 | `CDX-P-ISA` | Isa al-Hakkari | CH-03 | Attested | IKh | |
 | `CDX-P-TURANSHAH` | Turan-Shah | CH-03 | Attested | IKh, IS | |
 | `CDX-P-ADID` | al-Adid | CH-03 | Attested | IKh, IS | |
-| `CDX-P-MUTAMIN` | Mu'tamin al-Khilafa | CH-03 | **Attested, sources differ** | IAT, MQ, Lev | disputed |
+| `CDX-P-MUTAMIN` | The Mu'taman al-Khilafa | CH-03 | **Attested, sources differ** | IA-RHC, AS-RHC (Imad), LP; Lev (reported) | a title, not a name; disputed plot |
+| `CDX-P-QARAQUSH` | Baha ad-Din Qaraqush | CH-03 | Attested | IA-RHC, IKh | the white eunuch placed over the palace |
+| `CDX-S-PLOT1169` | The plot of 1169: was it real? | CH-03 | **Attested, sources differ** | IA-RHC, AS-RHC (Imad); Lev (reported) | the sandals; the day; the numbers |
 | `CDX-L-TIKRIT` | Tikrit | CH-00 | Attested | IS, IKh | |
 | `CDX-L-BAALBEK` | Baalbek | CH-00 | Attested | IKh | |
 | `CDX-L-DAMASCUS` | Damascus and the Ghouta | CH-01 | Attested | IKh | |
@@ -492,11 +500,11 @@ Entries unlock by chapter. All entries carry their confidence badge and sources.
 | `CDX-L-DAMIETTA` | Damietta | CH-03 | Attested | IS, IKh | |
 | `CDX-E-TIKRIT1132` | The clash at Tikrit | CH-00 | Attested | IKh (IAT, Usama) | |
 | `CDX-E-EXILE` | The exile from Tikrit | CH-00 | **Attested, sources differ** | IKh, IAT | |
-| `CDX-E-DAMASCUS1154` | Nur ad-Din takes Damascus | CH-01 | Attested | IKh | |
+| `CDX-E-DAMASCUS1154` | Nur ad-Din takes Damascus | CH-01 | **Attested, sources differ** | IA-RHC (Kamil, Atabegs), IKh | the East Gate; 9th or 10th of Safar; six days or ten |
 | `CDX-E-ALEXANDRIA1167` | Saladin at Alexandria | CH-02 | **Attested, sources differ** | IKh, IS | |
 | `CDX-E-SHAWAR1169` | The fall of Shawar | CH-03 | **Attested, sources differ** | IS, IKh | |
 | `CDX-E-SUCCESSION` | The succession of 1169 | CH-03 | Attested (partisan source) | IKh (IAT) | |
-| `CDX-E-UPRISING1169` | The uprising of the Fatimid regiments | CH-03 | **Attested, sources differ** | IAT, MQ, Lev | with content note |
+| `CDX-E-UPRISING1169` | The uprising of the Fatimid regiments | CH-03 | **Attested, sources differ** | IA-RHC, AS-RHC (Imad), LP; Lev (reported) | with content note; the pavilion; Turan-Shah |
 | `CDX-E-DAMIETTA1169` | The siege of Damietta | CH-03 | **Attested, sources differ** | IS, IKh, WT | chronology |
 | `CDX-T-ATABEG` | Atabeg | CH-00 | Attested | IKh | |
 | `CDX-T-IQTA` | Iqta' | CH-00 | Attested | IKh, IS | explains the promotion item |
@@ -511,6 +519,7 @@ Entries unlock by chapter. All entries carry their confidence badge and sources.
 | `CDX-S-QUARREL` | Who did Shirkuh kill, and why? | CH-00 | **Attested, sources differ** | IKh I vs IKh IV (IAT) | |
 | `CDX-S-GENEALOGY` | Kurdish roots or Arab descent? | CH-00 | **Attested, sources differ** | IKh | |
 | `CDX-S-SHAWAR` | Who seized Shawar? | CH-03 | **Attested, sources differ** | IS vs IKh notes | |
+| `CDX-S-DAMASCUS-DAY` | Damascus in April 1154: which day, how long a siege? | CH-01 | **Attested, sources differ** | IKh vs IA-RHC (Atabegs) | 9th or 10th of Safar; six days or ten |
 | `CDX-S-SHIRKUH-DEATH` | The death of Shirkuh | CH-03 | **Attested, sources differ** | IS, IKh | day and cause |
 | `CDX-S-BABAIN` | Where was al-Babain? | CH-02 | **Attested, sources differ** | IKh vs summaries | |
 | `CDX-S-GUIDE` | Reading the sources: who wrote what, and why | CH-00 | Attested | register in §2 | Ibn Shaddad's eyewitness window begins in 1188; Ibn al-Athir's Zengid sympathies |
@@ -529,9 +538,12 @@ Pre-1582 dates in modern scholarship are **Julian-calendar** dates. Hijri dates 
 |---|---|---|---|---|
 | Clash at Tikrit | Thu 12 Rabi' II 526 (IKh) | 2 Mar 1132 | 2 Mar 1132 is a **Wednesday** | month and year only |
 | Baalbek taken | 14 Safar 534 (Usama via IKh) | 10 Oct 1139 | n/a | month and year |
-| Damascus taken | **Sun 9 Safar 549** (IKh) | 25 Apr 1154 | ✓ Sunday | day shown |
+| Damascus taken | **Sun 9 Safar 549** (IKh); 10 Safar (IA-RHC *Atabegs*) | 25 Apr 1154 (26 Apr for the 10th) | ✓ Sunday (the 9th) | day shown (the 9th); the 10th in the Codex |
 | Shirkuh leaves Egypt | 24 Dhu'l-Hijja 559 (IKh) | 12 Nov 1164 | n/a | month and year |
 | Shawar seized | **Sat 17 Rabi' II 564** (IKh, IS) | 18 Jan 1169 | ✓ Saturday | day shown |
+| The Mu'taman killed | **Wed 25 Dhu'l-Qa'da 564** (Imad ad-Din via AS-RHC); "the beginning of Dhu'l-Qa'da" (IA-RHC) | 20 Aug 1169 (late July for IA) | ✓ Wednesday (tabular civil calendar) | day shown (20 August); Ibn al-Athir's earlier date in the Codex |
+| The Blacks driven to Giza | **Sat 28 Dhu'l-Qa'da 564** (Imad ad-Din via AS-RHC) | 23 Aug 1169 | ✓ Saturday | day shown |
+| Turan-Shah reaches Cairo | 8 Dhu'l-Qa'da 564 (Imad ad-Din via AS-RHC; no weekday) | 30 Jul (the translator) or 3 Aug (tabular) 1169 | n/a | "early in Dhu'l-Qa'da, about three weeks before" |
 | Shirkuh dies | **Sun 22 Jumada II 564** (IS, IKh) | 23 Mar 1169 | ✓ Sunday | day shown (alternatives 23rd, 28th noted) |
 | al-Adid dies | **Mon 10 Muharram 567** (IS, IKh) | 13 Sept 1171 | ✓ Monday | day shown |
 | Nur ad-Din dies | **Wed 11 Shawwal 569** (IS) | 15 May 1174 | ✓ Wednesday | day shown |
@@ -572,12 +584,12 @@ Legends and later inventions that the game does not present as history. Some may
 |---|---|---|---|
 | `UNV-01` | The victim of Shirkuh's quarrel at Tikrit being "a Christian scribe" | The texts read say "a man" or "the *isfahsalar* who insulted a woman" | check IAT's *Kamil*, Ibn Wasil |
 | `UNV-02` | Ayyub's and the young Saladin's roles in the 1148 siege of Damascus | not read | Ibn al-Qalanisi |
-| `UNV-03` | Who opened which gate at Damascus in April 1154, and how Ayyub and Shirkuh negotiated | only outlines seen | IAT, Ibn al-Qalanisi, Abu Shama |
+| `UNV-03` | The roles of Ayyub and Shirkuh in the transfer of Damascus in April 1154 | **Narrowed 2026-10-08:** the East Gate was opened by the city's urban guard (IA-RHC, read). Neither Ibn al-Athir passage names Ayyub or Shirkuh. Still unread: Ibn al-Qalanisi, Abu Shama's Arabic | Ibn al-Qalanisi (Gibb); Ibn Abi Tayy |
 | `UNV-04` | When al-Qadi al-Fadil first met Saladin | not found in texts read | Abu Shama; `MOD-LEV` |
 | `UNV-05` | Any contemporary description of Saladin's appearance | none found; sprites and portraits are generic | n/a |
 | `UNV-06` | Army sizes at Babain, Hattin, Acre, Arsuf | sources inflate or conflict | omitted |
-| `UNV-07` | Details of the Mu'tamin letter and its discovery | modern scholarship doubts the account | IAT, Abu Shama, Maqrizi, `MOD-LEV` |
-| `UNV-08` | Turan-Shah's arrival date relative to the August 1169 uprising | IAT places it "when the Franks gathered"; web summaries place it before the uprising | IAT *Kamil*, Abu Shama |
+| `UNV-07` | Whether the plot of the Mu'taman was real, and the letter of al-Qadi al-Fadil modern authors cite | **Narrowed 2026-10-08:** the story is in Ibn al-Athir and Imad ad-Din (both read, same sandal detail); modern doubt (Lev) is reported, not read | `MOD-LEV`; Abu Shama's Arabic for the letter |
+| `UNV-08` | Turan-Shah's arrival relative to the August 1169 fighting | **Resolved 2026-10-08:** Imad ad-Din (via Abu Shama) has him reach Cairo on 8 Dhu'l-Qa'da and fight in it (`CH-03.E13`); Lane-Poole's 1171–73 is the later campaign in the south | none |
 | `UNV-09` | The Frankish negotiators at Alexandria in 1167 and details of the terms | Frankish source not read | William of Tyre XIX |
 | `UNV-10` | Qaraqush's role in the 1169 succession | seen only in a web summary | IAT, Abu Shama |
 | `UNV-11` | Nur ad-Din's polo habits and Saladin's training | not verified | Ibn al-Athir; Ibn Khallikan's Nur ad-Din entry (rest) |
@@ -601,6 +613,7 @@ Legends and later inventions that the game does not present as history. Some may
 3. Cross-checked every cited date against the **weekday** the source gives, using a tabular Islamic calendar converted to the Julian calendar (§8).
 4. Tried to read Ibn al-Qalanisi (Gibb): the copy on archive.org is lending-only and returned an authorization error; I did **not** work around it.
 5. **2026-10-06 update:** searched the Ibn Shaddad text for weapon and armour terms to anchor the added weapon types (§6.2) and read the passages on the Acre brigands, Arsuf, Jaffa and the murder of Conrad.
+6. **2026-10-08 update:** read in French translation (RHC, public domain) Ibn al-Athir's *Kamil* for 549 and 564–565 and his *Atabegs* for Damascus in 549, and Abu Shama's extracts for 1169 (quoting Imad ad-Din); read Lane-Poole (1898, 1901) as a cross-check of the outline. The OCR text of each scan was searched for the passages and the passages read in full; the weekdays the sources give were checked against the tabular calendar (§8). Nothing in a modern translation (Richards, Gibb) was used.
 
 ### 11.2 Discrepancies found
 
@@ -618,11 +631,16 @@ Legends and later inventions that the game does not present as history. Some may
 | 10 | Saladin's death date: Wednesday 27 Safar 589 does not match Thursday 4 March 1193 (Julian); it matches 3 March | CH-FIN.E9, §8 |
 | 11 | The 1897 editors' Hijri–Julian conversions are off by a day in places (e.g., the days of Hattin) | §8 |
 | 12 | The "feigned retreat at Babain" and "two horses at Jaffa" are **not in Ibn Shaddad**; the first is a modern reconstruction, the second Frankish only | UNV-15, EXC-09 |
+| 13 | The Mu'taman's death: "the beginning of Dhu'l-Qa'da" (late July 1169) in Ibn al-Athir; Wednesday 25 Dhu'l-Qa'da (20 August) in Imad ad-Din, whose weekday agrees with the calendar | CH-03.E8 |
+| 14 | The eunuch is a title, *Mu'taman al-Khilafa*, in both early sources; Lane-Poole (1898) calls him "Nejah" and dates the killing to July | CH-03.E8 |
+| 15 | Damascus 1154: Sunday 9 Safar after six days (Ibn Khallikan) or the 10th after a ten-day blockade (Ibn al-Athir's *Atabegs*) | CH-01.E1 |
+| 16 | Turan-Shah and the fighting of 1169: present from 8 Dhu'l-Qa'da (Imad ad-Din); afterwards pursuing the fugitives (Ibn al-Athir); campaigns in Upper Egypt and Nubia in 1171–73 (Lane-Poole) | CH-03.E13 |
+| 17 | Turan-Shah's arrival: 30 July (the translator's conversion of 8 Dhu'l-Qa'da) or 3 August (the tabular calendar) | §8 |
 
 ### 11.3 Not yet done (to complete before each chapter is built)
 
 - Read **Ibn al-Athir's *Kamil*** and **Imad ad-Din** directly (Richards and Gabrieli translations), and **Abu Shama** for 1164–70.
-- Collate the sources on **Damascus 1154**, the **uprising of 1169**, the **terms at Jerusalem**, Hattin's day-by-day and the **Acre hostages**.
+- **Done 2026-10-08:** the mechanism of Damascus in 1154 (Ibn al-Athir) and the uprising of 1169 (Ibn al-Athir and Imad ad-Din via Abu Shama). **Still to do:** Ibn al-Qalanisi on 1154 (Gibb; the archive.org copy is lending-only), the **terms at Jerusalem**, Hattin's day-by-day and the **Acre hostages**, before those chapters are built.
 - Verify the modern references in §2.4 and add exact citations.
 - Re-read all PD page numbers against print.
 
