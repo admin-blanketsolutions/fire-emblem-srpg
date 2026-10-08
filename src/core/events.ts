@@ -44,6 +44,8 @@ export type EventAction =
   | { readonly type: 'spawn'; readonly units: readonly SpawnSpec[] }
   | { readonly type: 'setAi'; readonly unit: UnitKey; readonly ai: AiProfile }
   | { readonly type: 'recruit'; readonly unit: UnitKey }
+  /** A unit of the army that stood off the map (tagged `reserve`) comes on, at `at` or the tile it was given. */
+  | { readonly type: 'arrive'; readonly unit: UnitKey; readonly at?: Tile }
   /** A rank event: promote the unit, or hand it the Charter of Iqta' if it has not reached the promotion level. */
   | { readonly type: 'promote'; readonly unit: UnitKey }
   | { readonly type: 'flag'; readonly name: string }
@@ -230,6 +232,9 @@ function validateAction(a: EventAction, width: number, height: number, label: st
       break;
     case 'recruit':
       need(typeof a.unit === 'string', 'needs a unit');
+      break;
+    case 'arrive':
+      need(typeof a.unit === 'string' && (a.at === undefined || isTile(a.at, width, height)), 'needs a unit, and an in-bounds tile if it has one');
       break;
     case 'promote':
       need(typeof a.unit === 'string', 'needs a unit');

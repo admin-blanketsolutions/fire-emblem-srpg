@@ -1,0 +1,19 @@
+{
+  "id": "sup.shirkuh-salah.b",
+  "title": "Nothing Decided Without Him",
+  "ledger": ["SUP-SHIRKUH-SALAH-B", "CH-02.E4"],
+  "cmds": [
+    {"bg": "cairo-camp"},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "narrator", "text": "Egypt, after the peace. The army is camped by the Nile, and Shirkuh has a question that he is not sure how to put.", "kind": "narration"}},
+    {"say": {"who": "shirkuh", "text": "Shawar is a fox, and the Franks have a king who is not a fool. If we stay, they will come back. If we go, they will take what we leave. What do you see?", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "That you should not ask me, uncle. I have been in this country four months, and most of them behind a wall.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "On the first expedition, Ibn Shaddad writes, Shirkuh came to no decision, and settled no question, without first consulting his nephew; so much did he value his judgment, and the success that attended all his undertakings.", "kind": "narration", "src": ["CH-02.E4"]}},
+    {"say": {"who": "shirkuh", "text": "I ask because you have been behind a wall. You have counted what this country has, and what it has not. I have only counted what it could be.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "Then I will tell you what I counted. It has bread, and it has men who will follow whoever pays them. It has no one who is watching its borders.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "Hm. That is not nothing.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "It is not nothing. But I do not like what it means.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "Neither do I. Write it down, and we will hear it again before we choose.", "kind": "dramatized"}}
+  ]
+}

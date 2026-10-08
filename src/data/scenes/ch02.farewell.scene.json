@@ -1,0 +1,16 @@
+{
+  "id": "ch02.farewell",
+  "title": "The uncle rides south",
+  "ledger": ["CH-02.E7"],
+  "cmds": [
+    {"bg": "desert"},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "narrator", "text": "Shirkuh left the province of Upper Egypt, and went to Bilbays, to make peace with the Egyptians.", "kind": "narration", "src": ["CH-02.E7"]}},
+    {"say": {"who": "shirkuh", "text": "Count your bread. Count it again each morning. A city lasts as long as its bread.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "I will count it.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "And walk the walls at night. Men fight for a captain they have seen.", "kind": "dramatized"}},
+    {"hide": "shirkuh"},
+    {"say": {"who": "narrator", "text": "Salah ad-Din rode into Alexandria with a small army, to hold it for his uncle.", "kind": "narration", "src": ["CH-02.E7"]}}
+  ]
+}

@@ -1,0 +1,290 @@
+[
+  {
+    "id": "CDX-P-SALAH",
+    "category": "people",
+    "title": "Salah ad-Din",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IS", "SRC-IKH", "CH-00.E6"],
+    "body": [
+      "Yusuf, the son of Ayyub, was born in 532 AH (1137-38) in the citadel of Tikrit. Ibn Khallikan writes that all the historians agree on the year and the place. He grew up to rule Egypt and Syria and more, and is known by the titles he earned: Salah ad-Din, 'the welfare of the faith', and al-Malik an-Nasir, 'the helping king'.",
+      "None of the sources used for this game describes what he looked like, so every portrait in it is a type, not a likeness. His family's origins are disputed; see 'Kurdish roots or Arab descent?'."
+    ]
+  },
+  {
+    "id": "CDX-P-AYYUB",
+    "category": "people",
+    "title": "Najm ad-Din Ayyub",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IS", "CH-00.E2", "CH-00.E9", "CH-00.E10"],
+    "body": [
+      "The eldest son of Shadi. He kept the citadel of Tikrit after his father, as its warden (dizdar) under the Seljuk governor Bihruz. When Shirkuh's quarrel ended their service there, he and his brother went to Zengi at Mosul. Zengi gave Ayyub a fief and later made him warden of Baalbek.",
+      "After Zengi's murder in 541 AH (1146), Damascus besieged Baalbek; Ayyub asked Zengi's son for help, did not get it, and surrendered the fortress on terms. He became one of the great emirs of Damascus.",
+      "Ibn Khallikan calls him a man of great holiness and piety, fond of virtuous company, and says he saw at Baalbek the Sufi convent Ayyub founded there, called the Najmiyya after him."
+    ]
+  },
+  {
+    "id": "CDX-P-SHIRKUH",
+    "category": "people",
+    "title": "Asad ad-Din Shirkuh",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IS", "CH-00.E11"],
+    "body": [
+      "Ayyub's younger brother. The name Shirkuh is Persian and means 'lion of the mountain'. He served Zengi and then Zengi's son Nur ad-Din, whose confidence he won by his bravery and loyalty; Nur ad-Din gave him Homs and other places and the command of all his army.",
+      "Ibn Khallikan, quoting Ibn al-Athir, says it was Shirkuh's quarrel at Tikrit that ended the brothers' service there. He led the expeditions to Egypt, and his nephew Salah ad-Din went with him."
+    ]
+  },
+  {
+    "id": "CDX-P-ZENGI",
+    "category": "people",
+    "title": "Imad ad-Din Zengi",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IAT", "CH-00.E3", "CH-00.E8"],
+    "body": [
+      "The atabeg, or ruler, of Mosul, later of Aleppo, and the father of Nur ad-Din. In 526 AH (1132) he marched on Baghdad with the Seljuk prince Mas'ud and was routed near Tikrit. He took Baalbek in 534 AH (1139) and was murdered in 541 AH (1146).",
+      "Ibn al-Athir, who tells much of this, was a historian of Mosul and of the Zengid house, and writes warmly of Zengi and of his family. The game uses him with that in mind."
+    ]
+  },
+  {
+    "id": "CDX-P-BIHRUZ",
+    "category": "people",
+    "title": "Mujahid ad-Din Bihruz",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IAT", "CH-00.E2", "CH-00.E5"],
+    "body": [
+      "The shihna, or governor, of Iraq for the Seljuk sultan Mas'ud, who held Baghdad's affairs and had Tikrit as his own fief. Ibn Khallikan notes that he was a Greek slave by origin, and calls him high-minded, fond of great buildings and zealous for the country's welfare; he died on Wednesday the 23rd of Rajab 540 AH (January 1146).",
+      "He was the friend of Shadi, and made Shadi and then Ayyub wardens of Tikrit. He wrote Ayyub a letter of blame for helping Zengi, and years later sent both brothers away, though he wrote that he could not be harsh with sons of a friend."
+    ]
+  },
+  {
+    "id": "CDX-P-QARAJA",
+    "category": "people",
+    "title": "Qaraja as-Saqi",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IAT", "CH-00.E3"],
+    "body": [
+      "A commander whose real name was Bars; he was the governor of Fars and Khuzistan. When Mas'ud and Zengi marched against Baghdad, the Caliph al-Mustarshid, who was reigning there, called him to his help. He came, took the two princes by surprise and routed their armies.",
+      "He and the Caliph were defending Baghdad. In the game his horsemen are the pursuers at Tikrit, but they are not villains: the clash is a war between rulers, as most wars of the time were."
+    ]
+  },
+  {
+    "id": "CDX-P-USAMA",
+    "category": "people",
+    "title": "Usama ibn Munqidh",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-UM", "CH-00.E3"],
+    "body": [
+      "A knight and writer from Shaizar in Syria, who wrote a memoir of his life. Ibn Khallikan quotes him, in two places, saying that he himself was at the clash near Tikrit with Zengi and giving its date.",
+      "In the game he appears once, on the landing, as a witness. What he says there is invented."
+    ]
+  },
+  {
+    "id": "CDX-L-TIKRIT",
+    "category": "places",
+    "title": "Tikrit",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IS", "SRC-IKH", "CH-00.E1", "CH-00.E6"],
+    "body": [
+      "A town on the Tigris, with a fortress the sources call its castle or citadel. Shadi came there from Baghdad with his sons Ayyub and Shirkuh and settled; Ibn Khallikan says Shadi died there and that his tomb, with a dome over it, was within the town. The Seljuk governor Bihruz held Tikrit as a fief.",
+      "Salah ad-Din was born there in 532 AH. In the game its citadel, the landings on the river and the reed bank are drawn from nothing but the sources' bare mention of a fortress on the Tigris: the map is invented."
+    ]
+  },
+  {
+    "id": "CDX-L-BAALBEK",
+    "category": "places",
+    "title": "Baalbek",
+    "unlock": {"chapter": "CH-00", "at": "end"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "CH-00.E8", "CH-00.E9", "CH-00.E10"],
+    "body": [
+      "A fortified town in the Bekaa valley. Zengi took it after a siege of some months, which Ibn al-Qalanisi says began on Thursday the 20th of Dhu'l-Hijja 532 AH (August 1138) and Usama says ended on the 14th of Safar 534 AH (October 1139). He made Ayyub its warden.",
+      "Ayyub later surrendered it on terms and went to Damascus. He founded a Sufi convent there, the Najmiyya, which Ibn Khallikan saw."
+    ]
+  },
+  {
+    "id": "CDX-E-TIKRIT1132",
+    "category": "events",
+    "title": "The clash at Tikrit",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IAT", "SRC-UM", "CH-00.E3"],
+    "body": [
+      "Mas'ud, a Seljuk prince, and Zengi marched against Baghdad meaning to besiege it. The Caliph al-Mustarshid called Qaraja as-Saqi to his help; Qaraja came, took them unawares and routed their armies. Ibn al-Athir puts the battle near Tikrit on Thursday the 12th of Rabi' II 526 AH, and Usama, who says he was there with Zengi, gives the same day.",
+      "The 12th of Rabi' II 526 fell, by the tabular calendar, on a Wednesday (2 March 1132), so the game gives the month and the year only.",
+      "Zengi reached Tikrit. Ayyub let him have boats to cross the Tigris, and gave kindness and provisions to the men who followed him. Bihruz heard of it and wrote Ayyub a letter of blame."
+    ]
+  },
+  {
+    "id": "CDX-E-EXILE",
+    "category": "events",
+    "title": "The exile from Tikrit",
+    "unlock": {"chapter": "CH-00", "at": "end"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IKH", "SRC-IAT", "SRC-IS", "CH-00.E5", "CH-00.E7", "CH-00.E8"],
+    "body": [
+      "Some years after the boats, Shirkuh killed a man at Tikrit. Bihruz, remembering his friend Shadi, would not punish the brothers, but required them to leave. They went to Mosul, where Zengi, in return for the service at the river, gave them a large fief and took them into his army. Ayyub soon became warden of Baalbek.",
+      "Salah ad-Din was born at Tikrit in 532 AH, and the family left Tikrit about then. The sources do not say just when."
+    ],
+    "differ": [
+      {
+        "claim": "When did the family leave Tikrit?",
+        "positions": [
+          {"source": "SRC-IKH", "says": "A kinsman told Ibn Khallikan that some of their people said they left on the night Salah ad-Din was born."},
+          {"source": "SRC-IKH", "says": "Ibn Khallikan's own reckoning, from Zengi's movements and the date of Baalbek, is the end of 532 AH or the year 533."},
+          {"source": "SRC-IS", "says": "Ibn Shaddad says only that circumstances obliged Ayyub to leave Tikrit."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-T-ATABEG",
+    "category": "terms",
+    "title": "Atabeg",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "CH-00.E3"],
+    "body": [
+      "De Slane, who translated Ibn Khallikan, renders the word as 'guardian': the officer who administered for a young Seljuk prince. In time it became the title of the rulers who held a city in the sultan's name: Zengi is called the atabeg of Mosul, and his dynasty the Atabegs."
+    ]
+  },
+  {
+    "id": "CDX-T-IQTA",
+    "category": "terms",
+    "title": "Iqta'",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IS", "CH-00.E8"],
+    "body": [
+      "A grant of the revenues of a district to a soldier or an official, in return for service: how armies of the time were paid. De Slane renders it 'appanage' or 'fief'. When Zengi 'settled a large appanage' on Ayyub and Shirkuh, he was giving them the income to keep their men.",
+      "In the game a Charter of Iqta' is the item that promotes a Tier I unit of level 10 or more: the army's reward for long service."
+    ]
+  },
+  {
+    "id": "CDX-T-DIZDAR",
+    "category": "terms",
+    "title": "Dizdar and shihna",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "CH-00.E2", "CH-00.E8"],
+    "body": [
+      "A dizdar is a castle's warden: Ibn Khallikan explains that the Persian doz is a castle and dar a keeper. Ayyub was the dizdar of Tikrit and later of Baalbek.",
+      "A shihna is the governor the Seljuk sultans kept in a city: Bihruz was the shihna of Iraq."
+    ]
+  },
+  {
+    "id": "CDX-T-HALBERD",
+    "category": "terms",
+    "title": "Shirkuh's halberd",
+    "unlock": {"chapter": "CH-00", "at": "end"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "CH-00.E5"],
+    "body": [
+      "In the story Ibn Khallikan tells, Shirkuh killed the officer with the officer's own halberd, which he seized in his anger. De Slane's translation calls the weapon a halberd; the sources do not describe it further.",
+      "In the game the Axe line's heavy weapon, the Halberd, is named for it."
+    ]
+  },
+  {
+    "id": "CDX-S-BIRTHNIGHT",
+    "category": "sources",
+    "title": "'The night of his birth': who says so?",
+    "unlock": {"chapter": "CH-00", "at": "end"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IKH", "SRC-IS", "CH-00.E7"],
+    "body": [
+      "Many popular accounts say that the family left Tikrit on the night Salah ad-Din was born, and that the people took it for an ill omen. The detail is real, but it is Ibn Khallikan's, not Ibn Shaddad's."
+    ],
+    "differ": [
+      {
+        "claim": "What the sources say about the night of the birth",
+        "positions": [
+          {"source": "SRC-IKH", "says": "A member of the family told him that some of their people said they left on the night of the birth, thought it a bad omen, and that one answered that good might come of it when least expected."},
+          {"source": "SRC-IS", "says": "Says only that circumstances obliged Ayyub to leave Tikrit, and gives no night."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-S-QUARREL",
+    "category": "sources",
+    "title": "Who did Shirkuh kill, and why?",
+    "unlock": {"chapter": "CH-00", "at": "end"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IKH", "SRC-IAT", "CH-00.E5"],
+    "body": [
+      "All the accounts agree that Shirkuh killed a man at Tikrit and that this ended the brothers' service there. They differ about who the man was and why.",
+      "Some modern summaries say the victim was a Christian scribe. None of the texts read for this game says so."
+    ],
+    "differ": [
+      {
+        "claim": "The victim and the cause",
+        "positions": [
+          {"source": "SRC-IKH", "says": "In the entry on Ayyub: a woman was insulted at the castle gate by the commander of the guard (the isfahsalar); Shirkuh seized the officer's halberd and killed him."},
+          {"source": "SRC-IAT", "says": "Quoted in the entry on Saladin: Shirkuh had a dispute with a man at Tikrit and killed him."}
+        ]
+      },
+      {
+        "claim": "What Bihruz did",
+        "positions": [
+          {"source": "SRC-IKH", "says": "Ayyub imprisoned his brother and wrote to Bihruz, who answered that he owed a debt to their father and could not be harsh with either of them, but that they must leave Tikrit."},
+          {"source": "SRC-IAT", "says": "Bihruz sent a person to expel them both from the city."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-S-GENEALOGY",
+    "category": "sources",
+    "title": "Kurdish roots or Arab descent?",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IKH", "SRC-IAT", "SRC-IS", "CH-00.E1"],
+    "body": [
+      "Ibn Khallikan says that historians agree the family were Kurds of the Rawadiya tribe, from the town of Dvin (Duwin) in Armenia; a legist from Dvin told him that Ayyub was born in a village of Rawadiya Kurds near its gate. Ibn Shaddad too says Ayyub was born at Dvin.",
+      "Ibn Khallikan also read an old genealogical roll that traced Ayyub's line to an Arab tribe. A later member of the family, al-Mu'izz Isma'il of Yemen, claimed descent from the Umayyads. Ibn Khallikan heard from Ibn Shaddad that Salah ad-Din rejected that claim as baseless."
+    ],
+    "differ": [
+      {
+        "claim": "Where the family came from",
+        "positions": [
+          {"source": "SRC-IKH", "says": "Kurds of the Rawadiya tribe from Dvin, as the historians agree, and as Ibn al-Athir also says."},
+          {"source": "SRC-IKH", "says": "An Arab genealogy on a roll shown to Ibn Khallikan, which he reports but does not vouch for."},
+          {"source": "SRC-IS", "says": "Ibn Khallikan heard from Ibn Shaddad that Salah ad-Din rejected the Umayyad claim of a descendant as having no foundation."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-S-GUIDE",
+    "category": "sources",
+    "title": "Reading the sources: who wrote what, and why",
+    "unlock": {"chapter": "CH-00", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IS", "SRC-IAT", "SRC-IKH", "SRC-IAI-BARQ", "SRC-ASH"],
+    "body": [
+      "Ibn Shaddad was Salah ad-Din's judge of the army from 1188. He saw the last years himself; for the earlier ones he wrote down what the Sultan told him and what others remembered. His book is warm and admiring.",
+      "Ibn al-Athir wrote at Mosul, for the Zengid house, and is cooler towards Salah ad-Din than towards Nur ad-Din. Ibn Khallikan, who wrote in the next century, quotes both with care, adds his own notes and corrects their dates. Imad ad-Din was a secretary in Salah ad-Din's service from 1175, and Abu Shama preserved long extracts of his work.",
+      "In this game a line marked with a filled diamond is a paraphrase of something a source records. A line marked with an open diamond is invented to join the facts together. Where the sources disagree, the Codex shows what each says."
+    ]
+  },
+  {
+    "id": "CDX-G-CH00",
+    "category": "game",
+    "title": "Game vs History: the Prologue",
+    "unlock": {"chapter": "CH-00", "at": "end"},
+    "confidence": null,
+    "sources": ["CH-00.E3", "CH-00.E4"],
+    "body": [
+      "The sources tell of a rout, of Zengi coming to Tikrit, of boats and provisions given, of Bihruz's letter of blame, and later of the quarrel and the exile. They do not tell of any fighting at the river. The pursuit at the landings, the waves of horsemen, archers and men-at-arms and the captain who leads the last are the game's own; the landings, the citadel and the map are invented.",
+      "The Recruit is an invented person, flagged as such wherever they appear. The soldiers of the garrison and the fleeing men of Zengi's army are unnamed composites. Zengi himself is seen only in a scene.",
+      "The brothers' conversations are original; the letters of Bihruz are paraphrases of what Ibn Khallikan quotes. Six years separate the clash from the quarrel, and the game passes them in a card."
+    ],
+    "dramatized": ["ch00.pursuit", "ch00.boats", "ch00.zengi-crosses", "ch00.after", "ch00.quarrel", "ch00.birth-night", "ch00.departure"]
+  }
+]

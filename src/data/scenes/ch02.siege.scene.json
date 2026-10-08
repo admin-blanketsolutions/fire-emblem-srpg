@@ -1,0 +1,15 @@
+{
+  "id": "ch02.siege",
+  "title": "Counting the bread",
+  "ledger": ["CH-02.E7", "CH-02.E10"],
+  "cmds": [
+    {"bg": "alexandria-wall"},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"show": {"who": "recruit", "at": "right"}},
+    {"say": {"who": "narrator", "text": "The siege goes on. Shirkuh is in Upper Egypt. No word comes from him.", "kind": "narration", "src": ["CH-02.E7"]}},
+    {"say": {"who": "recruit", "text": "The Alexandrians on the east wall asked me how long the bread will last, my lord. I said I did not know.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "It will last until it does not. That is the only honest answer, and you gave it. Tell them: it will last a day longer than Shawar's patience.", "kind": "dramatized"}},
+    {"say": {"who": "recruit", "text": "Shall I tell them that you say so?", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "Tell them that. They had better hear it from a man they have seen on the wall.", "kind": "dramatized"}}
+  ]
+}

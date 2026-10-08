@@ -16,5 +16,62 @@
       {"kind": "apply", "do": [{"grant": "ayyub-shirkuh", "atLeast": "C"}, {"grant": "recruit-ayyub", "atLeast": "C"}]},
       {"kind": "camp", "label": "On to Damascus"}
     ]
+  },
+  {
+    "id": "CH-01",
+    "title": "Damascus: The East Gate",
+    "date": "Safar 549 AH · April 1154",
+    "steps": [
+      {"kind": "card"},
+      {"kind": "scenes", "scenes": ["ch01.briefing"]},
+      {"kind": "apply", "do": [{"join": "salah-ad-din"}, {"join": "army-horse-archer", "count": 3}, {"join": "army-healer"}, {"away": ["ayyub"]}, {"give": "salve"}, {"dinars": 200}]},
+      {"kind": "camp", "label": "Ride into the Ghouta"},
+      {"kind": "apply", "do": [{"away": []}]},
+      {"kind": "battle", "battle": "CH-01"},
+      {"kind": "scenes", "scenes": ["ch01.after"]},
+      {"kind": "apply", "do": [{"grant": "ayyub-salah", "atLeast": "C"}, {"grant": "ayyub-shirkuh", "atLeast": "B"}]},
+      {"kind": "camp", "label": "Years pass"}
+    ]
+  },
+  {
+    "id": "CH-02",
+    "title": "The Road to Egypt: Alexandria",
+    "date": "562 AH · 1167",
+    "steps": [
+      {"kind": "card"},
+      {"kind": "scenes", "scenes": ["ch02.road"]},
+      {"kind": "apply", "do": [{"train": "salah-ad-din", "levels": 3}, {"join": "army-fire-thrower"}, {"join": "army-sapper"}, {"grant": "shirkuh-salah", "atLeast": "C"}, {"give": "naphtha-pot", "count": 2}, {"dinars": 400}]},
+      {"kind": "camp", "label": "March for Egypt"},
+      {"kind": "scenes", "scenes": ["ch02.babain", "ch02.farewell"]},
+      {"kind": "apply", "do": [{"away": ["shirkuh", "ayyub"]}]},
+      {"kind": "scenes", "scenes": ["ch02.silafi"]},
+      {"kind": "camp", "label": "Hold Alexandria"},
+      {"kind": "battle", "battle": "CH-02"},
+      {"kind": "scenes", "scenes": ["ch02.after"]},
+      {"kind": "apply", "do": [{"away": ["ayyub"]}, {"grant": "shirkuh-salah", "atLeast": "B"}]},
+      {"kind": "camp", "label": "Back to Syria"}
+    ]
+  },
+  {
+    "id": "CH-03",
+    "title": "The Vizier",
+    "date": "564 AH · 1169",
+    "steps": [
+      {"kind": "card"},
+      {"kind": "scenes", "scenes": ["ch03.bilbays", "ch03.shawar", "ch03.vizier"]},
+      {"kind": "apply", "do": [{"train": "salah-ad-din", "levels": 3}, {"grant": "shirkuh-salah", "atLeast": "A"}, {"away": ["ayyub"]}, {"dinars": 300}]},
+      {"kind": "camp", "label": "To Shirkuh's sickbed"},
+      {"kind": "scenes", "scenes": ["ch03.deathbed"]},
+      {"kind": "apply", "do": [{"leave": "shirkuh"}, {"join": "isa"}, {"train": "salah-ad-din", "levels": 3}]},
+      {"kind": "scenes", "scenes": ["ch03.succession"]},
+      {"kind": "battle", "battle": "CH-03B"},
+      {"kind": "apply", "do": [{"grant": "isa-salah", "atLeast": "C"}, {"join": "turan-shah"}, {"dinars": 400}]},
+      {"kind": "scenes", "scenes": ["ch03.plot"]},
+      {"kind": "camp", "label": "Into the night"},
+      {"kind": "battle", "battle": "CH-03C"},
+      {"kind": "scenes", "scenes": ["ch03.aftermath"]},
+      {"kind": "apply", "do": [{"grant": "turan-shah-salah", "atLeast": "C"}]},
+      {"kind": "camp", "label": "End of the slice"}
+    ]
   }
 ]

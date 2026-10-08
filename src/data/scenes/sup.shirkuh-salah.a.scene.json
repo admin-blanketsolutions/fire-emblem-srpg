@@ -1,0 +1,21 @@
+{
+  "id": "sup.shirkuh-salah.a",
+  "title": "The Vizier's Table",
+  "ledger": ["SUP-SHIRKUH-SALAH-A", "CH-03.E4"],
+  "cmds": [
+    {"bg": "vizier-hall"},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "narrator", "text": "Cairo, in the weeks of Shirkuh's vizierate. There is a table in the hall, and there is food on it.", "kind": "narration"}},
+    {"say": {"who": "narrator", "text": "Ibn Shaddad says that Shirkuh was a very hearty eater, so fond of rich dishes that he often suffered from surfeit and indigestion; after great pain he would recover.", "kind": "narration", "src": ["CH-03.E4"]}},
+    {"say": {"who": "salah-ad-din", "text": "The physician said you should leave the heavy dishes, uncle.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "The physician has not run an army through a desert in a storm. A man who has done that is owed his dinner.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "He is also owed an old age.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "Hm. An old age. I have never seen one close. Sit down. Read to me from the treasury's accounts while I eat, and tell me where the money is.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Shirkuh entrusted the management of affairs to Salah ad-Din, on account of his great abilities.", "kind": "narration", "src": ["CH-03.E4"]}},
+    {"say": {"who": "salah-ad-din", "text": "It is in the hands of men who have no reason to give it to us. We shall have to be fair, uncle, or we will not be here a year.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "That is my nephew. I never taught you that. You were born knowing it.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "You taught me to count the bread.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "So I did. Pass the dish.", "kind": "dramatized"}}
+  ]
+}

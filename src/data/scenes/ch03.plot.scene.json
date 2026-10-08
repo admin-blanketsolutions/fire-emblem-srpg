@@ -1,0 +1,26 @@
+{
+  "id": "ch03.plot",
+  "title": "The letter in the sandals",
+  "ledger": ["CH-03.E8", "CH-03.E13"],
+  "cmds": [
+    {"bg": "cairo-night"},
+    {"music": "story"},
+    {"say": {"who": "narrator", "text": "Dhu'l-Qa'da, 564 AH: late July and August, 1169. Salah ad-Din was taking away the fiefs the Egyptians held, and giving them to his own officers.", "kind": "narration", "src": ["CH-03.E8"]}},
+    {"say": {"who": "narrator", "text": "In the palace a eunuch, who ruled the household, held the title 'the Trusted of the Caliphate', the Mu'taman al-Khilafa. Imad ad-Din and Ibn al-Athir tell the same story of him.", "kind": "narration", "src": ["CH-03.E8"]}},
+    {"say": {"who": "narrator", "text": "They say that he agreed with others to write to the Franks and call them in: when Salah ad-Din marched out against them, they would fall upon the garrison left in Cairo, and then upon his rear.", "kind": "narration", "src": ["CH-03.E8"]}},
+    {"say": {"who": "narrator", "text": "The letter, they say, came to light thus. A Turkoman, passing a well, met a ragged man wearing two new sandals that showed no sign of walking. He thought it strange, took the sandals to Salah ad-Din, and Salah ad-Din had them unstitched; and the letter was in them.", "kind": "narration", "src": ["CH-03.E8"]}},
+    {"say": {"who": "narrator", "text": "Whether the plot was real is disputed. The Codex shows what each side says.", "kind": "narration", "src": ["CH-03.E8"]}},
+    {"show": {"who": "turan-shah", "at": "left"}},
+    {"show": {"who": "salah-ad-din", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Nur ad-Din had sent Salah ad-Din's elder brother Turan-Shah from Damascus with reinforcements, at the first news that the Franks were coming and of the plot in the palace. He reached Cairo on the 8th of Dhu'l-Qa'da, early in August, about three weeks before the fighting.", "kind": "narration", "src": ["CH-03.E13"]}},
+    {"say": {"who": "turan-shah", "text": "I came as fast as the horses would bear it. The Franks are marching, the palace is plotting, and my little brother is lord of Egypt. I did not expect to be bored.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "You will not be bored for long, brother.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Salah ad-Din kept the matter secret. The eunuch, in terror, hardly dared leave the palace. At last he went out to his country house at Kharrakaniyya, near Qalyub, to amuse himself in secret; and there, on Wednesday the 25th of Dhu'l-Qa'da, 564 AH (20 August 1169), men sent by Salah ad-Din took him and killed him.", "kind": "narration", "src": ["CH-03.E8"]}},
+    {"say": {"who": "narrator", "text": "The Black regiments of the palace rose, in great numbers. Ibn al-Athir and Imad ad-Din both say more than fifty thousand; the game does not use the figure, and the Codex says why.", "kind": "narration", "src": ["CH-03.E8"]}},
+    {"show": {"who": "abul-hayja", "at": "center"}},
+    {"say": {"who": "abul-hayja", "text": "My lord, the regiments are in the open ground between the two palaces. I have my men ready.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "Then go and hold the street, emir. They are the caliph's soldiers, and many of them are frightened. Take no more life than the street requires.", "kind": "dramatized"}},
+    {"unlock": "CDX-P-MUTAMIN"},
+    {"unlock": "CDX-S-PLOT1169"}
+  ]
+}

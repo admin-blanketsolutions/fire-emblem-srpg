@@ -1,0 +1,14 @@
+{
+  "id": "ch01.father",
+  "title": "The East Gate stands open",
+  "ledger": ["CH-01.E3"],
+  "cmds": [
+    {"bg": "damascus-wall"},
+    {"show": {"who": "ayyub", "at": "left"}},
+    {"show": {"who": "salah-ad-din", "at": "right"}},
+    {"say": {"who": "narrator", "text": "The histories name Ayyub among the greatest emirs of Damascus, but they do not say what he did on this day.", "kind": "narration", "src": ["CH-01.E3"]}},
+    {"say": {"who": "ayyub", "text": "Yusuf. You came through the gate and not over the wall. Good.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "Father! You are unhurt.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "I have been where I was needed, and no further. Now go to your uncle. A city is not won by a gate alone: it is won in the streets, the morning after.", "kind": "dramatized"}}
+  ]
+}

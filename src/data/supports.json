@@ -5,7 +5,8 @@
     "b": "shirkuh",
     "pace": "fast",
     "scenes": {
-      "C": { "scene": "sup.ayyub-shirkuh.c", "ledger": "SUP-AYYUB-SHIRKUH-C", "availableFrom": "CH-00" }
+      "C": {"scene": "sup.ayyub-shirkuh.c", "ledger": "SUP-AYYUB-SHIRKUH-C", "availableFrom": "CH-00"},
+      "B": {"scene": "sup.ayyub-shirkuh.b", "ledger": "SUP-AYYUB-SHIRKUH-B", "availableFrom": "CH-01"}
     }
   },
   {
@@ -14,7 +15,7 @@
     "b": "ayyub",
     "pace": "fast",
     "scenes": {
-      "C": { "scene": "sup.recruit-ayyub.c", "ledger": "SUP-RECRUIT-AYYUB-C", "availableFrom": "CH-00" }
+      "C": {"scene": "sup.recruit-ayyub.c", "ledger": "SUP-RECRUIT-AYYUB-C", "availableFrom": "CH-00"}
     }
   },
   {
@@ -23,7 +24,37 @@
     "b": "salah-ad-din",
     "pace": "normal",
     "scenes": {
-      "C": { "scene": "sup.ayyub-salah.c", "ledger": "SUP-AYYUB-SALAH-C", "availableFrom": "CH-01" }
+      "C": {"scene": "sup.ayyub-salah.c", "ledger": "SUP-AYYUB-SALAH-C", "availableFrom": "CH-01"}
+    }
+  },
+  {
+    "id": "shirkuh-salah",
+    "a": "shirkuh",
+    "b": "salah-ad-din",
+    "pace": "fast",
+    "scenes": {
+      "C": {"scene": "sup.shirkuh-salah.c", "ledger": "SUP-SHIRKUH-SALAH-C", "availableFrom": "CH-02"},
+      "B": {"scene": "sup.shirkuh-salah.b", "ledger": "SUP-SHIRKUH-SALAH-B", "availableFrom": "CH-02"},
+      "A": {"scene": "sup.shirkuh-salah.a", "ledger": "SUP-SHIRKUH-SALAH-A", "availableFrom": "CH-03"}
+    }
+  },
+  {
+    "id": "isa-salah",
+    "a": "isa",
+    "b": "salah-ad-din",
+    "pace": "normal",
+    "scenes": {
+      "C": {"scene": "sup.isa-salah.c", "ledger": "SUP-ISA-SALAH-C", "availableFrom": "CH-03"}
+    }
+  },
+  {
+    "id": "turan-shah-salah",
+    "a": "turan-shah",
+    "b": "salah-ad-din",
+    "pace": "normal",
+    "bondKind": "kin",
+    "scenes": {
+      "C": {"scene": "sup.turanshah-salah.c", "ledger": "SUP-TURANSHAH-SALAH-C", "availableFrom": "CH-03"}
     }
   }
 ]

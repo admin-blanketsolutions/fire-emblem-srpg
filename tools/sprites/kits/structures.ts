@@ -100,12 +100,36 @@ function mangonel(armUp: boolean): Pix {
   return p;
 }
 
+/** A pavilion: a raised canopy on posts, its cloth in the owner's colours, a doorway in the middle. A plain finial: no emblem of any faith. */
+function pavilion(): Pix {
+  const p = new Pix(16, 16, 0);
+  p.rect(1, 13, 14, 2, M);
+  p.hline(1, 13, 14, MH);
+  p.vline(2, 6, 7, W);
+  p.vline(13, 6, 7, W);
+  p.rect(3, 8, 10, 5, A);
+  p.hline(3, 8, 10, B);
+  p.hline(3, 12, 10, T);
+  p.vline(7, 9, 4, O);
+  p.vline(8, 9, 4, O);
+  for (let y = 1; y <= 7; y++) {
+    const half = y + 1;
+    p.hline(8 - half, y, half * 2, y % 2 === 0 ? A : B);
+  }
+  p.hline(1, 7, 14, T);
+  p.vline(7, 0, 2, L);
+  p.set(8, 0, T);
+  p.outline(O);
+  return p;
+}
+
 export function structureSprites(): SpriteDef[] {
   return [
     structure('unit.gate', [gate()]),
     structure('unit.wall-segment', [wallSegment()]),
     structure('unit.barricade', [barricade()]),
     structure('unit.mangonel', [mangonel(false), mangonel(true)]),
+    structure('unit.pavilion', [pavilion()]),
   ];
 }
 

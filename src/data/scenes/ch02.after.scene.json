@@ -1,0 +1,19 @@
+{
+  "id": "ch02.after",
+  "title": "The peace",
+  "ledger": ["CH-02.E7", "CH-02.E8"],
+  "cmds": [
+    {"bg": "alexandria-sea"},
+    {"music": "story"},
+    {"say": {"who": "narrator", "text": "In Jumada II, 562 AH: March and April of 1167, Salah ad-Din sustained the siege of Alexandria, against Shawar and the Egyptian army.", "kind": "narration", "src": ["CH-02.E7"]}},
+    {"say": {"who": "narrator", "text": "At Bilbays, Shirkuh made peace with the Egyptians, and obtained the Franks' promise that they would leave Egypt before the end of the year. The Egyptians escorted Salah ad-Din out of Alexandria, to his uncle.", "kind": "narration", "src": ["CH-02.E7"]}},
+    {"say": {"who": "narrator", "text": "What decided the Franks to leave was the news that Nur ad-Din had invaded their country and taken the fortress of al-Munaytira.", "kind": "narration", "src": ["CH-02.E8"]}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "shirkuh", "text": "You held it.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "It held me, uncle, as much as I held it. I counted the bread every morning.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "That is the first thing I taught you, and the only thing you have ever done exactly as I said.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Salah ad-Din went back to Syria with Shirkuh. The month was Shawwal or Dhu'l-Qa'da, 562: August or September, 1167.", "kind": "narration", "src": ["CH-02.E7"]}},
+    {"unlock": "CDX-E-ALEXANDRIA1167"}
+  ]
+}

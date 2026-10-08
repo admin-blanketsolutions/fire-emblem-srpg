@@ -23,6 +23,8 @@ interface Row {
   won: number;
   turns: number;
   lost: number;
+  /** Why the battles that were lost were lost. */
+  reasons: Map<string, number>;
   levels: Map<string, { from: number; to: number; n: number }>;
 }
 
@@ -43,15 +45,17 @@ describe('balance', () => {
       if (!r) continue;
       const levels = [...r.levels].map(([u, v]) => `${u} ${(v.from / v.n).toFixed(1)}→${(v.to / v.n).toFixed(1)}`).join(', ');
       lines.push(`${id.padEnd(7)} won ${((100 * r.won) / r.runs).toFixed(0).padStart(3)}%  turns ${(r.turns / r.runs).toFixed(1).padStart(4)}  lost ${(r.lost / r.runs).toFixed(1)}/run   ${levels}`);
+      if (r.reasons.size > 0) lines.push(`        defeats: ${[...r.reasons].map(([why, n]) => `${why} ×${n}`).join('; ')}`);
     }
     console.log(lines.join('\n'));
   });
 });
 
 function add(rows: Map<string, Row>, b: BattleReport): void {
-  const r = rows.get(b.battle) ?? { runs: 0, won: 0, turns: 0, lost: 0, levels: new Map() };
+  const r = rows.get(b.battle) ?? { runs: 0, won: 0, turns: 0, lost: 0, reasons: new Map(), levels: new Map() };
   r.runs += 1;
   r.won += b.result === 'won' ? 1 : 0;
+  if (b.result === 'lost') r.reasons.set(b.reason, (r.reasons.get(b.reason) ?? 0) + 1);
   r.turns += b.turns;
   r.lost += b.lost.length;
   for (const [unit, [from, to]] of Object.entries(b.levels)) {

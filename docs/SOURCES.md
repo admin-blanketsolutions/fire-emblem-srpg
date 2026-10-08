@@ -486,6 +486,7 @@ Entries unlock by chapter. All entries carry their confidence badge and sources.
 | `CDX-P-SILAFI` | al-Hafiz al-Silafi | CH-02 | Attested | IS, IKh | |
 | `CDX-P-SHAWAR` | Shawar | CH-02 | Attested | IS, IKh | |
 | `CDX-P-AMALRIC` | Amalric I | CH-02 | Attested | WT (Frankish) | labelled Frankish side |
+| `CDX-P-EMIRS` | The emirs of Shirkuh's army: al-Yaruqi, Qutb ad-Din, al-Mashtub, al-Harimi | CH-03 | Attested | IKh-dS IV pp. 494–495 (IAT); IA-RHC *Atabegs* (RHC Or. II.2 pp. 255–257) | PD |
 | `CDX-P-ISA` | Isa al-Hakkari | CH-03 | Attested | IKh | |
 | `CDX-P-TURANSHAH` | Turan-Shah | CH-03 | Attested | IKh, IS | |
 | `CDX-P-ADID` | al-Adid | CH-03 | Attested | IKh, IS | |
@@ -509,6 +510,7 @@ Entries unlock by chapter. All entries carry their confidence badge and sources.
 | `CDX-T-ATABEG` | Atabeg | CH-00 | Attested | IKh | |
 | `CDX-T-IQTA` | Iqta' | CH-00 | Attested | IKh, IS | explains the promotion item |
 | `CDX-T-DIZDAR` | Dizdar / shihna | CH-00 | Attested | IKh | |
+| `CDX-T-AHDATH` | Ahdath: the urban guard | CH-01 | Attested | MOD-RHC (the editor's index note: the city militia of Aleppo and Damascus, remarked for courage and independence; IA-RHC *Kamil* and *Atabegs* for the guard that opened the East Gate) | PD |
 | `CDX-T-KHUTBA` | Khutba | CH-03 | Attested | IS, IKh | |
 | `CDX-T-WAZIR` | Vizier (wazir) of Egypt | CH-02 | Attested | IS, IKh | |
 | `CDX-T-NAFFAT` | Naffat (the Fire Thrower's flavour name) | CH-02 | Attested | IS | |

@@ -1,0 +1,17 @@
+{
+  "id": "sup.isa-salah.c",
+  "title": "The Persuader",
+  "ledger": ["SUP-ISA-SALAH-C", "CH-03.E5"],
+  "cmds": [
+    {"bg": "cairo-palace"},
+    {"show": {"who": "isa", "at": "right"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "narrator", "text": "Cairo, in the days after the emirs came over.", "kind": "narration"}},
+    {"say": {"who": "salah-ad-din", "text": "You said one thing to al-Mashtub, another to my uncle, a third to Qutb ad-Din. I listened to each of them, and each was true. Which was your own?", "kind": "dramatized"}},
+    {"say": {"who": "isa", "text": "All three. A man with one reason to follow you will leave when the reason does. A man with three will stay.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "You spoke to Qutb ad-Din of origins. I was not easy about that.", "kind": "dramatized"}},
+    {"say": {"who": "isa", "text": "I said what he could hear, as I said to the others. It was not a promise from you. Do not be easy about it: be careful with it. The day you need men of every kind, you will be glad you never asked who their grandfathers were.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "That is a better argument than the one you used.", "kind": "dramatized"}},
+    {"say": {"who": "isa", "text": "It is the same argument, my lord. I only told the part of it he could hear.", "kind": "dramatized"}}
+  ]
+}

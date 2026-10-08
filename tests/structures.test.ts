@@ -14,7 +14,7 @@ const stops = (r: ReachResult): string[] => r.stops.map((p) => `${p.x},${p.y}`).
 
 describe('the structure table', () => {
   it('describes gates, walls, barricades and mangonels', () => {
-    expect([...structures.keys()].sort()).toEqual(['barricade', 'gate', 'mangonel', 'wall-segment']);
+    expect([...structures.keys()].sort()).toEqual(['barricade', 'city-gate', 'city-wall', 'gate', 'mangonel', 'pavilion', 'wall-segment']);
     expect(structures.get('gate')).toMatchObject({ hp: 24, grd: 4 });
     expect(structures.get('wall-segment')?.breach).toBe('plain');
     expect(structures.get('mangonel')).toMatchObject({ weapon: 'mangonel-stone', fireWeak: true });

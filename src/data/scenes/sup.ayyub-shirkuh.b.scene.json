@@ -1,0 +1,22 @@
+{
+  "id": "sup.ayyub-shirkuh.b",
+  "title": "Baalbek Surrendered",
+  "ledger": ["SUP-AYYUB-SHIRKUH-B", "CH-00.E9"],
+  "cmds": [
+    {"bg": "damascus-dusk"},
+    {"show": {"who": "ayyub", "at": "left"}},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Damascus, some days after the city's fall. In Ayyub's house the brothers sit late.", "kind": "narration"}},
+    {"say": {"who": "shirkuh", "text": "Nur ad-Din took a city this week and did not break it. I wondered whether you were thinking of Baalbek.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "I am always thinking of Baalbek. A man does not hand over a fortress without asking what else he could have done.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "After Zengi's murder, the army of Damascus besieged Ayyub in Baalbek. He sent to Zengi's son at Mosul for troops, but the young prince was new to his throne and was trying to live at peace with his neighbours, and no troops came.", "kind": "narration", "src": ["CH-00.E9"]}},
+    {"say": {"who": "shirkuh", "text": "I told you to hold it.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "You told me a great deal, from Nur ad-Din's camp.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "As the garrison grew desperate, Ayyub feared the fortress would be taken by storm. He offered to surrender it, if he were given a fief; the lord of Damascus agreed, and swore to it.", "kind": "narration", "src": ["CH-00.E9"]}},
+    {"say": {"who": "ayyub", "text": "Every man in that fort went home alive. I have never been sorry for it.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "Nor have I. I only wished it had been me who had to choose.", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "No. You would have held it until the last stone. That is why it was I who held the keys.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "And now one lord has the two of us, and Damascus besides. It was never two roads, was it?", "kind": "dramatized"}},
+    {"say": {"who": "ayyub", "text": "It was always one. We were slow to see it.", "kind": "dramatized"}}
+  ]
+}

@@ -91,7 +91,7 @@ function ride(h: Harness): void {
 function records(h: Harness): void {
   const camp = h.scene() as CampScene;
   const items = (camp as unknown as { mainItems(): Array<{ label: string }> }).mainItems();
-  (camp as unknown as { mode: { kind: 'main'; index: number } }).mode = { kind: 'main', index: items.findIndex((i) => i.label === 'Codex and saves') };
+  (camp as unknown as { mode: { kind: 'main'; index: number } }).mode = { kind: 'main', index: items.findIndex((i) => i.label.startsWith('Codex and saves')) };
   h.press('confirm');
 }
 

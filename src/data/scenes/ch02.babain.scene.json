@@ -1,0 +1,19 @@
+{
+  "id": "ch02.babain",
+  "title": "The day of al-Babain",
+  "ledger": ["CH-02.E6", "CH-02.E7"],
+  "cmds": [
+    {"bg": "desert"},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "narrator", "text": "Shawar and all the Egyptians joined the Franks to give battle to Shirkuh. There were many skirmishes and many battles.", "kind": "narration", "src": ["CH-02.E6"]}},
+    {"say": {"who": "narrator", "text": "Ibn Khallikan's notes place the battle of al-Babain near Ushmunayn, in Middle Egypt. Ibn Shaddad's own account does not mention it.", "kind": "narration", "src": ["CH-02.E6"]}},
+    {"say": {"who": "narrator", "text": "After the battle, Salah ad-Din went to Alexandria, and fortified himself there.", "kind": "narration", "src": ["CH-02.E7"]}},
+    {"say": {"who": "shirkuh", "text": "The Franks and Shawar will not let me alone in the south. Alexandria is yours to hold. It has walls, and a harbour.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "And if it does not wish to be held, uncle?", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "Then be its friend before you are its master. Hold it until I come.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "And if you do not come?", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "Then I shall have been a poor uncle. I will come.", "kind": "dramatized"}},
+    {"unlock": "CDX-S-BABAIN"}
+  ]
+}

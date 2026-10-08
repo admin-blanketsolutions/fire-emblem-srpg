@@ -94,6 +94,14 @@ export class GameFlow {
     this.run();
   }
 
+  /** Play a campaign that already exists, from the step it stands at (a save, or one set up for a test). */
+  play(campaign: Campaign): void {
+    this.campaign = campaign;
+    this.fresh = 0;
+    this.openChapter();
+    this.run();
+  }
+
   // ---------------------------------------------------------------- walking the steps
 
   /** The step the campaign has reached, and carry it out. */
@@ -221,7 +229,8 @@ export class GameFlow {
     const campaign = this.need();
     const story = this.story();
     this.prepareDeployment();
-    const news = this.fresh > 0 ? `Codex: ${this.fresh} new ${this.fresh === 1 ? 'entry' : 'entries'}` : undefined;
+    // what opened since the last camp is said beside the Codex, not in the title
+    const news = this.fresh > 0 ? `  (${this.fresh} new)` : '';
     this.fresh = 0;
     const scene: CampScene = new CampScene({
       army: campaign.army,
@@ -236,10 +245,10 @@ export class GameFlow {
       flags: campaign.flags,
       names: this.names(),
       onUnlock: (id) => this.unlockEntries([id]),
-      title: note ?? news ?? 'Camp',
+      title: note ?? 'Camp',
       continueLabel: label ?? 'Ride on',
       onContinue: () => this.rideOut(),
-      extraItems: () => [{ label: 'Codex and saves', run: () => this.show(this.campOptions(scene)) }],
+      extraItems: () => [{ label: `Codex and saves${news}`, run: () => this.show(this.campOptions(scene)) }],
     });
     audio.playMusic('camp');
     this.show(scene);
@@ -304,9 +313,11 @@ export class GameFlow {
   beginBattle(battleId: string): Scene {
     const campaign = this.need();
     const story = this.story();
-    // a battle with no camp before it has no ride-out to save at: save as it begins
-    const before = story.chapters.get(campaign.chapter ?? '')?.steps[campaign.step - 1];
-    if (before?.kind !== 'camp') this.writeSave({ kind: 'autosave' }, this.saveLabel());
+    // a battle with no camp before it (changes to the army may stand between) has no ride-out to save at: save as it begins
+    const steps = story.chapters.get(campaign.chapter ?? '')?.steps ?? [];
+    let back = campaign.step - 1;
+    while (back >= 0 && steps[back]?.kind === 'apply') back -= 1;
+    if (steps[back]?.kind !== 'camp') this.writeSave({ kind: 'autosave' }, this.saveLabel());
     const source = sourceOf(campaign.story, battleId);
     const battle = battleFrom(source, { hitMode: this.settings.hitMode, guaranteedProgress: this.settings.guaranteedProgress }, hashSeed(campaign.seed, battleId), false);
     launchBattle(campaign, battle);

@@ -1,0 +1,73 @@
+{
+  "id": "CH-03C",
+  "name": "Bayn al-Qasrayn",
+  "size": [24, 16],
+  "tileset": "cairo-night",
+  "terrain": [
+    ".......##########.......",
+    "...####T########T####...",
+    "...####:::FFFF:::####...",
+    ".H.####:::FFFF:::####.H.",
+    "...#FF#::::::::::#FF#...",
+    "H..#FFO::::::::::OFF#...",
+    "...#FF#::H::::H::#FF#...",
+    "...####::::HH::::####...",
+    ".H.####::::::::::####.H.",
+    "...#FF#::H::::H::#FF#...",
+    "...#FFO::::::::::OFF#..H",
+    "...#FF#::::::::::#FF#...",
+    ".H.####:H::::::H:####.H.",
+    "...####::::::::::####...",
+    "...####::::::::::####...",
+    "...########OO########..."
+  ],
+  "legend": {".": "plain", ":": "road", "#": "wall", "O": "gate", "F": "fort", "H": "house", "T": "tower"},
+  "spawns": {
+    "player": [
+      {"unit": "salah-ad-din", "at": [11, 13], "tags": ["lord"]},
+      {"unit": "turan-shah", "at": [10, 12]},
+      {"unit": "isa", "at": [12, 13]},
+      {"unit": "qutb-ad-din", "at": [9, 13]},
+      {"unit": "al-mashtub", "at": [13, 12]},
+      {"unit": "al-harimi", "at": [8, 13]},
+      {"unit": "garrison-pikeman", "at": [10, 11], "tags": ["slot"]},
+      {"unit": "garrison-pikeman", "at": [12, 11], "tags": ["slot"]},
+      {"unit": "army-horse-archer", "at": [14, 13], "tags": ["slot"]},
+      {"unit": "army-horse-archer", "at": [15, 13], "tags": ["slot"]},
+      {"unit": "army-horse-archer", "at": [7, 13], "tags": ["slot"]},
+      {"unit": "army-fire-thrower", "at": [11, 12], "tags": ["slot"]},
+      {"unit": "army-healer", "at": [13, 14], "tags": ["slot"]},
+      {"unit": "garrison-soldier", "at": [9, 12], "tags": ["slot"]},
+      {"unit": "garrison-soldier", "at": [14, 12], "tags": ["slot"]}
+    ],
+    "ally": [
+      {"unit": "abul-hayja", "at": [11, 10], "ai": {"mode": "aggressive"}, "tags": ["ally-captain"]}
+    ],
+    "enemy": [
+      {"unit": "pavilion", "at": [11, 2], "faction": "fatimid"},
+      {"unit": "sudani-infantry", "at": [5, 5], "ai": {"mode": "defensive", "aggroRange": 4}},
+      {"unit": "sudani-infantry", "at": [5, 10], "ai": {"mode": "defensive", "aggroRange": 4}},
+      {"unit": "sudani-infantry", "at": [18, 5], "ai": {"mode": "defensive", "aggroRange": 4}},
+      {"unit": "sudani-infantry", "at": [18, 10], "ai": {"mode": "defensive", "aggroRange": 4}},
+      {"unit": "armenian-archer", "at": [4, 4], "ai": {"mode": "defensive", "aggroRange": 4}},
+      {"unit": "armenian-archer", "at": [19, 11], "ai": {"mode": "defensive", "aggroRange": 4}},
+      {"unit": "palace-guard", "at": [10, 3], "ai": {"mode": "guard", "guard": [11, 2]}},
+      {"unit": "palace-guard", "at": [12, 3], "ai": {"mode": "guard", "guard": [11, 2]}},
+      {"unit": "cairo-militia", "at": [10, 4], "ai": {"mode": "guard", "guard": [11, 2]}},
+      {"unit": "cairo-militia", "at": [12, 4], "ai": {"mode": "guard", "guard": [11, 2]}}
+    ]
+  },
+  "fog": true,
+  "visionPenalty": 1,
+  "reinforcements": [
+    {"turn": 2, "phase": "enemy", "units": [{"def": "sudani-infantry", "at": [5, 6]}, {"def": "cairo-militia", "at": [5, 9]}, {"def": "sudani-infantry", "at": [18, 6]}, {"def": "cairo-militia", "at": [18, 9]}]},
+    {"turn": 4, "phase": "enemy", "units": [{"def": "armenian-archer", "at": [5, 4]}, {"def": "palace-guard", "at": [5, 11]}, {"def": "armenian-archer", "at": [18, 4]}, {"def": "palace-guard", "at": [18, 11]}]},
+    {"turn": 6, "phase": "enemy", "units": [{"def": "sudani-infantry", "at": [5, 5]}, {"def": "sudani-infantry", "at": [5, 10]}, {"def": "regiment-commander", "at": [18, 5], "tags": ["leader"]}, {"def": "sudani-infantry", "at": [18, 10]}, {"def": "cairo-militia", "at": [18, 6]}]}
+  ],
+  "objective": {"type": "survive", "turns": 8},
+  "events": [
+    {"id": "t1", "when": {"type": "turnStart", "turn": 1, "phase": "player"}, "then": [{"type": "message", "text": "Night, and fog: the regiments of the palace have risen between the two palaces. Hold the square until the end of turn 8. Or burn the caliph's pavilion at the head of it with the Fire Thrower: the fighting will end at once."}]},
+    {"id": "t5", "when": {"type": "turnStart", "turn": 5, "phase": "player"}, "then": [{"type": "message", "text": "Turan-Shah calls for naphtha. The pavilion is at the north end of the square: fire does double against it."}]},
+    {"id": "pavilion", "when": {"type": "unitDefeated", "unit": "pavilion"}, "then": [{"type": "dialogue", "scene": "ch03.pavilion"}, {"type": "flag", "name": "pavilion-burned"}, {"type": "endChapter", "result": "won", "reason": "The regiments lost heart and scattered."}]}
+  ]
+}

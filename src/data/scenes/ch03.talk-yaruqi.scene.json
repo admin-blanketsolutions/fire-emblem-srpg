@@ -1,0 +1,14 @@
+{
+  "id": "ch03.talk-yaruqi",
+  "title": "Isa and al-Yaruqi",
+  "ledger": ["CH-03.E5"],
+  "cmds": [
+    {"bg": "council-tent"},
+    {"show": {"who": "isa", "at": "left"}},
+    {"show": {"who": "al-yaruqi", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Last, Isa went to Ain ad-Dawla al-Yaruqi, the chief of the emirs, who had more troops than all the rest. On him he used every argument he had, and used them in vain.", "kind": "narration", "src": ["CH-03.E5"]}},
+    {"say": {"who": "al-yaruqi", "text": "No. I will never serve under Yusuf.", "kind": "documented", "src": ["CH-03.E5"]}},
+    {"say": {"who": "narrator", "text": "Al-Yaruqi went back to Nur ad-Din with his men, and some other emirs went with him. Nur ad-Din blamed him for leaving Egypt; but it was done.", "kind": "narration", "src": ["CH-03.E5"]}},
+    {"unlock": "CDX-P-EMIRS"}
+  ]
+}

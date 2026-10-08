@@ -1,0 +1,107 @@
+[
+  {
+    "id": "CDX-P-NURADDIN",
+    "category": "people",
+    "title": "Nur ad-Din Mahmud",
+    "unlock": {"chapter": "CH-01", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IS", "SRC-IAT", "CH-01.E5", "CH-01.E6"],
+    "body": [
+      "The son of Zengi, lord of Aleppo and, from 549 AH (1154), of Damascus; his name means 'light of the faith' and he is called 'the just king'. Ibn Khallikan describes him as just, pious and devout, a strict observer of the law, partial to virtuous men and indefatigable in works of charity. He built colleges in the great cities of Syria, and in Damascus a hospital and a school for the study of Tradition.",
+      "Ayyub and Shirkuh served him, and so did Ayyub's son. Ibn Khallikan judged that it was from Nur ad-Din that Salah ad-Din learned righteousness and zeal in the war against the Franks.",
+      "Ibn al-Athir wrote the history of the Zengid house and admired Nur ad-Din; where this game follows him it says so."
+    ]
+  },
+  {
+    "id": "CDX-P-ABAQ",
+    "category": "people",
+    "title": "Mujir ad-Din Abaq",
+    "unlock": {"chapter": "CH-01", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IAT", "CH-01.E1", "CH-01.E2"],
+    "body": [
+      "The ruler of Damascus, of the line of Toghtikin: the son of Muhammad, grandson of Buri. When Nur ad-Din blockaded the city, Ibn al-Athir says, he wrote to the Franks offering money, and the fortress of Baalbek, if they would make Nur ad-Din withdraw.",
+      "When the city fell he gave up the citadel in return for a fief that included Homs. Nur ad-Din later took Homs back and offered him Balis instead; Abaq refused it, went to Iraq, lived at Baghdad and obtained a pension from the Caliph."
+    ]
+  },
+  {
+    "id": "CDX-L-DAMASCUS",
+    "category": "places",
+    "title": "Damascus and the Ghouta",
+    "unlock": {"chapter": "CH-01", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IKH", "SRC-IAT", "MOD-RHC", "CH-01.E1", "CH-01.E2"],
+    "body": [
+      "In 549 AH Damascus lay between Nur ad-Din's lands in the north and the Franks of Ascalon, who laid a yearly tribute on the city. It was the one great city of Syria that was not in Nur ad-Din's hands.",
+      "The country to the south and east of it, a note in the French edition of Ibn al-Athir observes, is covered with gardens and is called the Ghouta. The map of this chapter takes its orchards and canals from that; its walls, towers and streets are the game's own."
+    ]
+  },
+  {
+    "id": "CDX-E-DAMASCUS1154",
+    "category": "events",
+    "title": "Nur ad-Din takes Damascus",
+    "unlock": {"chapter": "CH-01", "at": "end"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IAT", "SRC-IKH", "CH-01.E1", "CH-01.E2"],
+    "body": [
+      "Nur ad-Din feared that the Franks would take Damascus, and chose guile over force. He sent Mujir ad-Din gifts and friendship, and warned him again and again that one of his emirs had offered to betray the city, until Mujir ad-Din had dismissed or imprisoned the able ones and had had the chief officer of his state, 'Ata ibn Hafiz, arrested and killed.",
+      "He then wrote to the members of the urban guard, and they promised to hand him the city. When he blockaded it, and Mujir ad-Din appealed to the Franks, the guard rose and opened the East Gate. Nur ad-Din entered, pledging the lives and property of the inhabitants, and besieged Mujir ad-Din in the citadel until he accepted a fief. The Franks, who had been gathering to relieve the city, turned back.",
+      "Neither of Ibn al-Athir's accounts says what Ayyub or Shirkuh did in the taking of Damascus; the game shows them there and no more."
+    ],
+    "differ": [
+      {
+        "claim": "The day, and the length of the blockade",
+        "positions": [
+          {"source": "SRC-IKH", "says": "Nur ad-Din laid siege on the 3rd of Safar 549 AH and occupied the city on Sunday the 9th (April 1154), six days later."},
+          {"source": "SRC-IAT", "says": "In the history of the Atabegs: a blockade of ten days, and the entry on the 10th of Safar (26 April 1154). In the larger history he gives only the month of Safar."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-S-DAMASCUS-DAY",
+    "category": "sources",
+    "title": "Damascus in April 1154: which day, how long a siege?",
+    "unlock": {"chapter": "CH-01", "at": "end"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IKH", "SRC-IAT", "CH-01.E1"],
+    "body": [
+      "Ibn Khallikan gives the siege from the 3rd to Sunday the 9th of Safar 549 AH. Ibn al-Athir, in his history of the Zengid atabegs, gives a blockade of ten days and the entry on the 10th. The tabular calendar agrees that the 9th of Safar was a Sunday, which is why the game names that day; the other account is shown here."
+    ],
+    "differ": [
+      {
+        "claim": "When Nur ad-Din entered Damascus",
+        "positions": [
+          {"source": "SRC-IKH", "says": "Sunday the 9th of Safar 549, after a siege begun on the 3rd."},
+          {"source": "SRC-IAT", "says": "The 10th of Safar 549 (26 April 1154), after a blockade of ten days."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-T-AHDATH",
+    "category": "terms",
+    "title": "Ahdath: the urban guard",
+    "unlock": {"chapter": "CH-01", "at": "start"},
+    "confidence": "attested",
+    "sources": ["MOD-RHC", "SRC-IAT", "CH-01.E2"],
+    "body": [
+      "The ahdath were a city's own militia: the French editors of Ibn al-Athir note that those of Aleppo and Damascus were often remarked for their courage and their spirit of independence. Their word counted for something in a siege: a ruler who lost the guard lost his gates.",
+      "It was the urban guard of Damascus, to whom Nur ad-Din had written, that rose and opened the East Gate to him. In the game, the Urban Guard Captain who meets Salah ad-Din in the orchard is an invented person standing for them all."
+    ]
+  },
+  {
+    "id": "CDX-G-CH01",
+    "category": "game",
+    "title": "Game vs History: Damascus",
+    "unlock": {"chapter": "CH-01", "at": "end"},
+    "confidence": null,
+    "sources": ["CH-01.E2", "CH-01.E3", "CH-01.E7"],
+    "body": [
+      "The sources say that Nur ad-Din took Damascus by arrangement with its guard: the East Gate was opened to him, and the city changed hands with little fighting. There was no battle in the orchards. The skirmishes outside the wall, the Burid garrison's sorties, the archers on the ramparts and the tower, and the captain at the gate are invented to make a chapter.",
+      "Salah ad-Din was about sixteen and in Nur ad-Din's service, and Ayyub was one of the emirs of Damascus; but no source says where either was on the day, or what Shirkuh did. Their places in the map, the meeting with the captain of the guard and Ayyub's arrival inside the walls are the game's own.",
+      "The turn limit stands for the Franks, who were gathering to relieve the city and turned back when it fell. The training in the camp is generic drill; no source describes how Salah ad-Din learned to ride and fight."
+    ],
+    "dramatized": ["ch01.briefing", "ch01.gate-captain", "ch01.father", "ch01.after", "sup.ayyub-shirkuh.b", "sup.ayyub-salah.c"]
+  }
+]

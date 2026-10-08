@@ -165,6 +165,10 @@ function place(unit: UnitInstance, at: { x: number; y: number; side: UnitInstanc
     triggered: false,
   });
   unit.tags = tags.filter((t) => t !== OPEN_SLOT);
+  // a reserve of the map stands off it until an event brings it on
+  const reserve = unit.tags.includes('reserve');
+  unit.retreated = reserve;
+  unit.escaped = reserve;
 }
 
 // ------------------------------------------------------------------ a battle's beginning and end

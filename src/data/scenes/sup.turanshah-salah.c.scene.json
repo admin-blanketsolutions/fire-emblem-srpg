@@ -1,0 +1,18 @@
+{
+  "id": "sup.turanshah-salah.c",
+  "title": "Lord of Egypt",
+  "ledger": ["SUP-TURANSHAH-SALAH-C", "CH-03.E12", "CH-03.E13"],
+  "cmds": [
+    {"bg": "cairo-palace"},
+    {"show": {"who": "turan-shah", "at": "left"}},
+    {"show": {"who": "salah-ad-din", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Cairo, in the weeks after the fighting. Turan-Shah, the elder brother, has come to the palace and stands in front of the seat where Salah ad-Din is sitting.", "kind": "narration"}},
+    {"say": {"who": "salah-ad-din", "text": "Sit, brother. You are my elder.", "kind": "dramatized"}},
+    {"say": {"who": "turan-shah", "text": "I will tell you what Nur ad-Din said to me at Damascus, before I came.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Nur ad-Din told Turan-Shah: if he meant to look upon his brother Yusuf as when he served him, waiting on him whilst he sat, he had better not go, for he would bring ruin on the country. But if he went to look upon him as the lord of Egypt and as his own lieutenant, and serve him as he served Nur ad-Din, he might go, and be a firm support to him.", "kind": "narration", "src": ["CH-03.E12"]}},
+    {"say": {"who": "turan-shah", "text": "So I stand until you tell me to sit, my lord of Egypt.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Turan-Shah answered Nur ad-Din that he would serve Salah ad-Din in a manner Nur ad-Din would hear of with satisfaction, and he behaved towards him as he said.", "kind": "narration", "src": ["CH-03.E12"]}},
+    {"say": {"who": "salah-ad-din", "text": "Then sit, brother. We have both stood long enough.", "kind": "dramatized"}},
+    {"say": {"who": "turan-shah", "text": "At my age a man likes to sit with a lord who knows where the chair is.", "kind": "dramatized"}}
+  ]
+}

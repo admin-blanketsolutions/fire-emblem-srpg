@@ -992,6 +992,19 @@ export class BattleState {
           }
         }
         break;
+      case 'arrive':
+        for (const u of this.units) {
+          if (!u.tags.includes('reserve') || !matchesKey(u, action.unit)) continue;
+          const tile = this.freeTileNear(action.at ? { x: action.at[0], y: action.at[1] } : { x: u.x, y: u.y }, u);
+          if (!tile) {
+            this.unhandled.push(action);
+            continue;
+          }
+          u.tags = u.tags.filter((t) => t !== 'reserve');
+          Object.assign(u, { retreated: false, escaped: false, x: tile.x, y: tile.y, home: { x: tile.x, y: tile.y } });
+          this.arrivals.push(u);
+        }
+        break;
       case 'promote':
         for (const u of this.units) {
           if (u.retreated || !matchesKey(u, action.unit)) continue;

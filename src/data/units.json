@@ -138,7 +138,7 @@
     "level": 2,
     "offset": {"hp": 4, "grd": 1},
     "growth": {"hp": 60, "mgt": 40, "skl": 40, "spd": 40, "fort": 30, "grd": 35, "nrv": 15},
-    "inventory": ["levy-spear", "javelin"],
+    "inventory": ["brace-spear", "javelin"],
     "faction": "ayyubid",
     "skin": "s2"
   },
@@ -542,5 +542,19 @@
     "skin": "s4",
     "boss": true,
     "tags": ["leader"]
+  },
+  "urban-guard": {
+    "id": "urban-guard",
+    "name": "Urban Guard",
+    "side": "ally",
+    "class": "soldier",
+    "level": 2,
+    "offset": {"hp": 2, "mgt": 1},
+    "growth": {},
+    "inventory": ["levy-spear"],
+    "faction": "burid",
+    "skin": "s3",
+    "fictional": true,
+    "ai": {"mode": "aggressive"}
   }
 }

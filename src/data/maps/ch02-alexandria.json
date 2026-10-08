@@ -1,0 +1,86 @@
+{
+  "id": "CH-02",
+  "name": "The Road to Egypt: Alexandria",
+  "size": [24, 18],
+  "tileset": "alexandria",
+  "terrain": [
+    "~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~pp~~~~~~~~~~~",
+    "d##########OO##########d",
+    ".#TRRRRRRRFFFFRRRRRRRT#.",
+    ".#R.......FFFF.......R#.",
+    ".#R.H..H.+.:.H.H..H..R#.",
+    ".#R........:.........R#.",
+    ".#RH::::::::::::::::::O.",
+    ".#R..H.....:.....H...R#.",
+    ".#R...H..H.:....H....R#.",
+    ".#TRRRRRRRRTRRRRRRRRRT#.",
+    ".##########O###########.",
+    ",,,,,,,,,,,,,,,,,,,,,,,,",
+    ",,,GG,,,,,,,,,,,,,,GG,,,",
+    ",G,,,,,,,,,,,,,,,,,,,,G,",
+    ",,,,,,,,,h,,,,h,,,,,,,,,",
+    ",,,,,,GG,,,,,,,,GG,,,,,,"
+  ],
+  "legend": {".": "plain", ",": "steppe", ":": "road", "~": "river", "p": "pier", "#": "wall", "R": "rampart", "O": "gate", "T": "tower", "h": "hill", "H": "house", "F": "fort", "+": "hospice", "d": "dune", "G": "grove"},
+  "spawns": {
+    "player": [
+      {"unit": "salah-ad-din", "at": [11, 9], "tags": ["lord"]},
+      {"unit": "recruit", "at": [10, 9]},
+      {"unit": "garrison-soldier", "at": [20, 8], "tags": ["slot"]},
+      {"unit": "garrison-soldier", "at": [12, 10], "tags": ["slot"]},
+      {"unit": "garrison-soldier", "at": [10, 10], "tags": ["slot"]},
+      {"unit": "garrison-soldier", "at": [14, 9], "tags": ["slot"]},
+      {"unit": "garrison-pikeman", "at": [20, 7], "tags": ["slot"]},
+      {"unit": "garrison-pikeman", "at": [20, 9], "tags": ["slot"]},
+      {"unit": "army-horse-archer", "at": [9, 8], "tags": ["slot"]},
+      {"unit": "army-horse-archer", "at": [13, 8], "tags": ["slot"]},
+      {"unit": "army-horse-archer", "at": [12, 7], "tags": ["slot"]},
+      {"unit": "army-healer", "at": [10, 7], "tags": ["slot"]},
+      {"unit": "army-fire-thrower", "at": [12, 9], "tags": ["slot"]},
+      {"unit": "army-sapper", "at": [13, 10], "tags": ["slot"]},
+      {"unit": "city-gate", "at": [11, 12], "faction": "neutral"},
+      {"unit": "city-wall", "at": [7, 12], "faction": "neutral"},
+      {"unit": "city-wall", "at": [16, 12], "faction": "neutral"}
+    ],
+    "ally": [
+      {"unit": "alexandrian-militia", "at": [5, 11], "ai": {"mode": "defensive", "aggroRange": 2}},
+      {"unit": "alexandrian-militia", "at": [8, 11], "ai": {"mode": "defensive", "aggroRange": 2}},
+      {"unit": "alexandrian-militia", "at": [14, 11], "ai": {"mode": "defensive", "aggroRange": 2}},
+      {"unit": "alexandrian-militia", "at": [18, 11], "ai": {"mode": "defensive", "aggroRange": 2}},
+      {"unit": "alexandrian-militia", "at": [19, 10], "ai": {"mode": "defensive", "aggroRange": 2}},
+      {"unit": "alexandrian-militia", "at": [4, 10], "ai": {"mode": "defensive", "aggroRange": 2}},
+      {"unit": "alexandrian-pikeman", "at": [10, 11], "ai": {"mode": "defensive", "aggroRange": 2}},
+      {"unit": "alexandrian-pikeman", "at": [12, 11], "ai": {"mode": "defensive", "aggroRange": 2}}
+    ],
+    "enemy": [
+      {"unit": "mangonel", "at": [5, 15], "faction": "frankish"},
+      {"unit": "mangonel", "at": [11, 16], "faction": "frankish"},
+      {"unit": "mangonel", "at": [17, 15], "faction": "frankish"},
+      {"unit": "egyptian-soldier", "at": [8, 14]},
+      {"unit": "egyptian-soldier", "at": [10, 14]},
+      {"unit": "egyptian-soldier", "at": [12, 14]},
+      {"unit": "egyptian-soldier", "at": [14, 14]},
+      {"unit": "egyptian-soldier", "at": [6, 14], "ai": {"mode": "aggressive"}},
+      {"unit": "egyptian-soldier", "at": [16, 14]},
+      {"unit": "egyptian-pikeman", "at": [9, 15]},
+      {"unit": "egyptian-pikeman", "at": [13, 15]},
+      {"unit": "frankish-crossbowman", "at": [7, 15], "ai": {"mode": "stationary"}},
+      {"unit": "frankish-crossbowman", "at": [15, 15], "ai": {"mode": "stationary"}}
+    ]
+  },
+  "wind": "E",
+  "reinforcements": [
+    {"turn": 3, "phase": "enemy", "units": [{"def": "frankish-knight", "at": [1, 17]}, {"def": "egyptian-soldier", "at": [3, 16]}, {"def": "egyptian-soldier", "at": [20, 16]}, {"def": "egyptian-soldier", "at": [12, 17]}]},
+    {"turn": 6, "phase": "enemy", "units": [{"def": "frankish-crossbowman", "at": [6, 17]}, {"def": "frankish-crossbowman", "at": [12, 17]}, {"def": "frankish-crossbowman", "at": [18, 17]}, {"def": "frankish-knight", "at": [0, 16]}, {"def": "frankish-knight", "at": [23, 16]}]},
+    {"turn": 9, "phase": "enemy", "units": [{"def": "egyptian-soldier", "at": [4, 17]}, {"def": "egyptian-soldier", "at": [8, 17]}, {"def": "egyptian-soldier", "at": [15, 17]}, {"def": "egyptian-soldier", "at": [19, 17]}, {"def": "frankish-sergeant", "at": [10, 17]}, {"def": "frankish-sergeant", "at": [14, 17]}, {"def": "frankish-captain", "at": [12, 17], "tags": ["leader"]}]}
+  ],
+  "objective": {"type": "defend", "turns": 12},
+  "events": [
+    {"id": "t1", "when": {"type": "turnStart", "turn": 1, "phase": "player"}, "then": [{"type": "message", "text": "Shawar's army and the Franks are before Alexandria with engines. Hold the city for twelve turns. The land gate and the walls will not last: the postern in the east wall is the one door you can hold. Fire destroys engines."}]},
+    {"id": "t3", "when": {"type": "turnStart", "turn": 3, "phase": "player"}, "then": [{"type": "message", "text": "The Sapper can raise barricades (Entrench) in a breach, up to three. A Pikeman's spear is best against horsemen."}]},
+    {"id": "silafi", "when": {"type": "turnStart", "turn": 7, "phase": "player"}, "then": [{"type": "dialogue", "scene": "ch02.siege"}]},
+    {"id": "engines", "when": {"type": "allDefeated", "tag": "engine"}, "then": [{"type": "message", "text": "The engines are burning. The walls will stand a little longer, and the garrison has found a cordial among the spoils."}, {"type": "giveItem", "unit": "lord", "item": "cordial"}, {"type": "unlockCodex", "id": "CDX-T-NAFFAT"}]}
+  ]
+}

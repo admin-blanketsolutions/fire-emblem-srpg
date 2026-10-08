@@ -1,0 +1,144 @@
+[
+  {
+    "id": "CDX-P-SILAFI",
+    "category": "people",
+    "title": "al-Hafiz al-Silafi",
+    "unlock": {"chapter": "CH-02", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IS", "SRC-IKH", "CH-02.E9"],
+    "body": [
+      "A scholar of Tradition from Isfahan who taught at Alexandria. Ibn Shaddad says that when Salah ad-Din was at Alexandria he often visited him, and learned from him a great number of traditions; he calls him 'the Hafiz al-Isfahani', which the 1897 translators could not identify.",
+      "Ibn Khallikan, who has an entry on him as-Silafi, writes that he was in Egypt when Shirkuh's army first came, and was more careful than any man in noting the date of events. It is on his word that Ibn Khallikan fixes the year of the first expedition (see 'The first Egyptian expedition: 558 or 559 AH?')."
+    ]
+  },
+  {
+    "id": "CDX-P-SHAWAR",
+    "category": "people",
+    "title": "Shawar",
+    "unlock": {"chapter": "CH-02", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IS", "SRC-IKH", "CH-02.E1", "CH-02.E5", "CH-02.E6"],
+    "body": [
+      "An Arab governor of Upper Egypt who rose to be the vizier of the Fatimid caliph al-Adid. Driven out of Cairo, he fled to Damascus (he arrived on the 23rd of Dhu'l-Qa'da 558 AH, October 1163) and asked Nur ad-Din for troops. Shirkuh took him back and he became vizier again.",
+      "Ibn Shaddad says he then played now with Shirkuh and now with the Franks. In 562 AH he heard what Shirkuh planned, feared that Egypt would pass to the Turks, and wrote to the Franks, who joined him against Shirkuh. His end is told in Chapter 3."
+    ]
+  },
+  {
+    "id": "CDX-P-AMALRIC",
+    "category": "people",
+    "title": "Amalric I of Jerusalem",
+    "unlock": {"chapter": "CH-02", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IS", "MOD-PPTS-IS", "CH-02.E5", "CH-02.E6"],
+    "body": [
+      "The king of Jerusalem (Amaury in French), whom Shawar made his ally. The 1897 translators of Ibn Shaddad note that in 1167 he agreed with Shawar to help the Fatimid caliph against Shirkuh, and that he left Egypt when Nur ad-Din took the Frankish fortress of al-Munaytira.",
+      "He is a Frankish king and is named here from the Arabic side and from the translators' notes. William of Tyre, the chief Latin historian of his reign, has not been read for this game; the Codex does not claim what he wrote."
+    ]
+  },
+  {
+    "id": "CDX-L-ALEXANDRIA",
+    "category": "places",
+    "title": "Alexandria",
+    "unlock": {"chapter": "CH-02", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IS", "SRC-IKH", "CH-02.E7", "CH-02.E9"],
+    "body": [
+      "The great port of Egypt on the Mediterranean. Salah ad-Din came there after the battle of al-Babain and fortified himself in it, and there he visited the scholar al-Silafi. Ibn Khallikan's notes say that in Jumada II 562 AH (March and April 1167) he had to sustain a siege there.",
+      "The map of the chapter is the game's own: the walls, the gates, the harbour and the siege lines are invented."
+    ]
+  },
+  {
+    "id": "CDX-E-ALEXANDRIA1167",
+    "category": "events",
+    "title": "Salah ad-Din at Alexandria",
+    "unlock": {"chapter": "CH-02", "at": "end"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IKH", "SRC-IS", "CH-02.E7", "CH-02.E8"],
+    "body": [
+      "After the battle of al-Babain, Shirkuh sent his nephew to Alexandria, which he fortified. Shawar and the Egyptian army besieged him there while Shirkuh was in Upper Egypt. Shirkuh then went to Bilbays and made peace; the Egyptians escorted Salah ad-Din out of Alexandria to his uncle, and they returned to Syria.",
+      "The Franks left Egypt when they heard that Nur ad-Din had taken their fortress of al-Munaytira in Rajab 562 AH."
+    ],
+    "differ": [
+      {
+        "claim": "The siege of Alexandria",
+        "positions": [
+          {"source": "SRC-IKH", "says": "In a note of unknown source, Ibn Khallikan has Salah ad-Din fortify Alexandria and sustain a siege against Shawar in Jumada II 562 AH (March to April 1167); Shirkuh then made peace at Bilbays and the Egyptians escorted Salah ad-Din to him."},
+          {"source": "SRC-IS", "says": "Ibn Shaddad does not mention the siege. He says that the Franks and Shirkuh both left Egypt, the Franks because Nur ad-Din had taken al-Munaytira, and that Shirkuh treated with them for the evacuation."},
+          {"source": "SRC-IKH", "says": "The names of the Frankish negotiators, and the length and the terms of the siege, are given in Latin sources which this game has not read, and are not given here."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-T-WAZIR",
+    "category": "terms",
+    "title": "Vizier (wazir) of Egypt",
+    "unlock": {"chapter": "CH-02", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IS", "SRC-IKH", "CH-02.E1"],
+    "body": [
+      "Under the Fatimid caliphs the vizier held all the real power: the caliph reigned, and the vizier had the army and the title of sultan. Ibn Shaddad explains the custom: whoever successfully raised the standard of revolt against a vizier was accepted by the court and given the office he had fought for.",
+      "That is why Shawar could lose the vizierate by force and win it back by force, and why, in 1169, the court gave Shirkuh the vizier's robe as soon as he had seized Shawar."
+    ]
+  },
+  {
+    "id": "CDX-T-NAFFAT",
+    "category": "terms",
+    "title": "Naffat: the thrower of naphtha",
+    "unlock": {"chapter": "CH-02", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IS", "SRC-ASH", "CH-03.E14"],
+    "body": [
+      "A naffat threw naphtha: a burning oil. Ibn Shaddad speaks of throwers of naphtha, of a caldron-maker of Damascus whose pots of fire were used against the Franks, and of naphtha put to a ram at Acre. Abu Shama, quoting Imad ad-Din, tells how in 1169 the naphtha-throwers of Turan-Shah set the caliph's pavilion alight at Cairo.",
+      "In the game the Fire Thrower is the line of these men: fire ignores cover, is turned aside by water, and does double against engines and barricades that burn."
+    ]
+  },
+  {
+    "id": "CDX-T-CROSSBOW",
+    "category": "terms",
+    "title": "Arbalists",
+    "unlock": {"chapter": "CH-02", "at": "start"},
+    "confidence": "attested",
+    "sources": ["SRC-IS", "MOD-PPTS-IS"],
+    "body": [
+      "The 1897 translators of Ibn Shaddad call the Franks' crossbowmen arbalists. Ibn Shaddad speaks of them again and again, at Damietta, at Acre, at Arsuf and at Jaffa. Their bolts could pierce armour that arrows would not.",
+      "In the game a crossbow is slow and heavy, strikes at two tiles, and ignores two points of the target's Guard."
+    ]
+  },
+  {
+    "id": "CDX-S-BABAIN",
+    "category": "sources",
+    "title": "Where was al-Babain?",
+    "unlock": {"chapter": "CH-02", "at": "start"},
+    "confidence": "attested-differ",
+    "sources": ["SRC-IKH", "SRC-IS", "MOD-PPTS-IS", "CH-02.E6"],
+    "body": [
+      "The battle of al-Babain was Shirkuh's victory over the Franks and the Egyptians in 562 AH. Ibn Shaddad does not describe it, and the 1897 translators remark on the omission. The sources and later writers do not agree on where it was fought.",
+      "A story told of it in modern books, that Shirkuh won it by feigning a retreat with Salah ad-Din holding the centre, is not in any of the texts read for this game, and the game does not use it."
+    ],
+    "differ": [
+      {
+        "claim": "Where the battle was fought",
+        "positions": [
+          {"source": "SRC-IKH", "says": "In the neighbourhood of Ushmunayn, in Middle Egypt, as Shirkuh went up the Nile."},
+          {"source": "MOD-PPTS-IS", "says": "In a note of the 1897 translators: at al-Babain, about six miles south of Cairo, when Shirkuh turned back on the Franks."},
+          {"source": "SRC-IS", "says": "Not mentioned."}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "CDX-G-CH02",
+    "category": "game",
+    "title": "Game vs History: Alexandria",
+    "unlock": {"chapter": "CH-02", "at": "end"},
+    "confidence": null,
+    "sources": ["CH-02.E7", "CH-02.E10"],
+    "body": [
+      "Salah ad-Din did hold Alexandria for a time in 1167, while Shirkuh was in Upper Egypt, and there was a siege. What the sources read here do not give is its course. The walls, the gates, the engines, the waves of attackers and the defenders on the ramparts are the game's own, and so is every fight in the chapter.",
+      "The Alexandrian militia is invented. Whether the people of Alexandria stood by Salah ad-Din is not known from the texts read; the game gives him a militia and no more.",
+      "The counting of the bread, the talk on the wall and the words of Shirkuh and Nur ad-Din are invented; what Ibn Shaddad records is that Salah ad-Din went against his will, and that Shirkuh valued his judgment. Al-Silafi and the visits to him are recorded; what they said is not."
+    ],
+    "dramatized": ["ch02.road", "ch02.babain", "ch02.farewell", "ch02.silafi", "ch02.siege", "ch02.after", "sup.shirkuh-salah.c", "sup.shirkuh-salah.b"]
+  }
+]

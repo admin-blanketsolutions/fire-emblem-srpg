@@ -27,11 +27,20 @@ export interface Story {
 const list = (modules: Record<string, unknown>): unknown[] => Object.keys(modules).sort().map((k) => modules[k]);
 const flat = (modules: Record<string, unknown>): unknown[] => list(modules).flatMap((m) => (Array.isArray(m) ? m : [m]));
 
-function build(characters: unknown[], scenes: unknown[], supports: unknown[], codex: unknown[], chapters: unknown[], known: Pick<ChapterValidation, 'battles' | 'units'>): Story {
+function build(
+  characters: unknown[],
+  scenes: unknown[],
+  supports: unknown[],
+  codex: unknown[],
+  chapters: unknown[],
+  known: Pick<ChapterValidation, 'battles' | 'units'>,
+  /** Scenes of another story that the Codex entries may name (the demo reads the campaign's entries). */
+  alsoScenes: readonly string[] = [],
+): Story {
   const table = buildCharacterTable(characters);
   const sceneTable = buildSceneTable(scenes, { characters: table });
   const supportTable = buildSupportTable(supports, { scenes: sceneTable });
-  const codexTable = buildCodexTable(codex, { scenes: new Set(sceneTable.keys()) });
+  const codexTable = buildCodexTable(codex, { scenes: new Set([...sceneTable.keys(), ...alsoScenes]) });
   return {
     characters: table,
     scenes: sceneTable,
@@ -76,4 +85,5 @@ export const demoStory: Story = build(
   [...flat(campaignCodex), ...flat(demoCodex)],
   flat(demoChapters),
   { battles: new Set(['siege']), units: new Set([...Object.keys(testUnitsJson), ...Object.keys(siegeUnitsJson)]) },
+  [...campaignStory.scenes.keys()],
 );

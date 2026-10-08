@@ -42,7 +42,10 @@ export function buildBattle(map: GameMap, defs: UnitTable, tables: BattleTables,
       return built;
     }
     const overrides = { ...(spawn.ai ? { ai: spawn.ai } : {}), ...(spawn.tags ? { tags: spawn.tags } : {}), ...(spawn.side ? { side: spawn.side } : {}) };
-    return createUnit(def, id, spawn.at[0], spawn.at[1], tables, overrides);
+    const unit = createUnit(def, id, spawn.at[0], spawn.at[1], tables, overrides);
+    // a reserve stands off the map until an event brings it on
+    if (unit.tags.includes('reserve')) Object.assign(unit, { retreated: true, escaped: true });
+    return unit;
   });
   const rng = createRng(options.seed ?? hashSeed('battle', map.id));
   const battle = new BattleState(map, units, tables, rng, { ...DEFAULT_RULES, ...options.rules });

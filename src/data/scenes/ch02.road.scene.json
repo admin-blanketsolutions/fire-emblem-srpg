@@ -1,0 +1,21 @@
+{
+  "id": "ch02.road",
+  "title": "The road to Egypt",
+  "ledger": ["CH-02.E1", "CH-02.E2", "CH-02.E3", "CH-02.E6"],
+  "cmds": [
+    {"bg": "road-dust"},
+    {"music": "story"},
+    {"say": {"who": "narrator", "text": "Damascus, 562 AH: the winter of 1166 to 1167. Thirteen years have passed since the East Gate, and Salah ad-Din is a grown man in Nur ad-Din's service.", "kind": "narration"}},
+    {"say": {"who": "narrator", "text": "Shawar, the vizier of Egypt, had been driven out of Cairo, and had been put back in his office by Shirkuh's army. Now he feared that Shirkuh would one day take Egypt for himself, and he wrote to the Franks and made an agreement with them.", "kind": "narration", "src": ["CH-02.E1", "CH-02.E6"]}},
+    {"show": {"who": "nur-ad-din", "at": "left"}},
+    {"show": {"who": "shirkuh", "at": "center"}},
+    {"show": {"who": "salah-ad-din", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Nur ad-Din and Shirkuh were afraid that if the Franks once occupied Egypt, they would take the whole country.", "kind": "narration", "src": ["CH-02.E6"]}},
+    {"say": {"who": "nur-ad-din", "text": "Take what men you need, Shirkuh. I will give you troops and money. I cannot come myself.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "I do not ask you to. I ask for the boy.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Nur ad-Din furnished the army, and constrained Salah ad-Din, against his wish, to go with his uncle.", "kind": "narration", "src": ["CH-02.E3", "CH-02.E6"]}},
+    {"say": {"who": "salah-ad-din", "text": "Do I have a say in it, uncle?", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "You have a say in everything but this. I do not need your love of the road. I need you at my side, to tell me what you see.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "They marched on the 12th of Rabi' I, 562 AH, in January 1167, and entered Egyptian ground at the very time the Franks did.", "kind": "narration", "src": ["CH-02.E6"]}}
+  ]
+}

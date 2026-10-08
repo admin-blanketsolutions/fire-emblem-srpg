@@ -1,0 +1,19 @@
+{
+  "id": "ch03.appointment",
+  "title": "The emirs have come",
+  "ledger": ["CH-03.E5", "CH-03.E6", "CH-03.E7"],
+  "cmds": [
+    {"bg": "cairo-palace"},
+    {"music": "story"},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"show": {"who": "isa", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Salah ad-Din's power was now on a solid footing, and his authority consolidated. He acted as the lieutenant of Nur ad-Din, and had the khutba said in Nur ad-Din's name in all the cities of Egypt.", "kind": "narration", "src": ["CH-03.E5", "CH-03.E7"]}},
+    {"say": {"who": "narrator", "text": "When Nur ad-Din wrote, he addressed him as 'the emir isfahsalar', the emir who commands the army, and signed his letters with a mark, so as not to compromise the dignity of his name.", "kind": "narration", "src": ["CH-03.E7"]}},
+    {"say": {"who": "narrator", "text": "From then on Salah ad-Din renounced wine and the pleasures of his youth, and gave himself up to the work of government.", "kind": "narration", "src": ["CH-03.E6"]}},
+    {"say": {"who": "isa", "text": "They have come, my lord. Three of four. That is more than most men are given.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "I did not win them. You did, one at a time, by telling each what he could hear.", "kind": "dramatized"}},
+    {"say": {"who": "isa", "text": "Then do not make me repeat it. A lord is judged by what he does with what he is given.", "kind": "dramatized"}},
+    {"unlock": "CDX-P-ISA"},
+    {"unlock": "CDX-T-KHUTBA"}
+  ]
+}

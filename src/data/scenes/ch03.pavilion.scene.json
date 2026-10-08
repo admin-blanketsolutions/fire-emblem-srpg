@@ -1,0 +1,15 @@
+{
+  "id": "ch03.pavilion",
+  "title": "The pavilion",
+  "ledger": ["CH-03.E14", "CH-03.E13"],
+  "cmds": [
+    {"bg": "cairo-night"},
+    {"show": {"who": "turan-shah", "at": "left"}},
+    {"say": {"who": "narrator", "text": "Al-Adid followed the fighting between the two palaces from a high pavilion. It is said that he ordered the palace's eunuchs to shower arrows and stones on the Syrian troops; others say that it was against his will.", "kind": "narration", "src": ["CH-03.E14"]}},
+    {"say": {"who": "turan-shah", "text": "The pavilion! Naphtha-throwers, to me! Burn it!", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Shams ad-Dawla Turan-Shah ordered his naphtha-throwers to set the caliph's pavilion on fire. As the first of them set to work, the door of the pavilion opened, and an officer of the palace came out.", "kind": "narration", "src": ["CH-03.E14"]}},
+    {"say": {"who": "narrator", "text": "He cried that the Commander of the Faithful greeted Shams ad-Dawla, and bade him fall upon the rebels and drive them out of the country.", "kind": "narration", "src": ["CH-03.E14"]}},
+    {"say": {"who": "narrator", "text": "The Black regiments had believed that they had the caliph's approval. When they heard these words, they lost heart, turned back and scattered.", "kind": "narration", "src": ["CH-03.E14"]}},
+    {"unlock": "CDX-E-UPRISING1169"}
+  ]
+}

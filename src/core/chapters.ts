@@ -1,7 +1,9 @@
 import type { BattleTables } from './battle';
 import type { Campaign } from './campaign';
 import type { CodexTable } from './codex';
+import { levelUp } from './exp';
 import { freshUses } from './inventory';
+import { createRng, hashSeed } from './rng';
 import { RANKS, THRESHOLDS, type Rank } from './supports';
 import { createUnit, type UnitInstance, type UnitTable } from './unit';
 
@@ -23,6 +25,8 @@ export type StepEffect =
   | { readonly away: readonly string[] }
   /** The story has brought a pair this far: their points rise to the rank's threshold if they are below it. */
   | { readonly grant: string; readonly atLeast: Rank }
+  /** Years of service pass: the unit gains levels, as if it had earned the experience (its growths decide what rises). */
+  | { readonly train: string; readonly levels: number }
   /** Something goes into the baggage train. */
   | { readonly give: string; readonly count?: number }
   | { readonly dinars: number }
@@ -65,9 +69,9 @@ export interface ChapterValidation {
   readonly codex?: ReadonlySet<string>;
 }
 
-const VERBS = ['join', 'leave', 'away', 'grant', 'give', 'dinars', 'flag', 'unlock'] as const;
+const VERBS = ['join', 'leave', 'away', 'grant', 'train', 'give', 'dinars', 'flag', 'unlock'] as const;
 type Verb = (typeof VERBS)[number];
-const COMPANIONS: Readonly<Record<Verb, readonly string[]>> = { join: ['count'], leave: [], away: [], grant: ['atLeast'], give: ['count'], dinars: [], flag: [], unlock: [] };
+const COMPANIONS: Readonly<Record<Verb, readonly string[]>> = { join: ['count'], leave: [], away: [], grant: ['atLeast'], train: ['levels'], give: ['count'], dinars: [], flag: [], unlock: [] };
 
 const isText = (v: unknown): v is string => typeof v === 'string' && v.trim() !== '';
 const isCount = (v: unknown): boolean => Number.isInteger(v) && (v as number) >= 1 && (v as number) <= 12;
@@ -100,6 +104,11 @@ function validateEffect(raw: unknown, ctx: ChapterValidation, where: string): St
       if (!isText(value)) throw new Error(`${where}: grant needs a support id`);
       known(ctx.supports, value, 'the support');
       if (!RANKS.includes(e.atLeast as Rank)) throw new Error(`${where}: grant needs atLeast: ${RANKS.join(', ')}`);
+      break;
+    case 'train':
+      if (!isText(value)) throw new Error(`${where}: train needs a unit definition id`);
+      known(ctx.units, value, 'the unit');
+      if (!Number.isInteger(e.levels) || (e.levels as number) < 1 || (e.levels as number) > 10) throw new Error(`${where}: train needs levels from 1 to 10`);
       break;
     case 'give':
       if (!isText(value)) throw new Error(`${where}: give needs an item id`);
@@ -275,12 +284,23 @@ export function applyEffects(campaign: Campaign, effects: readonly StepEffect[],
       army.units = army.units.filter((u) => u.defId !== effect.leave);
       army.away.delete(effect.leave);
     } else if ('away' in effect) {
+      const before = army.away;
       army.away = new Set(effect.away);
-      for (const unit of army.units) if (army.away.has(unit.defId)) army.deployed.delete(unit.id);
+      for (const unit of army.units) {
+        if (army.away.has(unit.defId)) army.deployed.delete(unit.id);
+        else if (before.has(unit.defId)) army.deployed.add(unit.id); // back with the army, and going unless it is left out
+      }
     } else if ('grant' in effect) {
       if (!army.supports) throw new Error('The army has no supports to grant points in');
       const state = army.supports.stateOf(effect.grant);
       state.points = Math.max(state.points, THRESHOLDS[effect.atLeast]);
+    } else if ('train' in effect) {
+      const rng = createRng(hashSeed(campaign.seed, 'train', effect.train, campaign.chapter ?? '', campaign.step));
+      for (const unit of army.units.filter((u) => u.defId === effect.train)) {
+        const classDef = env.tables.classes.get(unit.classId);
+        if (!classDef) throw new Error(`Unit "${unit.id}" has unknown class "${unit.classId}"`);
+        for (let n = 0; n < effect.levels && unit.level < env.tables.balance.levelCap; n++) levelUp(unit, classDef, rng, true);
+      }
     } else if ('give' in effect) {
       const uses = freshUses(effect.give, env.tables);
       if (uses === null) throw new Error(`Cannot give unknown item "${effect.give}"`);

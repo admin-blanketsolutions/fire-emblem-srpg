@@ -581,8 +581,8 @@ export class CampScene implements Scene {
 
   private drawMain(ctx: CanvasRenderingContext2D, mode: Extract<Mode, { kind: 'main' }>): void {
     const items = this.mainItems();
-    this.text.drawCentered(ctx, this.title, LOGICAL_WIDTH / 2, 12, { color: COLORS.text, shadow: COLORS.ink, scale: 2 });
-    this.dinars(ctx);
+    this.text.drawCentered(ctx, this.title, LOGICAL_WIDTH / 2, 8, { color: COLORS.text, shadow: COLORS.ink, scale: 2 });
+    this.text.drawRight(ctx, `Dinars ${this.army.dinars}`, LOGICAL_WIDTH - 8, 26, GOLD);
     const { w } = menuSize(this.text, items);
     const x = Math.round((LOGICAL_WIDTH - w) / 2);
     const y = 36;

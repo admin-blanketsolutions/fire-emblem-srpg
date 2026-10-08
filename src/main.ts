@@ -1,3 +1,5 @@
+import { runCampaign } from './core/bot';
+import { botEnvFor, newCampaignFor, STORIES } from './data/battles';
 import { createCampDemo, createSiegeDemo, demoSupports } from './data/demos';
 import { demoStory } from './data/story';
 import { shops } from './data';
@@ -41,6 +43,8 @@ async function boot(): Promise<void> {
   // the proving ground under each objective (?objective=seize, ?fog=1, ?seed=42), the siege
   // (?demo=siege) or the camp (?demo=camp).
   const direct = ['objective', 'demo', 'fog', 'seed'].some((key) => params.has(key));
+  // ?chapter=CH-02 starts the campaign at a chapter, with an army the computer has brought there (for testers; ?mode=casual, ?seed=7)
+  const startChapter = params.get('chapter');
   if (!direct) {
     const { store, persistent } = openBrowserStore();
     const flow = new GameFlow({
@@ -53,6 +57,11 @@ async function boot(): Promise<void> {
       newSeed: () => Math.floor(Math.random() * 0x7fffffff),
     });
     game.run(flow.title());
+    if (startChapter && STORIES.campaign.chapters.has(startChapter)) {
+      const campaign = newCampaignFor('campaign', params.get('mode') === 'classic' ? 'classic' : 'casual', Number(params.get('seed')) || 7);
+      runCampaign(botEnvFor('campaign'), campaign, { talks: true, keepGoing: true, untilChapter: startChapter });
+      flow.play(campaign);
+    }
     if (import.meta.env.DEV) Object.assign(window, { sultan: { flow, assets, audio } });
     return;
   }

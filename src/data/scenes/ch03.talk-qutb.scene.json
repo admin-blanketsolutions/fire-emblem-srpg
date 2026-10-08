@@ -1,0 +1,17 @@
+{
+  "id": "ch03.talk-qutb",
+  "title": "Isa and Qutb ad-Din",
+  "ledger": ["CH-03.E5"],
+  "cmds": [
+    {"bg": "council-tent"},
+    {"show": {"who": "isa", "at": "left"}},
+    {"show": {"who": "qutb-ad-din", "at": "right"}},
+    {"say": {"who": "narrator", "text": "Then Isa went to Qutb ad-Din Khusraw ibn Talil.", "kind": "narration", "src": ["CH-03.E5"]}},
+    {"say": {"who": "isa", "text": "All the people now obey Salah ad-Din, except you and al-Yaruqi. Whatever else, there is a bond between you and him: you are both Kurds, and you will not let the high command pass to the Turks.", "kind": "documented", "src": ["CH-03.E5"]}},
+    {"say": {"who": "narrator", "text": "So Ibn al-Athir reports his words. It was the politics of a camp of emirs, who counted their followings by origin; it does not speak for every Kurd or every Turk. Nur ad-Din, whom they all served, was himself regarded as a Turk.", "kind": "narration", "src": ["CH-03.E5", "MOD-PPTS-IS"]}},
+    {"say": {"who": "qutb-ad-din", "text": "A bond of blood is a fine thing to be reminded of. It is better when it comes with a fief.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "By magnificent promises, and the offer of a larger fief, he brought Qutb ad-Din to submit to Salah ad-Din.", "kind": "narration", "src": ["CH-03.E5"]}},
+    {"say": {"who": "isa", "text": "You will have it in the vizier's own hand.", "kind": "dramatized"}},
+    {"flag": "qutb-won"}
+  ]
+}

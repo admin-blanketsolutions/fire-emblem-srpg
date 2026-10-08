@@ -1,0 +1,18 @@
+{
+  "id": "sup.shirkuh-salah.c",
+  "title": "Against His Will",
+  "ledger": ["SUP-SHIRKUH-SALAH-C", "CH-02.E3"],
+  "cmds": [
+    {"bg": "camp-night"},
+    {"show": {"who": "shirkuh", "at": "right"}},
+    {"show": {"who": "salah-ad-din", "at": "left"}},
+    {"say": {"who": "narrator", "text": "The army camps for the night, three days out of Damascus.", "kind": "narration"}},
+    {"say": {"who": "salah-ad-din", "text": "You have not asked me why I did not want to come.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "I know why. You like the city, and your father's house, and your hours of study. You do not like the road, and the dust, and men who want what you cannot give them.", "kind": "dramatized"}},
+    {"say": {"who": "narrator", "text": "Ibn Shaddad says that Nur ad-Din constrained Salah ad-Din to go to Egypt, against his wish. Of the expedition that followed, Salah ad-Din told him that of all men he was the one who least wished to go.", "kind": "narration", "src": ["CH-02.E3"]}},
+    {"say": {"who": "salah-ad-din", "text": "You make it sound like a fault.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "It is the best thing in you. A man who loves the road does not mind what it costs. You mind. So you will count the cost, and I will have a vanguard that comes home.", "kind": "dramatized"}},
+    {"say": {"who": "salah-ad-din", "text": "I will take the vanguard. But if you ask me to love it, uncle, I will lie to you.", "kind": "dramatized"}},
+    {"say": {"who": "shirkuh", "text": "I would sooner you lied than that you were a fool. Go and sleep.", "kind": "dramatized"}}
+  ]
+}
