@@ -67,7 +67,7 @@
   "objective": {"type": "survive", "turns": 8},
   "events": [
     {"id": "t1", "when": {"type": "turnStart", "turn": 1, "phase": "player"}, "then": [{"type": "message", "text": "Night, and fog: the regiments of the palace have risen between the two palaces. Hold the square until the end of turn 8. Or burn the caliph's pavilion at the head of it with the Fire Thrower: the fighting will end at once."}]},
-    {"id": "t5", "when": {"type": "turnStart", "turn": 5, "phase": "player"}, "then": [{"type": "message", "text": "Turan-Shah calls for naphtha. The pavilion is at the north end of the square: fire does double against it."}]},
+    {"id": "t5", "when": {"type": "turnStart", "turn": 5, "phase": "player"}, "then": [{"type": "message", "text": "Turan-Shah calls for naphtha. The pavilion is at the north end of the square: steel scarcely marks its silks, but fire does double against it."}]},
     {"id": "pavilion", "when": {"type": "unitDefeated", "unit": "pavilion"}, "then": [{"type": "dialogue", "scene": "ch03.pavilion"}, {"type": "flag", "name": "pavilion-burned"}, {"type": "endChapter", "result": "won", "reason": "The regiments lost heart and scattered."}]}
   ]
 }
