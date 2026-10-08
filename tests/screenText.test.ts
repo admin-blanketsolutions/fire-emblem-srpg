@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import fontJson from '../assets/fonts/majlis.font.json';
 import { measureText, validateFont, wrapText } from '../src/core/font';
+import { checkName, NAME_MAX } from '../src/core/naming';
 import { DEFAULT_SETTINGS } from '../src/core/settings';
 import { LOGICAL_WIDTH } from '../src/core/viewport';
 import type { TextRenderer } from '../src/engine/text';
 import type { CampScene } from '../src/scenes/campScene';
 import type { ListScreen, ListContent } from '../src/scenes/listScreen';
 import { SettingsScene, TitleScene } from '../src/scenes/menus';
+import { NAME_SUBTITLE } from '../src/scenes/nameScene';
 import { harness, startCampaign } from './flowHarness';
 
 /**
@@ -47,5 +49,18 @@ describe('the lines about a chosen row', () => {
       fits(`records, ${mode}`, h.flow.campOptions(h.scene() as CampScene) as ListScreen);
       fits(`end menu, ${mode}`, (h.flow as unknown as { endMenu(): ListScreen }).endMenu());
     }
+  });
+});
+
+describe('the lines of the name screen', () => {
+  /** Each is drawn on one row, centred, so a wider line is cut off at both edges. */
+  it('each fit on one row of the screen', () => {
+    const refusals = ['', 'x'.repeat(NAME_MAX + 1), 'حسن', '1Hasan', 'Ha$an', 'Allah'].flatMap((name) => {
+      const check = checkName(name);
+      return check.ok ? [] : [check.reason];
+    });
+    expect(refusals).toHaveLength(6);
+    const tooWide = [NAME_SUBTITLE, 'OK Press a key   Back Delete', ...refusals].filter((line) => measureText(font, line) > LOGICAL_WIDTH - 16);
+    expect(tooWide).toEqual([]);
   });
 });

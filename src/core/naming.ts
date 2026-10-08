@@ -36,10 +36,10 @@ export function checkName(raw: string): NameCheck {
   if (name === '') return { ok: false, reason: 'A name needs at least one letter.' };
   if (name.length > NAME_MAX) return { ok: false, reason: `A name has at most ${NAME_MAX} letters.` };
   if (hasArabicScript(name)) return { ok: false, reason: 'Names are written in Latin letters.' };
-  if (!/^[A-Za-z][A-Za-z '.-]*$/.test(name)) return { ok: false, reason: 'A name begins with a letter and uses letters, spaces, hyphens, apostrophes and full stops.' };
+  if (!/^[A-Za-z][A-Za-z '.-]*$/.test(name)) return { ok: false, reason: 'A name begins with a letter.' };
   const lower = name.toLowerCase();
   const tokens = lower.split(/[\s'.-]+/);
-  if (BLOCKED.some((w) => tokens.includes(w)) || deniedWordIn(name)) return { ok: false, reason: 'That is not a name for a soldier of the levy.' };
+  if (BLOCKED.some((w) => tokens.includes(w)) || deniedWordIn(name)) return { ok: false, reason: 'That is not a name for a soldier.' };
   return { ok: true, name };
 }
 

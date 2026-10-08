@@ -13,6 +13,9 @@ import { DIM, drawBackdrop, GOLD, PLAIN } from './listScreen';
  * tap), and a name box above it. Back takes a letter away; on an empty name it leaves.
  */
 
+/** Under the title: what the Recruit is. One row, so it must fit the screen. */
+export const NAME_SUBTITLE = 'An invented levy soldier of Tikrit.';
+
 export interface NameSceneOptions {
   readonly text: TextRenderer;
   readonly initial?: string;
@@ -70,7 +73,7 @@ export class NameScene implements Scene {
     const { text } = this.o;
     drawBackdrop(ctx);
     text.drawCentered(ctx, 'Name the Recruit', LOGICAL_WIDTH / 2, 8, { color: COLORS.text, shadow: COLORS.ink, scale: 2 });
-    text.drawCentered(ctx, 'A levy soldier of Tikrit: an invented person (game-only).', LOGICAL_WIDTH / 2, 28, DIM);
+    text.drawCentered(ctx, NAME_SUBTITLE, LOGICAL_WIDTH / 2, 28, DIM);
 
     drawPanel(ctx, 56, 40, 128, 18);
     const blink = Math.floor(this.clock / 400) % 2 === 0 && this.entry.text.length < NAME_MAX;
