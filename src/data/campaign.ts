@@ -1,6 +1,9 @@
+import { validateBalance, type Balance } from '../core/balance';
 import type { BattleTables } from '../core/battle';
 import { parseMap, type GameMap, type MapJson } from '../core/map';
 import type { UnitDef, UnitTable } from '../core/unit';
+import balanceJson from './balance.json';
+import campaignBalanceJson from './campaignBalance.json';
 import { tables, terrain } from './index';
 import unitsJson from './units.json';
 
@@ -27,8 +30,15 @@ export const campaignMapJson: ReadonlyMap<string, MapJson> = new Map(
   }),
 );
 
-/** The tables a chapter's battle runs on: the shared rules and items, with the campaign's units. */
-export const campaignTables: BattleTables = { ...tables, units: campaignUnits };
+/**
+ * The campaign's balance: the engine's numbers (`balance.json`, DESIGN §5.7) with the pace of growth set
+ * for a story that gives an army a few fights a chapter and no ground to grind on. Only what
+ * `campaignBalance.json` names is changed, so the proving ground and its tests keep the shared numbers.
+ */
+export const campaignBalance: Balance = validateBalance({ ...balanceJson, ...campaignBalanceJson });
+
+/** The tables a chapter's battle runs on: the shared rules and items, with the campaign's units and balance. */
+export const campaignTables: BattleTables = { ...tables, balance: campaignBalance, units: campaignUnits };
 
 /** A chapter map, parsed and checked. Throws if there is none of that id. */
 export function campaignMap(id: string): GameMap {

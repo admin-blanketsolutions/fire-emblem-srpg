@@ -61,6 +61,10 @@ export interface BattleReport {
   readonly levels: Readonly<Record<string, readonly [number, number]>>;
   /** Units of the army lost under the Classic rules. */
   readonly lost: readonly string[];
+  /** Experience the army's units earned in the battle, together (a level is 100). */
+  readonly exp: number;
+  /** The highest levels the army's units stand at when the battle is over (tier counted: Tier II level 3 is 23), best first. */
+  readonly top: readonly number[];
 }
 
 export interface RunReport {
@@ -212,6 +216,7 @@ export function runCampaign(env: BotEnv, campaign: Campaign, options: BotOptions
         const battle = env.battle(step.battle, rules, hashSeed(campaign.seed, step.battle));
         launchBattle(campaign, battle);
         const before = Object.fromEntries(campaign.army.units.map((u) => [u.defId, u.level] as const));
+        const expBefore = new Map(campaign.army.units.map((u) => [u.id, u.level * 100 + u.exp] as const));
         const play = options.plays?.[step.battle];
         if (play) play(battle);
         else autoPlay(battle, options.stance?.[step.battle]);
@@ -226,7 +231,9 @@ export function runCampaign(env: BotEnv, campaign: Campaign, options: BotOptions
         const levels = Object.fromEntries(
           campaign.army.units.filter((u) => before[u.defId] !== undefined && !/#\d+$/.test(u.id)).map((u) => [u.defId, [before[u.defId] as number, u.level] as const] as const),
         );
-        battles.push({ battle: step.battle, result: outcome.result, reason: outcome.reason, turns: battle.turn, levels, lost: (settled?.lost ?? []).map((u) => u.id) });
+        const exp = campaign.army.units.reduce((n, u) => n + Math.max(0, u.level * 100 + u.exp - (expBefore.get(u.id) ?? u.level * 100 + u.exp)), 0);
+        const top = campaign.army.units.map((u) => u.level + 20 * (u.tier - 1)).sort((a, b) => b - a).slice(0, 5);
+        battles.push({ battle: step.battle, result: outcome.result, reason: outcome.reason, turns: battle.turn, levels, lost: (settled?.lost ?? []).map((u) => u.id), exp, top });
         if (!settled) return { battles, completed: false, failedAt: step.battle };
         if (outcome.result === 'lost') failedAt ??= step.battle;
         break;

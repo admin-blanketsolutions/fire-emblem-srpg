@@ -38,7 +38,7 @@
   {
     "id": "CDX-P-EMIRS",
     "category": "people",
-    "title": "The emirs of Shirkuh’s army",
+    "title": "The emirs of Shirkuh's army",
     "unlock": {"chapter": "CH-03", "at": "start"},
     "confidence": "attested",
     "sources": ["SRC-IKH", "SRC-IAT", "CH-03.E5"],
@@ -50,7 +50,7 @@
   {
     "id": "CDX-P-MUTAMIN",
     "category": "people",
-    "title": "The Mu’taman al-Khilafa",
+    "title": "The Mu'taman al-Khilafa",
     "unlock": {"chapter": "CH-03", "at": "start"},
     "confidence": "attested-differ",
     "sources": ["SRC-IAT", "SRC-IAI-BARQ", "SRC-ASH", "MOD-LANEPOOLE", "CH-03.E8"],

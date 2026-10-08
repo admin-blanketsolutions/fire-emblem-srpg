@@ -3,9 +3,9 @@ import factions from '../assets/palettes/factions.json';
 import skins from '../assets/palettes/skins.json';
 import type { EventAction, EventDef } from '../src/core/events';
 import { parseMap, type MapJson, type SpawnJson } from '../src/core/map';
-import { campaignMapJson, campaignUnits } from '../src/data/campaign';
+import { campaignBalance, campaignMapJson, campaignTables, campaignUnits } from '../src/data/campaign';
 import { STORIES } from '../src/data/battles';
-import { classes, items, structures, terrain, weapons } from '../src/data';
+import { balance, classes, items, structures, terrain, weapons } from '../src/data';
 
 /**
  * The campaign's data, checked as a whole (what the loaders cannot see one file at a time): every
@@ -34,6 +34,16 @@ describe('the campaign’s units', () => {
   it('keeps the Recruit the only invented person who may be named, and never calls a unit a Prophet or a Companion', () => {
     expect(Object.values(campaignUnits).filter((u) => u.playerNamed).map((u) => u.id)).toEqual(['recruit']);
     for (const def of Object.values(campaignUnits)) expect(def.id + def.name).not.toMatch(/prophet|sahab|companion/i);
+  });
+});
+
+describe('the campaign’s balance', () => {
+  it('is the engine’s, but for the pace of growth, and the battles run on it', () => {
+    expect(campaignBalance).toEqual({ ...balance, tierExpRate: campaignBalance.tierExpRate });
+    expect(campaignTables.balance).toBe(campaignBalance);
+    const [one, two, three] = [1, 2, 3].map((t) => campaignBalance.tierExpRate[t as 1 | 2 | 3]);
+    expect(one).toBeGreaterThan(balance.tierExpRate[1]);
+    expect(one! > two! && two! > three!, 'a higher tier still learns more slowly').toBe(true);
   });
 });
 
