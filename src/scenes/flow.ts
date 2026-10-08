@@ -1,5 +1,5 @@
 import type { BattleState } from '../core/battle';
-import { fitDeployment } from '../core/camp';
+import { beginCamp, fitDeployment } from '../core/camp';
 import { changeMode, concludeBattle, deploymentFor, launchBattle, type Campaign } from '../core/campaign';
 import { applyEffects, nextBattle, stepAfter, type ChapterDef, type Step } from '../core/chapters';
 import { entriesUnlockedAt, unlock } from '../core/codex';
@@ -91,6 +91,7 @@ export class GameFlow {
     this.campaign = newCampaignFor(story, mode, this.s.newSeed());
     this.fresh = 0;
     this.openChapter();
+    if (this.step()?.kind === 'camp') beginCamp(this.campaign.army);
     this.run();
   }
 
@@ -99,6 +100,7 @@ export class GameFlow {
     this.campaign = campaign;
     this.fresh = 0;
     this.openChapter();
+    if (this.step()?.kind === 'camp') beginCamp(campaign.army);
     this.run();
   }
 
@@ -148,6 +150,8 @@ export class GameFlow {
     } else {
       campaign.step = next.step;
     }
+    // a camp the army has just reached starts with its conversations and drills to spend; one opened from a save does not
+    if (this.step()?.kind === 'camp') beginCamp(campaign.army);
     this.run(note);
   }
 
@@ -504,6 +508,12 @@ export class GameFlow {
 
   private story() {
     return STORIES[this.storyId()];
+  }
+
+  /** The step the campaign has reached. */
+  private step(): Step | undefined {
+    const campaign = this.need();
+    return this.chapter()?.steps[campaign.step];
   }
 
   private chapter(): ChapterDef | undefined {

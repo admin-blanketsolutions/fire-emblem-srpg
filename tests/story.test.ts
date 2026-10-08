@@ -34,6 +34,9 @@ function pass(h: Harness): string {
   if (scene instanceof CampScene) {
     // save as the camp stands and read it back: the whole campaign is what a player could be carrying
     const campaign = h.flow.campaign!;
+    // every camp the story reaches starts with its conversations and drills still to spend
+    expect(campaign.army.camp.talks).toBe(0);
+    expect(campaign.army.camp.drilled.size).toBe(0);
     const file = encodeSave({ kind: 'slot', campaign, label: 'test', savedAt: '2026-10-08T10:00:00Z' });
     const back = decodeSave(JSON.parse(JSON.stringify(file)) as unknown, loadEnv).campaign;
     expect({ chapter: back.chapter, step: back.step, name: back.recruitName, flags: [...back.flags].sort(), codex: [...back.codex].sort(), dinars: back.army.dinars }).toEqual({

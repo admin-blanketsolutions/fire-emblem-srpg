@@ -6,7 +6,7 @@ import type { Point } from './types';
 import type { UnitInstance } from './unit';
 import type { AiProfile } from './aiProfile';
 import type { BattleRules, BattleState, BattleTables } from './battle';
-import { availableTalks, completeTalk, fitDeployment, promotable, promoteWithItem } from './camp';
+import { availableTalks, beginCamp, completeTalk, fitDeployment, promotable, promoteWithItem } from './camp';
 import { concludeBattle, deploymentFor, launchBattle, type Campaign } from './campaign';
 import { applyEffects, nextBattle, stepAfter, stepAt, type ChapterTable } from './chapters';
 import type { CodexTable } from './codex';
@@ -166,6 +166,7 @@ function passScene(campaign: Campaign, env: BotEnv, id: string): void {
 /** The camp: size the deployment for the next battle, hear the talks, and promote whoever can be. */
 function useCamp(campaign: Campaign, env: BotEnv, options: BotOptions): void {
   const { army } = campaign;
+  beginCamp(army);
   const upcoming = nextBattle(env.chapters, { chapter: campaign.chapter ?? '', step: campaign.step });
   if (upcoming) {
     const preview = env.battle(upcoming.battle, {}, 1);
